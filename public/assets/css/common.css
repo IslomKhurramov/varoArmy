@@ -46,7 +46,7 @@
     border:1px solid #333333;
     height: 34px;
     width: 72px;
-    font: Malgun Gothic;
+    font-family: 'Malgun Gothic', sans-serif;
     border-radius: 4px;
 
   }
@@ -56,7 +56,7 @@
     border:1px solid #333333;
     height: 34px;
     width: 72px;
-    font: Malgun Gothic;
+    font-family: 'Malgun Gothic', sans-serif;
     border-radius: 4px;
     cursor: pointer;
   }
@@ -70,7 +70,7 @@
     height: 28px;
     width: 80px;
     font-weight: bold;
-    font: "Malgun Gothic";
+    font-family: 'Malgun Gothic', sans-serif;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
@@ -82,7 +82,7 @@
     height: 28px;
     width: 80px;
     font-weight: bold;
-    font: "Malgun Gothic";
+    font-family: 'Malgun Gothic', sans-serif;
     border-radius: 4px;
     cursor: pointer;
   }
@@ -151,7 +151,7 @@
     background-color: #fff;
     font-weight: 400;
     font-size: 12px;    
-    font: "Malgun Gothic";
+    font-family: 'Malgun Gothic', sans-serif;
 
   }
   input:focus,
@@ -2441,6 +2441,21 @@
     width: 140px;
     text-align: center;
   }
+  .menu-container .menu-item2 {
+    font-size: 14px;
+    color: rgba(98, 102, 119, 1);
+    height: 40px;
+    line-height: 40px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    font-weight: 500;
+    /* border: 1px solid rgba(98, 102, 119, 0.2); */
+    cursor: pointer;
+    background-color: #fff;
+    flex-shrink: 0;
+    width: 140px;
+    text-align: center;
+  }
   .menu-container .menu-item.active {
     background-color: #ffc327;
     color: #fff;
@@ -2462,6 +2477,11 @@
     border-color: #f69036;
   }
   .menu-container .menu-item.blue {
+    background-color: #0067ff;
+    color: #fff;
+    border-color: #0067ff;
+  }
+  .menu-container .menu-item2.blue {
     background-color: #0067ff;
     color: #fff;
     border-color: #0067ff;

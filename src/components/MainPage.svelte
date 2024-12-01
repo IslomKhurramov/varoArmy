@@ -531,7 +531,7 @@
   }
   .section1 {
     width: 15%;
-    height: 75vh;
+    height: 90vh;
     margin-right: 5px;
     margin-top: 5px;
     border-radius: 10px;
@@ -540,7 +540,7 @@
   }
   .section2 {
     width: 85%;
-    height: 75vh;
+    height: 90vh;
     margin-top: 5px;
     display: flex;
     flex-direction: column;

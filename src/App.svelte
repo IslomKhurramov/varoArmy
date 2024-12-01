@@ -95,40 +95,33 @@
   <body>
     <div id="wrap">
       <div class="container">
-        <nav class="titleWrap">
-          <h1>LOGO</h1>
-
-          <section>
-            <div class="alarmWrap">
-              <button type="button" class="alarm on notification">
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <img src="./assets/images/alarm.svg" />
-              </button>
-              <!-- <div class="tooltip-modal">
-                <h3 class="title">알림</h3>
-                <section class="content" style="height: 290px;overflow: auto;">
-                  <div>
-                   
-                    <a href="javascript:void(0);">
-                      <div class="title"></div>
-                      <div class="day"></div>
-                    </a>
-                  </div>
-                </section>
-              </div>
-            </div> -->
-              <article class="user-box-menu">
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <img src="./assets/images/person.svg" />
-                <div class="user" style="min-width: 60px;font-size: 16px;">
-                  <span style="font-size: 16px;"> </span>님
-                </div>
-                <div class="logout-menu">
-                  <button class="logout-button"> 로그아웃 </button>
-                </div>
-              </article>
+        <nav class="titleWrap1">
+          <div class="logoBox">
+            <div style="display: flex; flex-direction:row; gap:5px;">
+              <img src="assets/images/cbms.png" alt="logo" />
+              <p>CBMS</p>
             </div>
-          </section>
+            <p>Cyber Battlefield Management System</p>
+          </div>
+          <div class="titleWrap2">
+            <div class="part1">
+              <button class="btnHeader">사이버 정보·감시·정찰</button>
+              <p>사이버 지휘통제</p>
+              <p>사이버작전(능동대응)</p>
+            </div>
+            <div class="part2">
+              <p>체계관리</p>
+              <div style="display: flex; flex-direction:row; gap:5px;">
+                <button class="selectModel">실제모드</button>
+                <button
+                  class="selectModel"
+                  style="background-color:#E99808; color:#fff">상황도</button
+                >
+              </div>
+              <img src="assets/images/mail.png" alt="email" />
+              <img src="assets/images/user.png" alt="user" />
+            </div>
+          </div>
         </nav>
 
         <div class="body">
@@ -154,29 +147,83 @@
     flex-direction: column;
     width: 100%;
   }
-  .login_box {
+  .logoBox {
+    width: 15%;
+    display: flex;
+    color: #fff;
+    flex-direction: column;
+  }
+  .logoBox img {
+    width: 85px;
+    height: 42px;
+  }
+  .part1 {
     display: flex;
     flex-direction: row;
-    width: 300px;
     align-items: center;
     justify-content: space-between;
-    background-color: #fff;
+    width: 490px;
   }
-  .alarmWrap {
+  .part2 {
     display: flex;
     flex-direction: row;
+    width: 590px;
+    justify-content: center;
+    gap: 20px;
     align-items: center;
+    margin-right: 50px;
   }
-  .titleWrap {
+  .part2 img {
+    width: 28px;
+    height: 28px;
+  }
+  .titleWrap1 {
     display: flex;
     flex-direction: row;
     position: relative;
     padding: 0 24px;
     justify-content: space-between;
-    background-color: #fff;
-    height: 90px;
+    background-color: #3b4360;
+    height: 50px;
+    width: 100%;
+    color: #fff;
+    font-family: "Malgun Gothic", sans-serif;
+  }
+  .titleWrap2 {
+    width: 85%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Malgun Gothic", sans-serif;
   }
   .body {
     padding: 10px;
+  }
+  .btnHeader {
+    width: 190px;
+    height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    -webkit-padding: 0.4em 0;
+    padding: 0em;
+    margin: 0 0 0em 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    font-size: 14px;
+    font-family: "Malgun Gothic", sans-serif;
+  }
+  .selectModel {
+    width: 88px;
+    height: 28px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 5px;
   }
 </style>
