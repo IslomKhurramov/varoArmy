@@ -5,7 +5,7 @@
     overflow: hidden;
     margin: 0 auto;
     font-weight: 500;
-    letter-spacing: -0.02em;
+    /* letter-spacing: -0.02em; */
     font-family:
       "Pretendard Variable",
       Pretendard,
@@ -2444,8 +2444,8 @@
   .menu-container .menu-item2 {
     font-size: 14px;
     color: rgba(98, 102, 119, 1);
-    height: 40px;
-    line-height: 40px;
+    height: 30px;
+    line-height: 30px;
     box-sizing: border-box;
     border-radius: 6px;
     font-weight: 500;
@@ -2482,9 +2482,9 @@
     border-color: #0067ff;
   }
   .menu-container .menu-item2.blue {
-    background-color: #0067ff;
+    background-color: #223449;
     color: #fff;
-    border-color: #0067ff;
+    border-color: #223449;
   }
   
   .menu-container .menu-item.red {

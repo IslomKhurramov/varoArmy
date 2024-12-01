@@ -16,7 +16,8 @@
   let activeMenu = "MainPage";
   let currentPath = "";
   let currentSearch = "";
-
+  let isDarkMode = false; // Tracks dark mode state
+  let isToggleVisible = false;
   beforeUpdate(() => {
     if (
       currentPath !== window.location.pathname ||
@@ -89,6 +90,28 @@
   $: {
     updateActiveMenu();
   }
+  // Function to handle clicks outside
+  const handleClickOutside = (event) => {
+    const toggleButton = document.querySelector(".toggleButton");
+    const selectModel = document.querySelector(".selectModel");
+
+    // Check if the click target is outside both the button and the menu
+    if (
+      !toggleButton.contains(event.target) &&
+      !selectModel.contains(event.target)
+    ) {
+      isToggleVisible = false;
+    }
+  };
+
+  // Add event listener on mount
+  onMount(() => {
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside); // Cleanup on unmount
+    };
+  });
 </script>
 
 <Router>
@@ -98,10 +121,10 @@
         <nav class="titleWrap1">
           <div class="logoBox">
             <div style="display: flex; flex-direction:row; gap:5px;">
-              <img src="assets/images/cbms.png" alt="logo" />
-              <p>CBMS</p>
+              <!-- <img src="assets/images/logo2.png" alt="logo" /> -->
+              <p style="font-size: 21px;font-weight:bold;">CBMS</p>
             </div>
-            <p>Cyber Battlefield Management System</p>
+            <p style="font-size:11px;">Cyber Battlefield Management System</p>
           </div>
           <div class="titleWrap2">
             <div class="part1">
@@ -110,16 +133,48 @@
               <p>사이버작전(능동대응)</p>
             </div>
             <div class="part2">
-              <p>체계관리</p>
+              <p style="font-weight: bold; font-size:14px">체계관리</p>
               <div style="display: flex; flex-direction:row; gap:5px;">
-                <button class="selectModel">실제모드</button>
+                <button
+                  class="selectModel"
+                  on:click="{() => (isToggleVisible = !isToggleVisible)}"
+                >
+                  실제모드
+                </button>
+
+                <!-- Dropdown menu -->
+                {#if isToggleVisible}
+                  <div class="toggleButton">
+                    <p>실제모드</p>
+                    <p>훈련모드1</p>
+                    <p>훈련모드2</p>
+                    <p>훈련모드3</p>
+                  </div>
+                {/if}
                 <button
                   class="selectModel"
                   style="background-color:#E99808; color:#fff">상황도</button
                 >
               </div>
-              <img src="assets/images/mail.png" alt="email" />
+              <div>
+                <img src="assets/images/mail.png" alt="email" class="email" />
+                <div class="messageNumber"><p>785</p></div>
+              </div>
               <img src="assets/images/user.png" alt="user" />
+              <div>
+                <input
+                  type="checkbox"
+                  class="checkbox"
+                  id="checkbox"
+                  bind:checked="{isDarkMode}"
+                />
+                <label for="checkbox" class="checkbox-label">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+
+                  <span class="ball"></span>
+                </label>
+              </div>
             </div>
           </div>
         </nav>
@@ -142,16 +197,19 @@
 </Router>
 
 <style>
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
   .container {
     display: flex;
     flex-direction: column;
     width: 100%;
   }
-  .logoBox {
-    width: 15%;
-    display: flex;
-    color: #fff;
-    flex-direction: column;
+  p {
+    display: block;
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    unicode-bidi: isolate;
   }
   .logoBox img {
     width: 85px;
@@ -164,10 +222,14 @@
     justify-content: space-between;
     width: 490px;
   }
+  .part1 p {
+    font-size: 14px;
+    font-weight: bold;
+  }
   .part2 {
     display: flex;
     flex-direction: row;
-    width: 590px;
+    width: 425px;
     justify-content: center;
     gap: 20px;
     align-items: center;
@@ -180,15 +242,26 @@
   .titleWrap1 {
     display: flex;
     flex-direction: row;
+    align-items: center; /* Align items vertically centered */
+    justify-content: space-between;
     position: relative;
     padding: 0 24px;
-    justify-content: space-between;
     background-color: #3b4360;
     height: 50px;
     width: 100%;
     color: #fff;
     font-family: "Malgun Gothic", sans-serif;
   }
+
+  .logoBox {
+    width: 15%;
+    display: flex;
+    color: #fff;
+    flex-direction: column;
+    height: 50px;
+    align-items: flex-start; /* Align to the left */
+  }
+
   .titleWrap2 {
     width: 85%;
     display: flex;
@@ -206,6 +279,7 @@
     text-align: center;
     border-radius: 5px;
     font-weight: bold;
+    background-color: #eeeeee;
   }
   button {
     font-family: inherit;
@@ -222,8 +296,107 @@
   .selectModel {
     width: 88px;
     height: 28px;
+    background-color: #eeeeee;
     font-weight: bold;
     text-align: center;
     border-radius: 5px;
+    position: relative;
+  }
+  .toggleButton {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background-color: #eeeeee;
+    border: #cccccc;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-left: -16px;
+    /* margin-right: 43px; */
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .toggleButton p {
+    padding-top: 5px;
+    text-align: center;
+    width: 90px;
+    color: #3b4360;
+    font-size: 14px;
+    padding-bottom: 5px;
+  }
+  .toggleButton p:hover {
+    padding-top: 5px;
+    text-align: center;
+    background-color: #3b4360;
+    color: #fff;
+    width: 90px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .messageNumber {
+    position: absolute;
+    background-color: #fdb812;
+    color: #3b4360;
+    border: 1px solid #223449;
+    border-radius: 10px;
+    /* margin-right: -185px; */
+    margin-top: -36px;
+    min-width: 15px;
+    text-align: center;
+    margin-left: 15px;
+  }
+  .messageNumber p {
+    font-size: 12px;
+    font-weight: bold;
+    color: #223449;
+    font-family: " Malgun Gothic ";
+    padding: 2px;
+  }
+  .email {
+    position: relative;
+  }
+  /************************************/
+  .checkbox {
+    opacity: 0;
+    position: absolute;
+  }
+
+  .checkbox-label {
+    background-color: #111;
+    width: 40px;
+    height: 16px;
+    border-radius: 50px;
+    position: relative;
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .fa-moon {
+    color: #f1c40f;
+  }
+
+  .fa-sun {
+    color: #f39c12;
+  }
+
+  .checkbox-label .ball {
+    background-color: #fff;
+    width: 22px;
+    height: 22px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    border-radius: 50%;
+    transition: transform 0.2s linear;
+  }
+
+  .checkbox:checked + .checkbox-label .ball {
+    transform: translateX(24px);
   }
 </style>
