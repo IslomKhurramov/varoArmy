@@ -44,12 +44,450 @@
         activeMenu = "취약점현황";
         break;
       default:
-        activeMenu = "MainPage";
+        activeMenu = "신규계획등록";
     }
   });
 </script>
 
-<section class="search_box"></section>
+<section class="search_box">
+  <div style="width: 15%; margin-right:10px;">
+    <p style="text-align:center">{activeMenu}</p>
+  </div>
+  {#if activeMenu === "신규계획등록"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="운영관리부대" selected>운영관리부대</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option value="점검관" selected>점검관</option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "결과등록"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="관리부대
+"
+          selected
+          >관리부대
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="담당자" selected>담당자</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "결과조회"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="관리부대
+"
+          selected
+          >관리부대
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="담당자" selected>담당자</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "조치계획"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="관리부대
+"
+          selected
+          >관리부대
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="담당자" selected>담당자</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "조치내역"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="운영관리부대" selected>운영관리부대</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option value="점검관" selected>점검관</option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "이력관리"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="운영관리부대" selected>운영관리부대</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option value="점검관" selected>점검관</option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "점검항목관리"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="항목그룹">항목그룹</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option value="점검대상" selected>점검대상 </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="검색이름검색" selected>검색이름검색</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option value="점검관" selected>점검관</option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "점검준비"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="운영관리부대" selected>운영관리부대</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option value="점검관" selected>점검관</option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {:else if activeMenu === "취약점현황"}
+    <section class="filterWrap">
+      <!-- Group Filter -->
+      <select name="approval_status" id="approval_status">
+        <option value="점검계획명">점검계획명</option>
+        <option></option>
+      </select>
+
+      <!-- OS Type Filter -->
+      <select name="asset_group" id="asset_group">
+        <option
+          value="망 구분
+"
+          selected
+          >망 구분
+        </option>
+
+        <option value="UNIX">UNIX</option>
+        <option value="WINDOWS">WINDOWS</option>
+        <option value="PC">PC</option>
+        <option value="NETWORK">NETWORK</option>
+        <option value="DBMS">DBMS</option>
+        <option value="WEB">WEB</option>
+        <option value="WAS">WAS</option>
+        <option value="CLOUD">CLOUD</option>
+        <option value="SECURITY">SECURITY</option>
+      </select>
+
+      <!-- Agent Installation Status Filter -->
+      <select name="operating_system" id="operating_system">
+        <option value="운영관리부대" selected>운영관리부대</option>
+        <option value="YES">등록승인</option>
+        <option value="NO">등록 해제</option>
+      </select>
+
+      <!-- Activation Status Filter -->
+      <select name="agent_status" id="agent_status">
+        <option value="점검관" selected>점검관</option>
+        <option value="1">활동적인</option>
+        <option value="0">비활성</option>
+      </select>
+
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="btn btnSearch"
+        ><img src="assets/images/search.png" alt="search" />조회</button
+      >
+    </section>
+  {/if}
+</section>
 <main>
   <section class="section1">
     <!-- <div class="header_menu"><h2>kjkjkjkjkjk</h2></div> -->
@@ -80,12 +518,16 @@
   }
   .search_box {
     position: relative;
-    padding: 0 24px;
+    /* padding: 0 24px; */
     justify-content: space-between;
+    justify-content: center;
+    width: 100%;
+    align-items: center;
     background-color: #fff;
     border-radius: 10px;
     border: 1px solid rgba(242, 242, 242, 1);
-    height: 80px;
+    height: 60px;
+    display: flex;
   }
   .section1 {
     width: 15%;
@@ -122,5 +564,13 @@
     width: 100%;
     border-radius: 10px;
     border: 1px solid rgba(242, 242, 242, 1);
+  }
+  .filterWrap {
+    display: flex;
+    width: 85%;
+    align-items: center;
+    /* justify-content: center; */
+    flex-direction: row;
+    gap: 20px;
   }
 </style>

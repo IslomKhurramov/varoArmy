@@ -96,7 +96,7 @@
     <div id="wrap">
       <div class="container">
         <nav class="titleWrap">
-          <h1>{activeMenu}</h1>
+          <h1>LOGO</h1>
 
           <section>
             <div class="alarmWrap">

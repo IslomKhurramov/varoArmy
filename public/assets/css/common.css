@@ -41,9 +41,50 @@
   .btnPrimary,
   .btnPrimaryFontGray,
   .badgePrimary {
-    background-color: rgba(0, 103, 255, 0.05);
-    color: #0067ff;
-    border-color: rgba(0, 103, 255, 0.1);
+    background-color: #ffffff;
+    color: #333333;
+    border:1px solid #333333;
+    height: 34px;
+    width: 72px;
+    font: Malgun Gothic;
+    border-radius: 4px;
+
+  }
+  .btnPrimary:hover{
+    background-color: #333333;
+    color: #ffffff;
+    border:1px solid #333333;
+    height: 34px;
+    width: 72px;
+    font: Malgun Gothic;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btnSearch img{
+    width: 14px;
+  }
+  .btnSearch{
+    background-color: #117CE9;
+    color: #ffffff;
+    border:none;
+    height: 28px;
+    width: 80px;
+    font-weight: bold;
+    font: "Malgun Gothic";
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btnSearch:hover{
+    background-color: #0767c8;
+    color: #ffffff;
+    border:none;
+    height: 28px;
+    width: 80px;
+    font-weight: bold;
+    font: "Malgun Gothic";
+    border-radius: 4px;
+    cursor: pointer;
   }
   .btnDefault {
     background-color: transparent;
@@ -99,22 +140,36 @@
     color: #626677;
   }
   select {
-    padding: 0 32px 0 15px;
-    height: 40px;
-    background-size: 8px;
-    color: #626677;
-    border: 1px solid rgba(98, 102, 119, 0.2);
+    padding: 0 8px 0 8px;
+    height: 28px;
+    min-width: 48px;
+    color: #777777;
+    border: 1px solid #C8C8C8;
     border-radius: 6px;
     box-sizing: border-box;
     background-size: 10px;
     background-color: #fff;
     font-weight: 400;
-    font-size: 16px;
+    font-size: 12px;    
+    font: "Malgun Gothic";
+
   }
   input:focus,
   select:focus {
     outline: none;
     border-color: #0067ff !important;
+    background-color: #FFFFFF;    
+    border: 1px solid #117CE9;
+
+  }
+  input:active,
+  select:active {
+    outline: none;
+    border-color: #0067ff !important;
+    background-color: #FFFFFF;    
+    border: 1px solid #C8C8C8;
+    color: #333333;
+
   }
   .copyright {
     color: #7b92ae;
