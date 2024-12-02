@@ -11,6 +11,7 @@
   import Page8 from "./점검준비8/Page8.svelte";
   import Page9 from "./취약점현황9/Page9.svelte";
   import { Route } from "svelte-routing";
+  import LeftContainer from "./LeftContainer.svelte";
 
   export let activeMenu = "신규계획등록";
 
@@ -491,7 +492,7 @@
 <main>
   <section class="section1">
     <!-- <div class="header_menu"><h2>kjkjkjkjkjk</h2></div> -->
-    <div class="body_menu"></div>
+    <div class="body_menu"><LeftContainer/></div>
   </section>
   <section class="section2">
     <div class="header_menu">
