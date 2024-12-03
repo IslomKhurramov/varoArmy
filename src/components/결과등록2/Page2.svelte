@@ -1,8 +1,5 @@
 
 <script>
-    let inspectionTitle = "23 교육사 국방정보체계 취약점 점검";
-    let inspectionPeriod = "2024-01-01 ~ 2024-03-01";
-    let inspectionCategory = "긴급점검";
   
     let tableData = [
       { category: "에이전트 (100)", unix: 10, windows: 70, network: 0, dbms: "-", pc: "-", errors: 3, total: "80%" },
@@ -61,7 +58,7 @@
   
     <!-- Registration Status -->
     <div class="tableListWrap">
-      <h4>등록현황</h4>
+      <p>등록현황</p>
       <table class="tableList hdBorder">
                <colgroup>
             <col style="width:14%;" />
@@ -192,9 +189,9 @@
     }
   
     .btn-primary {
-        width: auto;
-        height: 34px;
-        font-size: 14px;
+      width: auto;
+      height: 34px;
+      font-size: 14px;
       color: #333333;
       border: 1px solid #333333;
       font-weight: bold;
@@ -210,17 +207,17 @@
     }
   
     .btn-secondary {
-        width: auto;
-        height: 34px;
-        color: #333333;
-        font-size: 14px;
+      width: auto;
+      height: 34px;
+      color: #333333;
+      font-size: 14px;
       border: 1px solid #333333;
       font-weight: bold;
     }
   
     .btn-secondary:hover {
-        width: auto;
-        height: 34px;
+      width: auto;
+      height: 34px;
       background-color: #c43840;
       color: #FFFFFF;
       border: none;
@@ -284,26 +281,31 @@
     }
 
     .tableListWrap {
-    overflow-y: auto;
-    max-height: 65vh;
+      overflow-y: auto;
+      max-height: 65vh;
   }
 
-  .tableListWrap {
-    overflow: visible;
-    position: relative;
+    .tableListWrap p {
+     font-size: 14px;
+     font-weight: bold;
   }
 
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+    .tableListWrap {
+     overflow: visible;
+     position: relative;
   }
 
-  tr:hover {
-    cursor: pointer;
-    background-color: #f4f4f4;
-    transition-duration: 0.3s;
+    thead {
+     position: sticky;
+     top: 0;
+     z-index: 10;
+     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+  }
+
+    tr:hover {
+     cursor: pointer;
+     background-color: #f4f4f4;
+     transition-duration: 0.3s;
   }
   </style>
   
