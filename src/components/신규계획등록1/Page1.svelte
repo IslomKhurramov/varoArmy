@@ -101,15 +101,15 @@
       </div>
 
       <div class="inputRow">
-        <label>첨부파일</label>
-        <input
+          <label>점검계획내용</label>
+          <input
           type="text"
-
-        />
-      </div>
-
-      <div class="inputRow">
-        <label>점검계획내용</label>
+          
+          />
+        </div>
+        
+        <div class="inputRow">
+          <label>첨부파일</label>
         <input
           type="text"
         />
@@ -118,7 +118,57 @@
       <div class="inputRow">
         <label>점검관정보</label>
         <input type="password" />
+        <button class="buttons">검색</button>
       </div>
+      <div class="inputRow">
+        <label>점검스케줄</label>
+        <select bind:value={formData.executionCondition}>
+          <option>즉시/예약</option>
+        </select>
+      </div>
+
+      <div class="inputRow">
+          <label></label>
+          <div class="riskLevels">
+            <div class="riskLevelItem">
+              <p>반복주기</p>
+              <input
+                type="number"
+              />
+              <select bind:value={formData.repeatPeriod}>
+                <option>분</option>
+                <option>시간</option>
+                <option>일</option>
+                <option>주</option>
+                <option>월</option>
+              </select>
+            </div>
+            <div class="riskLevelItem">
+              <span>반복횟수</span>
+              <select bind:value={formData.repeatPeriod}>
+                <option>분</option>
+                <option>시간</option>
+                <option>일</option>
+                <option>주</option>
+                <option>월</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="inputRow">
+            <label></label>
+            <div class="riskLevels">
+                <div class="riskLevelItem">
+                    <p>시작일</p>
+                    <input type="datetime-local" bind:value={formData.startDate} />
+                </div>
+
+                <div class="riskLevelItem">
+                    <span>종료일</span>
+                    <input type="datetime-local" bind:value={formData.endDate} />
+                </div>
+          </div>
+        </div>
     </div>
   </main>
   
@@ -143,13 +193,15 @@
     .inputRow {
       display: flex;
       align-items: center;
-      gap: 20px;
+      row-gap: 20px;
+      column-gap: 10px;
     }
 
     .inputRow1 {
       display: flex;
       align-items: center;
-      gap: 20px;
+      row-gap: 20px;
+      column-gap: 10px;
     }
 
     .inputRow1 p {
@@ -211,13 +263,13 @@
       padding: 17px;
       border: 1px solid #cccccc;
       border-radius: 5px;
-      font-size: 16px;
+      font-size: 12px;
     }
   
  
     .riskLevels {
       display: flex;
-      column-gap: 20px;
+      column-gap: 10px;
       flex: 1; 
     }
   
@@ -226,6 +278,7 @@
       align-items: center;
       flex: 1; 
       gap: 20;
+      column-gap: 10px;
     }
   
     .riskLevelItem input {
@@ -233,10 +286,24 @@
       padding: 10px;
       border: 1px solid #cccccc;
       border-radius: 5px;
-      font-size: 16px;
+      font-size: 12px;
       text-align: center;
       box-sizing: border-box;
     }
+
+    .riskLevelItem span {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap; /* Prevent text wrapping */
+    margin: 0 10px;
+  }
+
+  .riskLevelItem p {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap; /* Prevent text wrapping */
+    margin-right: 10px;
+  }
   
    
     @media (max-width: 768px) {
