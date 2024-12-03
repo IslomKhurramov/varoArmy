@@ -182,7 +182,7 @@
         <div class="body">
           <MainPage bind:activeMenu />
         </div>
-        <Route path="/page1" component="{Page1}" />
+        <!-- <Route path="/page1" component="{Page1}" />
         <Route path="/page2" component="{Page2}" />
         <Route path="/page3" component="{Page3}" />
         <Route path="/page4" component="{Page4}" />
@@ -190,7 +190,8 @@
         <Route path="/page6" component="{Page6}" />
         <Route path="/page7" component="{Page7}" />
         <Route path="/page6" component="{Page8}" />
-        <Route path="/page7" component="{Page9}" />
+        <Route path="/page7" component="{Page9}" /> -->
+        <div>fjkdlkjfljlfjfjdf</div>
       </div>
     </div>
   </body>

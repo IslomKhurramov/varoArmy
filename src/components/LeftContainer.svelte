@@ -106,9 +106,9 @@
   
     <!-- Buttons -->
     <div class="buttons">
-      <button style="background-color: #148D7F;">복사</button>
-      <button style="background-color: #E24D54;">삭제</button>
-      <button style="background-color: #117CE9;">EXCEL</button>
+      <button >복사</button>
+      <button >삭제</button>
+      <button >EXCEL</button>
     </div>
   </div>
   
@@ -127,7 +127,7 @@
   
     /* Header */
     .menuHeader {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #333;
       text-align: center;
@@ -151,7 +151,7 @@
     .accordion-header {
       width: 100%;
       padding: 15px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
       background: #f7f7f7;
       border: none;
@@ -166,7 +166,7 @@
     }
   
     .accordion-header:hover {
-      background-color: #0056b3;
+      background-color: #223449;
       color: white;
     }
   
@@ -204,16 +204,21 @@
   
     /* Buttons */
     .buttons {
+      width: 100%;
       display: flex;
       justify-content: space-between;
       margin-top: 20px;
     }
   
     .buttons button {
-      padding: 10px 20px;
-      color: white;
-      border: none;
-      border-radius: 5px;
+      width: 72px;
+      height: 34px;
+      font-family: 'Franklin Gothic Medium',;
+      color: #999999;
+      background-color: #FFFFFF;
+      border: 1px solid #999999;
+      font-weight: bold;
+      border-radius: 4px;
       font-size: 14px;
       cursor: pointer;
       transition: background-color 0.3s ease;
@@ -221,6 +226,12 @@
   
     .buttons button:hover {
       opacity: 0.9;
+      color: #FFFFFF;
+      background-color: #333333;
+      border: none;
+      font-weight: bold;
+      font-size: 14px;
+      border-radius: 4px;
     }
   </style>
   
