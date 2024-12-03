@@ -143,6 +143,7 @@
                 <option>월</option>
               </select>
             </div>
+            
             <div class="riskLevelItem">
               <span>반복횟수</span>
               <select bind:value={formData.repeatPeriod}>
