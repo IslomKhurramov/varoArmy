@@ -38,6 +38,41 @@
     cursor: pointer;
     transition-duration: 0.3s;
   }
+  .inputDefault{
+    min-width: 48px;
+    padding-left:8px ;
+    padding-right: 8px;
+    height: 28px;
+    font-family: 'Malgun Gothic', sans-serif;
+    border:1px solid #C8C8C8;
+    font-size: 12px;
+    background-color: #FFFFFF;
+color: #777777;
+  }
+  .inputDefault:active{
+    min-width: 48px;
+    padding-left:8px ;
+    padding-right: 8px;
+    height: 28px;
+    color: #333333;
+    font-family: 'Malgun Gothic', sans-serif;
+    border:1px solid #C8C8C8;
+    font-size: 14px;
+    background-color: #FFFFFF;
+
+  }
+  .inputDefault:focus{
+    min-width: 48px;
+    padding-left:8px ;
+    padding-right: 8px;
+    height: 28px;
+    color: #333333;
+    font-family: 'Malgun Gothic', sans-serif;
+    border:1px solid #117CE9;
+    font-size: 14px;
+    background-color: #FFFFFF;
+
+  }
   .btnPrimary,
   .btnPrimaryFontGray,
   .badgePrimary {
@@ -74,6 +109,45 @@
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
+  }
+  .btnSave{
+    background-color: #095eb4;
+    color: #ffffff;
+    border:none;
+    height:auto;
+    width: 72px;
+    font-family: 'Malgun Gothic', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btnSave:hover{
+    background-color: #333333;
+    color: #ffffff;
+    border:none;
+    height: auto;
+    width: 72px;
+    font-family: 'Malgun Gothic', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btnUpload{
+    background-color: #148D7F;
+    color: #ffffff;
+    border:none;
+    height: auto;
+    width: auto;
+    font-family: 'Malgun Gothic', sans-serif;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #999999;
+    font-weight: bold;   
+  }
+  .btnUpload:hover{
+    background-color: #333333;
+    color: #ffffff;
   }
   .btnSearch:hover{
     background-color: #0767c8;

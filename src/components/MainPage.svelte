@@ -12,9 +12,11 @@
   import Page9 from "./취약점현황9/Page9.svelte";
   import { Route } from "svelte-routing";
   import LeftContainer from "./LeftContainer.svelte";
+  import { comment, current_component } from "svelte/internal";
+  import LeftMenu from "./LeftMenu.svelte";
 
   export let activeMenu = "신규계획등록";
-
+  let currentPage = null;
   onMount(() => {
     switch (window.location.pathname) {
       case "/page1":
@@ -43,6 +45,9 @@
         break;
       case "/page9":
         activeMenu = "취약점현황";
+        break;
+      case "/leftMenu":
+        activeMenu = "leftMenu";
         break;
       default:
         activeMenu = "신규계획등록";
@@ -492,22 +497,27 @@
 <main>
   <section class="section1">
     <!-- <div class="header_menu"><h2>kjkjkjkjkjk</h2></div> -->
-    <div class="body_menu"><LeftContainer/></div>
+    <div class="body_menu"><LeftContainer bind:currentPage /></div>
   </section>
   <section class="section2">
     <div class="header_menu">
       <Header />
     </div>
     <div class="body_menu">
-      <Route path="/page1" component="{Page1}" />
-      <Route path="/page2" component="{Page2}" />
-      <Route path="/page3" component="{Page3}" />
-      <Route path="/page4" component="{Page4}" />
-      <Route path="/page5" component="{Page5}" />
-      <Route path="/page6" component="{Page6}" />
-      <Route path="/page7" component="{Page7}" />
-      <Route path="/page6" component="{Page8}" />
-      <Route path="/page7" component="{Page9}" />
+      {#if currentPage}
+        <svelte:component this="{currentPage}" />
+      {:else}
+        <Route path="/page1" component="{Page1}" />
+        <Route path="/page2" component="{Page2}" />
+        <Route path="/page3" component="{Page3}" />
+        <Route path="/page4" component="{Page4}" />
+        <Route path="/page5" component="{Page5}" />
+        <Route path="/page6" component="{Page6}" />
+        <Route path="/page7" component="{Page7}" />
+        <Route path="/page6" component="{Page8}" />
+        <Route path="/page7" component="{Page9}" />
+        <Route path="/leftMenu" component="{LeftMenu}" />
+      {/if}
     </div>
   </section>
 </main>
