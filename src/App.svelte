@@ -90,28 +90,6 @@
   $: {
     updateActiveMenu();
   }
-  // Function to handle clicks outside
-  const handleClickOutside = (event) => {
-    const toggleButton = document.querySelector(".toggleButton");
-    const selectModel = document.querySelector(".selectModel");
-
-    // Check if the click target is outside both the button and the menu
-    if (
-      !toggleButton.contains(event.target) &&
-      !selectModel.contains(event.target)
-    ) {
-      isToggleVisible = false;
-    }
-  };
-
-  // Add event listener on mount
-  onMount(() => {
-    document.addEventListener("click", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside); // Cleanup on unmount
-    };
-  });
 </script>
 
 <Router>

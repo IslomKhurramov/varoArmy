@@ -90,7 +90,9 @@
               {data.agent}
             </td>
             <td class="text-center">
+              <div class="table_modal_btn">
                 <button class=" btn-box_12">재실행 </button>
+              </div>
             </td>
           </tr>
         {/each}
@@ -135,20 +137,22 @@
       transition-duration: 0.3s;
     }
 
-    .btn-box_12 {
+    .table_modal_btn {
+      display: flex;
+      align-items: center;
+    justify-content: center;
+    }
+
+    .table_modal_btn .btn-box_12 {
     width: 74px;
-    height: 34px;
-    display: flex;
-    float: right;
-    margin-top: 20px;
-    margin-left: 10px;
+    height: 28px;
     color: #999999;
     background-color: #FFFFFF;
     border: 1px solid #999999;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     border-radius: 4px;
     box-sizing: border-box;
@@ -161,7 +165,7 @@
     background-color: #333333;
     border: none;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 12px;
     border-radius: 4px;
   }
   </style>
