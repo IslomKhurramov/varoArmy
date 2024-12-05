@@ -99,11 +99,9 @@
           >
             <ul>
               {#each item.subItems as subItem}
-                <Link to="leftMenu">
-                  <li on:click="{() => (activeMenu = subItem.title)}">
-                    {subItem.title}
-                  </li>
-                </Link>
+                <li on:click="{() => (activeMenu = subItem.title)}">
+                  {subItem.title}
+                </li>
               {/each}
             </ul>
           </div>

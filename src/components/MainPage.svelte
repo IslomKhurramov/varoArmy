@@ -46,9 +46,6 @@
       case "/page9":
         activeMenu = "취약점현황";
         break;
-      case "/leftMenu":
-        activeMenu = "leftMenu";
-        break;
       default:
         activeMenu = "신규계획등록";
     }
@@ -495,29 +492,21 @@
   {/if}
 </section>
 <main>
-  <section class="section1">
-    <!-- <div class="header_menu"><h2>kjkjkjkjkjk</h2></div> -->
-    <div class="body_menu"><LeftContainer bind:currentPage /></div>
-  </section>
   <section class="section2">
     <div class="header_menu">
       <Header />
     </div>
     <div class="body_menu">
-      {#if currentPage}
-        <svelte:component this="{currentPage}" />
-      {:else}
-        <Route path="/page1" component="{Page1}" />
-        <Route path="/page2" component="{Page2}" />
-        <Route path="/page3" component="{Page3}" />
-        <Route path="/page4" component="{Page4}" />
-        <Route path="/page5" component="{Page5}" />
-        <Route path="/page6" component="{Page6}" />
-        <Route path="/page7" component="{Page7}" />
-        <Route path="/page6" component="{Page8}" />
-        <Route path="/page7" component="{Page9}" />
-        <Route path="/leftMenu" component="{LeftMenu}" />
-      {/if}
+      <Route path="/page1" component="{Page1}" />
+      <Route path="/page2" component="{Page2}" />
+      <Route path="/page3" component="{Page3}" />
+      <Route path="/page4" component="{Page4}" />
+      <Route path="/page5" component="{Page5}" />
+      <Route path="/page6" component="{Page6}" />
+      <Route path="/page7" component="{Page7}" />
+      <Route path="/page8" component="{Page8}" />
+      <Route path="/page9" component="{Page9}" />
+      <!-- <Route path="/leftMenu" component="{LeftMenu}" /> -->
     </div>
   </section>
 </main>
@@ -550,7 +539,7 @@
     border: 1px solid rgba(242, 242, 242, 1);
   }
   .section2 {
-    width: 85%;
+    width: 100%;
     height: 90vh;
     margin-top: 5px;
     display: flex;
@@ -570,7 +559,6 @@
     border: 1px solid rgba(242, 242, 242, 1);
   }
   .body_menu {
-    background-color: #fff;
     height: 100%;
     width: 100%;
     border-radius: 10px;
