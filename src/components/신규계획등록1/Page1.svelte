@@ -26,7 +26,7 @@
 </script>
 
 
-<main class="table-container">
+  <main class="table-container">
     <div class="formContainer">
       <div class="inputRow">
         <label>점검계획제목</label>
@@ -181,6 +181,7 @@
       overflow-y: auto;
       border-radius: 10px;
       height: calc(100vh - 200px);
+      padding: 10px 0px 0px 0px;
     }
   
     .formContainer {
