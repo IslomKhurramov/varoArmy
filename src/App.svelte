@@ -16,7 +16,8 @@
   let activeMenu = "MainPage";
   let currentPath = "";
   let currentSearch = "";
-
+  let isDarkMode = false; // Tracks dark mode state
+  let isToggleVisible = false;
   beforeUpdate(() => {
     if (
       currentPath !== window.location.pathname ||
@@ -95,40 +96,65 @@
   <body>
     <div id="wrap">
       <div class="container">
-        <nav class="titleWrap">
-          <h1>{activeMenu}</h1>
-
-          <section>
-            <div class="alarmWrap">
-              <button type="button" class="alarm on notification">
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <img src="./assets/images/alarm.svg" />
-              </button>
-              <!-- <div class="tooltip-modal">
-                <h3 class="title">알림</h3>
-                <section class="content" style="height: 290px;overflow: auto;">
-                  <div>
-                   
-                    <a href="javascript:void(0);">
-                      <div class="title"></div>
-                      <div class="day"></div>
-                    </a>
-                  </div>
-                </section>
-              </div>
-            </div> -->
-              <article class="user-box-menu">
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <img src="./assets/images/person.svg" />
-                <div class="user" style="min-width: 60px;font-size: 16px;">
-                  <span style="font-size: 16px;"> </span>님
-                </div>
-                <div class="logout-menu">
-                  <button class="logout-button"> 로그아웃 </button>
-                </div>
-              </article>
+        <nav class="titleWrap1">
+          <div class="logoBox">
+            <div style="display: flex; flex-direction:row; gap:5px;">
+              <!-- <img src="assets/images/logo2.png" alt="logo" /> -->
+              <p style="font-size: 21px;font-weight:bold;">CBMS</p>
             </div>
-          </section>
+            <p style="font-size:11px;">Cyber Battlefield Management System</p>
+          </div>
+          <div class="titleWrap2">
+            <div class="part1">
+              <button class="btnHeader">사이버 정보·감시·정찰</button>
+              <p>사이버 지휘통제</p>
+              <p>사이버작전(능동대응)</p>
+            </div>
+            <div class="part2">
+              <p style="font-weight: bold; font-size:14px">체계관리</p>
+              <div style="display: flex; flex-direction:row; gap:5px;">
+                <button
+                  class="selectModel"
+                  on:click="{() => (isToggleVisible = !isToggleVisible)}"
+                >
+                  실제모드
+                </button>
+
+                <!-- Dropdown menu -->
+                {#if isToggleVisible}
+                  <div class="toggleButton">
+                    <p>실제모드</p>
+                    <p>훈련모드1</p>
+                    <p>훈련모드2</p>
+                    <p>훈련모드3</p>
+                  </div>
+                {/if}
+                <button
+                  class="selectModel"
+                  style="background-color:#E99808; color:#fff">상황도</button
+                >
+              </div>
+              <div>
+                <img src="assets/images/mail.png" alt="email" class="email" />
+                <div class="messageNumber"><p>785</p></div>
+              </div>
+              <img src="assets/images/user.png" alt="user" />
+              <div>
+                <input
+                  type="checkbox"
+                  class="checkbox"
+                  id="checkbox"
+                  bind:checked="{isDarkMode}"
+                />
+                <label for="checkbox" class="checkbox-label">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+
+                  <span class="ball"></span>
+                </label>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <div class="body">
@@ -149,34 +175,206 @@
 </Router>
 
 <style>
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
   .container {
     display: flex;
     flex-direction: column;
     width: 100%;
   }
-  .login_box {
+  p {
+    display: block;
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    unicode-bidi: isolate;
+  }
+  .logoBox img {
+    width: 85px;
+    height: 42px;
+  }
+  .part1 {
     display: flex;
     flex-direction: row;
-    width: 300px;
     align-items: center;
     justify-content: space-between;
-    background-color: #fff;
+    width: 490px;
   }
-  .alarmWrap {
+  .part1 p {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .part2 {
     display: flex;
     flex-direction: row;
+    width: 425px;
+    justify-content: center;
+    gap: 20px;
     align-items: center;
+    margin-right: 50px;
   }
-  .titleWrap {
+  .part2 img {
+    width: 28px;
+    height: 28px;
+  }
+  .titleWrap1 {
     display: flex;
     flex-direction: row;
+    align-items: center; /* Align items vertically centered */
+    justify-content: space-between;
     position: relative;
     padding: 0 24px;
+    background-color: #3b4360;
+    height: 50px;
+    width: 100%;
+    color: #fff;
+    font-family: "Malgun Gothic", sans-serif;
+  }
+
+  .logoBox {
+    width: 15%;
+    display: flex;
+    color: #fff;
+    flex-direction: column;
+    height: 50px;
+    align-items: flex-start; /* Align to the left */
+  }
+
+  .titleWrap2 {
+    width: 85%;
+    display: flex;
+    flex-direction: row;
     justify-content: space-between;
-    background-color: #fff;
-    height: 90px;
+    align-items: center;
+    font-family: "Malgun Gothic", sans-serif;
   }
   .body {
     padding: 10px;
+  }
+  .btnHeader {
+    width: 190px;
+    height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    font-weight: bold;
+    background-color: #eeeeee;
+  }
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    -webkit-padding: 0.4em 0;
+    padding: 0em;
+    margin: 0 0 0em 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    font-size: 14px;
+    font-family: "Malgun Gothic", sans-serif;
+  }
+  .selectModel {
+    width: 88px;
+    height: 28px;
+    background-color: #eeeeee;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 5px;
+    position: relative;
+  }
+  .toggleButton {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background-color: #eeeeee;
+    border: #cccccc;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-left: -16px;
+    /* margin-right: 43px; */
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .toggleButton p {
+    padding-top: 5px;
+    text-align: center;
+    width: 90px;
+    color: #3b4360;
+    font-size: 14px;
+    padding-bottom: 5px;
+  }
+  .toggleButton p:hover {
+    padding-top: 5px;
+    text-align: center;
+    background-color: #3b4360;
+    color: #fff;
+    width: 90px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .messageNumber {
+    position: absolute;
+    background-color: #fdb812;
+    color: #3b4360;
+    border: 1px solid #223449;
+    border-radius: 10px;
+    /* margin-right: -185px; */
+    margin-top: -36px;
+    min-width: 15px;
+    text-align: center;
+    margin-left: 15px;
+  }
+  .messageNumber p {
+    font-size: 12px;
+    font-weight: bold;
+    color: #223449;
+    font-family: " Malgun Gothic ";
+    padding: 2px;
+  }
+  .email {
+    position: relative;
+  }
+  /************************************/
+  .checkbox {
+    opacity: 0;
+    position: absolute;
+  }
+
+  .checkbox-label {
+    background-color: #111;
+    width: 40px;
+    height: 16px;
+    border-radius: 50px;
+    position: relative;
+    padding: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .fa-moon {
+    color: #f1c40f;
+  }
+
+  .fa-sun {
+    color: #f39c12;
+  }
+
+  .checkbox-label .ball {
+    background-color: #fff;
+    width: 22px;
+    height: 22px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    border-radius: 50%;
+    transition: transform 0.2s linear;
+  }
+
+  .checkbox:checked + .checkbox-label .ball {
+    transform: translateX(24px);
   }
 </style>
