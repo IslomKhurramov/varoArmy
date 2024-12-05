@@ -191,7 +191,6 @@
         <Route path="/page7" component="{Page7}" />
         <Route path="/page6" component="{Page8}" />
         <Route path="/page7" component="{Page9}" /> -->
-        <div>fjkdlkjfljlfjfjdf</div>
       </div>
     </div>
   </body>

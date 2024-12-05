@@ -1,6 +1,59 @@
-
 <script>
-  
+import ModalDynamic from "../../shared/ModalDynamic.svelte";
+  import ResultPopup from "./ResultPopup.svelte";
+  import {
+    getCCEResultUploadStatus,
+    getResultUploadStatus,
+    getUploadedResultErrors,
+  } from "../../services/result/resultService";
+  import ResultErrorPopup from "./ResultErrorPopup.svelte";
+  import Modal2 from "../../shared/Modal2.svelte";
+
+    let jsonInput;
+  let txtInput;
+  let excelInput;
+  let jsonFiles = [];
+  let txtFiles = [];
+  let excelFiles = [];
+
+  let planList = [];
+  let selectedPlan = "";
+  let resultStatus = null;
+  let resultErrors = null;
+  let uploadStatus = null;
+  let showModal = false;
+  let showErrorModal = false;
+  let modalData = null;
+  let modalErrorData = null;
+  let uploadStatusModalData = null;
+
+  $: {
+    console.log("resultStatus:", resultStatus);
+    console.log("resultErrors:", resultErrors);
+  }
+
+  const fetchResultStatus = () => {
+    resultStatus = [{ id: 1, name: "Asset 1" }, { id: 2, name: "Asset 2" }];
+    showModal = true;
+  };
+
+  const fetchResultErrors = () => {
+    resultErrors = [{ id: 1, error: "Error 1" }, { id: 2, error: "Error 2" }];
+    showErrorModal = true;
+  };
+
+  $: if (selectedPlan) {
+    (async () => {
+      try {
+        resultStatus = await getCCEResultUploadStatus(selectedPlan);
+        resultErrors = await getUploadedResultErrors(selectedPlan);
+        uploadStatus = await getResultUploadStatus(selectedPlan);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    })();
+  }
+
     let tableData = [
       { category: "에이전트 (100)", unix: 10, windows: 70, network: 0, dbms: "-", pc: "-", errors: 3, total: "80%" },
       { category: "비에이전트 (10)", unix: 1, windows: 0, network: 7, dbms: "-", pc: "-", errors: "-", total: "90%" },
@@ -41,6 +94,8 @@
         ],
       },
     ];
+
+
   </script>
   
   <div class="inspection-container">
@@ -54,6 +109,40 @@
             <option value="UNIX">{item.title}</option>
         {/each}
           </select>
+      </div>
+
+
+      <div class="inputRow box_1">
+        <label>점검분류</label>
+        <select class="inputRow"
+        id="asset_group"
+        >
+        {#each mainItems as item, index}
+            <option value="UNIX">{item.title}</option>
+        {/each}
+          </select>
+      </div>
+
+      
+      <div class="inputRow box_1">
+        <label>점검기간</label>
+        <div class="dateWrap">
+          <div class="date">
+            <input
+              type="date"
+              class="datepicker"
+              placeholder="시작일시"
+            />
+          </div>
+          <img src="./assets/images/dash.svg" />
+          <div class="date">
+            <input
+              type="date"
+              class="datepicker"
+              placeholder="종료일시"
+            />
+          </div>
+        </div>
       </div>
   
     <!-- Registration Status -->
@@ -98,8 +187,16 @@
         </tbody>
       </table>
       <div class="buttons">
-        <button class="btn btn-primary">결과미등록자산</button>
-        <button class="btn btn-secondary">등록실패내역</button>
+        <button class="btn btn-primary"   
+        on:click={() => {
+          showModal = true;
+          modalData = resultStatus; 
+        }}
+        
+        >결과미등록자산</button>
+        <button class="btn btn-secondary" 
+        on:click={fetchResultErrors}
+        >등록실패내역</button>
       </div>
     </div>
   
@@ -119,11 +216,44 @@
       </div>
     </div>
   </div>
+
+
+  {#if showModal}
+  <ModalDynamic 
+   bind:showModal
+   modalWidth={60}
+   modalHeight={600}
+  >
+    <ResultPopup bind:modalData />
+  </ModalDynamic>
+  {/if}
+
+  {#if showErrorModal}
+  <ModalDynamic bind:showModal={showErrorModal} modalWidth={60} modalHeight={600}  showExecuteAllButton={true}>
+    <ResultErrorPopup bind:modalData={resultErrors} />
+  </ModalDynamic>
+  {/if}
+
+<!-- {#if uploadStatusModalData && uploadStatusModalData?.length !== 0}
+  <ModalDynamic
+    bind:showModal={uploadStatusModalData}
+    modalWidth={80}
+    modalHeight={uploadStatusModalData?.uploaded_status?.length > 10
+      ? 600
+      : null}
+    bind:modalData={uploadStatusModalData}
+  >
+    <ResultUploadStatusPopup bind:uploadStatusModalData />
+  </ModalDynamic>
+{/if} -->
   
   <style>
     .inspection-container {
       font-family: Arial, sans-serif;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      row-gap: 15px;
     }
 
     .inputRow {
@@ -139,10 +269,20 @@
     }
 
     .box_1 {
-      width: 70%;
+      width: 50%;
     }
 
     .inputRow select {
+      flex: 1;
+      width: 100%;
+      height: 34px;
+      padding: 17px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    .inputRow input {
       flex: 1;
       width: 100%;
       height: 34px;
@@ -162,11 +302,6 @@
     table td {
       padding: 10px;
       text-align: center;
-    }
-  
-    table th {
-      background-color: #AAAAAA;
-      color: white;
     }
   
     .buttons {

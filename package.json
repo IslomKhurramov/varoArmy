@@ -23,6 +23,10 @@
     "@fortawesome/svelte-fontawesome": "^0.2.3",
     "bootstrap": "^5.3.3",
     "sirv-cli": "^2.0.0",
-    "svelte-routing": "^2.13.0"
+    "svelte-routing": "^2.13.0",
+    "sweetalert": "^2.1.2",
+    "swiper": "^6.8.4",
+    "d3": "^7.9.0",
+    "axios": "^1.7.7"
   }
 }
