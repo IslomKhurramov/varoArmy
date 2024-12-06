@@ -1,0 +1,312 @@
+<script>
+      import { onMount } from "svelte";
+  import Swiper, { Navigation, Pagination } from "swiper";
+  import "swiper/swiper-bundle.min.css";
+
+  let swiperContainer
+  let scrollAmount = 0;
+  let itemWidth = 146;
+  let menuWidth = 1260;
+  let menuWrapper;
+  let swiperInstance;
+  onMount(() => {
+    // Ensure swiperContainer is bound
+    if (swiperContainer) {
+      swiperInstance = new Swiper(swiperContainer, {
+        modules: [Navigation, Pagination],
+        loop: false, // Avoid layout issues caused by looping
+        slidesPerView: 4, // Adjust this value to suit your design
+        spaceBetween: 10, // Fine-tune spacing to avoid layout shifts
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+      });
+    }
+
+    // Initialize menu wrapper for scrolling
+    menuWrapper = document.getElementById("menuWrapper");
+
+    return () => {
+      if (swiperInstance) {
+        swiperInstance.destroy(true, true);
+      }
+    };
+  });
+
+  const handleScroll = (direction) => {
+    if (direction === "prev") {
+      scrollAmount -= itemWidth;
+      if (scrollAmount < 0) scrollAmount = 0;
+    } else if (direction === "next") {
+      scrollAmount += itemWidth;
+      const maxScroll = menuWrapper.scrollWidth - menuWidth;
+      if (scrollAmount > maxScroll) scrollAmount = maxScroll;
+    }
+    if (menuWrapper) {
+      menuWrapper.style.transform = `translateX(-${scrollAmount}px)`;
+    }
+  };
+  let slides = [];
+
+// Generate fake data
+for (let i = 1; i <= 100; i++) {
+  slides.push({
+    ccc_item_no: `Item ${i}`, // Example fake item number
+    name: `Name ${i}`, // Optional: Add other fields as needed
+  });
+}
+
+let activeAsset = null;
+
+function handleSlideclick(slide) {
+  activeAsset = slide; // Set the clicked slide as active
+  console.log("Selected Slide:", slide);
+}
+
+
+let formData = {
+    planTitle: "",
+    inspectionPeriod: "",
+    category: "",
+    system: "",
+    domain: "전체",
+    item: "",
+    description: "",
+    attachment: null,
+    inspectorInfo: "",
+    executionCondition: "즉시/예약",
+    repeatPeriod: "",
+    repeatCount: 1,
+    startDate: "2024-09-01 12:00:00",
+    endDate: "2024-09-01 12:00:00",
+  };
+</script>
+
+<div class="contentArea">
+<section
+bind:this={swiperContainer}
+style="position: sticky;  z-index:99; background-color:white;"
+class="topCon swiper-container"
+>
+<div
+  class="menu-container"
+  style="position: sticky; z-index:99; background-color:white;"
+>
+  <button
+    class="arrow-btn"
+    id="prevBtn"
+    on:click={() => handleScroll("prev")}
+  >
+    ◀
+  </button>
+
+  <div
+    class="menu-wrapper-container"
+    style="background-color: white; z-index:99;"
+  >
+    <div
+      class="menu-wrapper"
+      id="menuWrapper"
+      style="background-color: white; z-index:99;"
+      bind:this={menuWrapper}
+    >
+      {#if slides.length > 0}
+        {#each slides as slide}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            value={slide.ccc_item_no}
+            name={slide}
+            class="menu-item {activeAsset &&
+            activeAsset.ccc_item_no === slide.ccc_item_no
+              ? 'active'
+              : ''}"
+            on:click={() => handleSlideclick(slide)}
+          >
+            {slide.ccc_item_no}
+          </div>
+        {/each}
+      {:else}
+        <div>데이터가 없습니다</div>
+      {/if}
+    </div>
+  </div>
+
+  <button
+    id="nextBtn"
+    class="arrow-btn"
+    on:click={() => handleScroll("next")}
+  >
+    ▶
+  </button>
+</div>
+</section>
+
+<div class="formContainer">
+  <section class="rowSection">
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+  </section>
+
+  <section class="rowSection">
+
+  <section class="rowSection">
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+  </section>
+  <section class="rowSection">
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+  </section>
+  </section>
+
+  <section class="rowSection">
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+    <div class="inputRow">
+      <label>점검계획제목</label>
+      <input type="text" />
+    </div>
+  </section>
+
+
+
+  <div class="inputRow">
+    <label>점검계획제목</label>
+    <div style="display: flex; flex-direction:column; width:91%">
+      <input type="text" />
+      <input type="text">
+    </div>
+  </div>
+
+  <div class="inputRow">
+    <label>점검계획내용</label>
+    <div style="display: flex; gap:10px; flex-direction:row; width:91%">
+    <select>
+      <option value="good">good</option>
+      <option value="good">good</option>
+      <option value="good">good</option>
+    </select>
+    <button class="btnSave ">edit</button>
+    <input type="text">
+    </div>
+  </div>
+
+  <div class="inputRow">
+    <label>첨부파일</label>
+    <input type="text" />
+  </div>
+
+  <div class="inputRo">
+    <label>점검관정보</label>
+    <input class="fileupload" type="file" />
+  </div>
+  <div class="inputRow">
+    <label>점검관정보</label>
+    <input type="text" />
+  </div>
+  <div class="lastButtons">
+    <button class="btnSave">save</button>
+    <button class="btnSave">edit</button>
+    <button class="btnSave">change</button>
+  </div>
+</div>
+</div>
+
+<style>
+  .lastButtons{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+gap: 10px;
+    width: 100%;
+  }
+.rowSection{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+}
+  .formContainer {
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .inputRow {
+    display: flex;
+    align-items: center;
+    row-gap: 20px;
+    column-gap: 10px;
+    width: 100%;
+  }
+  .inputRo {
+    display: flex;
+    align-items: center;
+    row-gap: 20px;
+    column-gap: 10px;
+    width: 100%;
+  }
+
+ 
+
+  .inputRow label {
+    width: 120px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-left: 20px;
+  }
+  .inputRo label {
+    width: 120px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-left: 20px;
+  }
+
+  .inputRow input {
+    flex: 1;
+    width: 100%;
+    height: 34px;
+    padding: 17px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .inputRow select {
+    flex: 1;
+    width: 100%;
+    height: 34px;
+    padding: 17px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+
+</style>
