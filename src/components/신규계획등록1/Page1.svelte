@@ -188,7 +188,7 @@
         <div class="inputRow">
           <label>점검분야</label>
           <input type="text" />
-          <button class="buttons">검색</button>
+          <button class="buttons1">검색</button>
         </div>
 
         <div class="inputRow1">
@@ -242,8 +242,8 @@
 
         <div class="inputRow">
           <label>점검관정보</label>
-          <input type="password" />
-          <button class="buttons">검색</button>
+          <input type="text" />
+          <button class="buttons1">검색</button>
         </div>
         <div class="inputRow">
           <label>점검스케줄</label>
@@ -461,7 +461,7 @@
     }
   }
 
-  .inputRow .buttons {
+  .inputRow .buttons1 {
     width: 72px;
     height: 34px;
     font-family: "Franklin Gothic Medium";
@@ -474,7 +474,7 @@
     border: none;
   }
 
-  .inputRow .buttons:hover {
+  .inputRow .buttons1:hover {
     color: #ffffff;
     background-color: #354d7d;
     border: none;
