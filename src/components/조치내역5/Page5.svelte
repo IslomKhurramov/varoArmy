@@ -10,7 +10,7 @@
       ccr_item_no__ccc_item_item: "NW-06",
       ccr_item_no__ccc_item_title: "SETUID..",
       ccr_item_no__ccc_item_criteria: "취약",
-      ccr_item_no__ccc_item_result: "조치예정",
+      ccr_item_no__ccc_item_result: "조치승인",
     });
   }
   /**********LEFT SIDE*/
@@ -135,7 +135,112 @@
       </div>
     </div>
   </section>
-  <section class="section2"></section>
+  <section class="section2">
+    <article class="contentArea">
+      <section class="filterWrap" style="margin-bottom: 0px;">
+        <div>
+          <select>
+            <option value="" selected disabled>점검대상체계</option>
+
+            <option value="{'점검대상체계'}">점검대상체계</option>
+          </select>
+          <input
+            style="    height: 28px;
+            font-size: 12px;"
+            type="datetime-local"
+          />
+
+          <select>
+            
+            <option value="점검관" selected>점검관</option>
+            <option value="">미등록</option>
+          </select>
+          <select id="result">
+            <option value="" selected>점검구분 </option>
+
+            <option
+              value="점검구분
+        "
+              >점검구분
+            </option>
+          </select>
+
+          <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
+            ><img src="assets/images/reset.png" alt="search" />초기화</button
+          >
+        </div>
+      </section>
+      <div class="last_button">
+        <select>
+          <option value="조치승인" selected>조치승인</option>
+          <option value="조치반려">조치반려</option>
+        </select>
+        <select>
+          <option
+            value="10줄
+        "
+            selected
+            >10줄
+          </option>
+          <option
+            value="20줄
+        "
+            >20줄
+          </option>
+        </select>
+      </div>
+      <div class="tableListWrap">
+        <table class="tableList hdBorder">
+          <colgroup>
+            <col style="width:90px;" />
+            <col style="width:170px" />
+            <col style="width:140px" />
+            <col style="width: 200px;" />
+            <col />
+            <col />
+            <col />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="text-center">번호</th>
+              <th class="text-center">점검분야 </th>
+              <th class="text-center">자산명 </th>
+              <th class="text-center">점검항목</th>
+              <th class="text-center">점검명</th>
+              <th class="text-center">점검결과 </th>
+              <th class="text-center">처리유형 </th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each resultData as data, index}
+              <tr>
+                <td class="text-center">{resultData.length - index}</td>
+
+                <td class="text-center">
+                  {data?.ast_uuid__ass_uuid__ast_hostname}
+                </td>
+                <td class="text-center">
+                  <div>
+                    {data?.ccr_item_no__ccc_item_no}
+                  </div>
+                </td>
+                <td class="text-center">
+                  {data.ccr_item_no__ccc_item_item}
+                </td>
+                <td> {data.ccr_item_no__ccc_item_title}</td>
+                <td class="text-center"
+                  >{data.ccr_item_no__ccc_item_criteria}
+                </td>
+                <td class="text-center"
+                  >{data.ccr_item_no__ccc_item_result}
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
 </main>
 
 <style>
@@ -165,5 +270,72 @@
     flex-direction: column;
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
+  }
+  thead {
+    position: sticky; /* Make the header sticky */
+    top: 0; /* Stick the header to the top */
+    z-index: 10; /* Ensure the header is above the scrolling content */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Shadow effect for separation */
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+  }
+  table th {
+    /* background-color: #aaaaaa;
+      color: white; */
+    font-weight: bold;
+  }
+  table th,
+  table td {
+    padding: 10px;
+    /* text-align: center; */
+    font-size: 12px;
+    /* height: 40px; */
+  }
+  table td {
+    font-weight: normal;
+    height: 40px;
+  }
+  .btn {
+    font-size: 14px;
+  }
+  .tableListWrap {
+    height: 66vh;
+    /* margin-bottom: 20px; */
+    overflow-y: auto;
+  }
+  .lastBox {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+  tr:hover {
+    cursor: pointer;
+    background-color: #f4f4f4;
+    transition-duration: 0.3s;
+  }
+  .btnUpload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .last_button {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 10px;
+  }
+  .last_button button {
+    padding: 10px;
+    border-radius: 4px;
+    width: auto;
+    margin: 10px;
   }
 </style>
