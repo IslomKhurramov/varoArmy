@@ -145,21 +145,8 @@
       </div>
     </div>
   </section>
-  <section class="section2 tableWrap">
-    <!-- <script>
-      import FifthMenuFirst from "../FifthMenuFirst.svelte";
-      import FifthMenuSecon from "../FifthMenuSecon.svelte";
-      import FifthMenuThird from "../FifthMenuThird.svelte";
-      export let tabMenu;
     
-      let setView = "plan";
-      let currentPage = FifthMenuFirst;
-    
-      const selectPage = (page) => {
-        currentPage = page;
-      };
-    </script> -->
-
+      <section class="section2 tableWrap" style="height: calc(-100px + 100vh);">
         <div class="tableListWrap">
           <section
             class="subTabWrap"
@@ -203,8 +190,8 @@
             <svelte:component this={currentPage} />
           {/if}
         </div>
+      </section>
     
-  </section>
 </main>
 
 <style>
@@ -234,15 +221,6 @@
     flex-direction: column;
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
-  }
-
-  .tableWrap {
-    height: calc(100vh - 100px);
-    overflow: hidden;
-  }
-
-  .tableListWrap {
-      overflow: hidden;
   }
 
 </style>
