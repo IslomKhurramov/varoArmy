@@ -1,6 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
+  import FirstMenu from "./모든구성요소/FirstMenu.svelte";
+  import SeconMenu from "./모든구성요소/SeconMenu.svelte";
+  import ThirdMenu from "./모든구성요소/ThirdMenu.svelte";
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -13,6 +16,13 @@
       ccr_item_no__ccc_item_result: "조치예정",
     });
   }
+
+  let setView = "plan";
+      let currentPage = FirstMenu;
+    
+      const selectPage = (page) => {
+        currentPage = page;
+      };
   /**********LEFT SIDE*/
   let mainTitle = "점검 계획 현황";
   let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
@@ -135,7 +145,66 @@
       </div>
     </div>
   </section>
-  <section class="section2"></section>
+  <section class="section2 tableWrap">
+    <!-- <script>
+      import FifthMenuFirst from "../FifthMenuFirst.svelte";
+      import FifthMenuSecon from "../FifthMenuSecon.svelte";
+      import FifthMenuThird from "../FifthMenuThird.svelte";
+      export let tabMenu;
+    
+      let setView = "plan";
+      let currentPage = FifthMenuFirst;
+    
+      const selectPage = (page) => {
+        currentPage = page;
+      };
+    </script> -->
+
+        <div class="tableListWrap">
+          <section
+            class="subTabWrap"
+            style="height: 50px; background-color: #fff; margin-top: 8px; padding-left: 20px; border-radius: 10px"
+          >
+            <a
+              href="javascript:void(0);"
+              class={setView == "plan" ? "active" : ""}
+              on:click={() => {
+                setView = "plan";
+                selectPage(FirstMenu);
+              }}
+            >
+              시스템로그
+            </a>
+            <a
+              href="javascript:void(0);"
+              class={setView == "plan_accept" ? "active" : ""}
+              on:click={() => {
+                setView = "plan_accept";
+                selectPage(SeconMenu);
+              }}
+              style="margin-left: 10px;"
+            >
+              감사로그
+            </a>
+            <a
+              href="javascript:void(0);"
+              class={setView == "plan_siroj" ? "active" : ""}
+              on:click={() => {
+                setView = "plan_siroj";
+                selectPage(ThirdMenu);
+              }}
+              style="margin-left: 10px;"
+            >
+              수행명령조회
+            </a>
+          </section>
+    
+          {#if currentPage}
+            <svelte:component this={currentPage} />
+          {/if}
+        </div>
+    
+  </section>
 </main>
 
 <style>
@@ -166,4 +235,14 @@
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
   }
+
+  .tableWrap {
+    height: calc(100vh - 100px);
+    overflow: hidden;
+  }
+
+  .tableListWrap {
+      overflow: hidden;
+  }
+
 </style>
