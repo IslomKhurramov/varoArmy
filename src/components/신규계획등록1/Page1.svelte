@@ -153,9 +153,7 @@
     </div>
   </section>
   <section class="section2">
-    {#if currentPage === LeftContainer}
-      <svelte:component this="{currentPage}" />
-    {:else}
+  
       <div class="formContainer">
         <div class="inputRow">
           <label>점검계획제목</label>
@@ -294,7 +292,6 @@
           </div>
         </div>
       </div>
-    {/if}
   </section>
 </main>
 
