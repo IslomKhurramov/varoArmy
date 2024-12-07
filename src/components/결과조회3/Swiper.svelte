@@ -2,6 +2,7 @@
       import { onMount } from "svelte";
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
+  import ModalPopEdit from "./ModalPopEdit.svelte";
 
   let swiperContainer
   let scrollAmount = 0;
@@ -9,6 +10,7 @@
   let menuWidth = 1260;
   let menuWrapper;
   let swiperInstance;
+  let showModal=false;
   onMount(() => {
     // Ensure swiperContainer is bound
     if (swiperContainer) {
@@ -85,6 +87,25 @@ let formData = {
     startDate: "2024-09-01 12:00:00",
     endDate: "2024-09-01 12:00:00",
   };
+   // Close modal when Esc key is pressed
+   function handleKeyDown(event) {
+    if (event.key === "Escape") {
+      closeShowModal();
+    }
+  }
+  function closeShowModal() {
+    showModal = false;
+  }
+
+  onMount(() => {
+    // Listen for keydown event when the modal is open
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      // Remove the event listener when the component is destroyed
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });
 </script>
 
 <div class="contentArea">
@@ -211,7 +232,7 @@ class="topCon swiper-container"
       <option value="good">good</option>
       <option value="good">good</option>
     </select>
-    <button class="btnSave ">edit</button>
+    <button class="btnSave " on:click={()=>showModal=true}>edit</button>
     <input type="text">
     </div>
   </div>
@@ -236,8 +257,30 @@ class="topCon swiper-container"
   </div>
 </div>
 </div>
+{#if showModal}
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<div
+  class="modal-open-wrap"
+  on:click={() => (showModal = false)}
+  on:keydown={handleKeyDown}
+  tabindex="0"
+>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <dialog
+    open
+    on:close={() => (showModal = false)}
+    on:click|stopPropagation
+  >
+    <ModalPopEdit {closeShowModal}
+    />
+  </dialog>
+</div>
+{/if}
 
 <style>
+  .btnSave{
+    height: 34px;
+  }
   .lastButtons{
     display: flex;
     flex-direction: row;
@@ -307,6 +350,41 @@ gap: 10px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 12px;
+  }
+  .modal-open-wrap {
+    display: block;
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(167, 167, 167, 0.6);
+  }
+ 
+  /****Modal Container*/
+  dialog {
+    position: fixed;
+    /* height: 600px; */
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1103px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: svelte-s7onsa-fadeIn 0.3s ease;
+    z-index: 100;
+  }
+
+  /* Modal backdrop */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeInBackdrop 0.3s ease;
   }
 
 </style>
