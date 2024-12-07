@@ -2950,3 +2950,28 @@ color: #777777;
     font-size: 14px;
     border-radius: 4px;
   }
+ 
+    .btnDone{
+      background-color: #FFFFFF;
+      color: #999999;
+      border:none;
+      height:auto;
+      width: auto;
+      font-family: 'Malgun Gothic', sans-serif;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #999999;
+    }
+    .btnDone:hover{
+      background-color: #333333;
+      color: #FFFFFF;
+      border:none;
+      height: auto;
+      width: auto;
+      font-family: 'Malgun Gothic', sans-serif;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  

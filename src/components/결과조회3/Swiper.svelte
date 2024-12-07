@@ -1,16 +1,16 @@
 <script>
-      import { onMount } from "svelte";
+  import { onMount } from "svelte";
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
   import ModalPopEdit from "./ModalPopEdit.svelte";
 
-  let swiperContainer
+  let swiperContainer;
   let scrollAmount = 0;
   let itemWidth = 146;
   let menuWidth = 1260;
   let menuWrapper;
   let swiperInstance;
-  let showModal=false;
+  let showModal = false;
   onMount(() => {
     // Ensure swiperContainer is bound
     if (swiperContainer) {
@@ -55,23 +55,22 @@
   };
   let slides = [];
 
-// Generate fake data
-for (let i = 1; i <= 100; i++) {
-  slides.push({
-    ccc_item_no: `Item ${i}`, // Example fake item number
-    name: `Name ${i}`, // Optional: Add other fields as needed
-  });
-}
+  // Generate fake data
+  for (let i = 1; i <= 100; i++) {
+    slides.push({
+      ccc_item_no: `Item ${i}`, // Example fake item number
+      name: `Name ${i}`, // Optional: Add other fields as needed
+    });
+  }
 
-let activeAsset = null;
+  let activeAsset = null;
 
-function handleSlideclick(slide) {
-  activeAsset = slide; // Set the clicked slide as active
-  console.log("Selected Slide:", slide);
-}
+  function handleSlideclick(slide) {
+    activeAsset = slide; // Set the clicked slide as active
+    console.log("Selected Slide:", slide);
+  }
 
-
-let formData = {
+  let formData = {
     planTitle: "",
     inspectionPeriod: "",
     category: "",
@@ -87,8 +86,8 @@ let formData = {
     startDate: "2024-09-01 12:00:00",
     endDate: "2024-09-01 12:00:00",
   };
-   // Close modal when Esc key is pressed
-   function handleKeyDown(event) {
+  // Close modal when Esc key is pressed
+  function handleKeyDown(event) {
     if (event.key === "Escape") {
       closeShowModal();
     }
@@ -109,191 +108,199 @@ let formData = {
 </script>
 
 <div class="contentArea">
-<section
-bind:this={swiperContainer}
-style="position: sticky;  z-index:99; background-color:white;"
-class="topCon swiper-container"
->
-<div
-  class="menu-container"
-  style="position: sticky; z-index:99; background-color:white;"
->
-  <button
-    class="arrow-btn"
-    id="prevBtn"
-    on:click={() => handleScroll("prev")}
-  >
-    ◀
-  </button>
-
-  <div
-    class="menu-wrapper-container"
-    style="background-color: white; z-index:99;"
+  <section
+    bind:this="{swiperContainer}"
+    style="position: sticky;  z-index:99; background-color:white;"
+    class="topCon swiper-container"
   >
     <div
-      class="menu-wrapper"
-      id="menuWrapper"
-      style="background-color: white; z-index:99;"
-      bind:this={menuWrapper}
+      class="menu-container"
+      style="position: sticky; z-index:99; background-color:white;"
     >
-      {#if slides.length > 0}
-        {#each slides as slide}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div
-            value={slide.ccc_item_no}
-            name={slide}
-            class="menu-item {activeAsset &&
-            activeAsset.ccc_item_no === slide.ccc_item_no
-              ? 'active'
-              : ''}"
-            on:click={() => handleSlideclick(slide)}
-          >
-            {slide.ccc_item_no}
-          </div>
-        {/each}
-      {:else}
-        <div>데이터가 없습니다</div>
-      {/if}
-    </div>
-  </div>
+      <button
+        class="arrow-btn"
+        id="prevBtn"
+        on:click="{() => handleScroll('prev')}"
+      >
+        ◀
+      </button>
 
-  <button
-    id="nextBtn"
-    class="arrow-btn"
-    on:click={() => handleScroll("next")}
-  >
-    ▶
-  </button>
-</div>
-</section>
+      <div
+        class="menu-wrapper-container"
+        style="background-color: white; z-index:99;"
+      >
+        <div
+          class="menu-wrapper"
+          id="menuWrapper"
+          style="background-color: white; z-index:99;"
+          bind:this="{menuWrapper}"
+        >
+          {#if slides.length > 0}
+            {#each slides as slide}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <div
+                value="{slide.ccc_item_no}"
+                name="{slide}"
+                class="menu-item {activeAsset &&
+                activeAsset.ccc_item_no === slide.ccc_item_no
+                  ? 'active'
+                  : ''}"
+                on:click="{() => handleSlideclick(slide)}"
+              >
+                {slide.ccc_item_no}
+              </div>
+            {/each}
+          {:else}
+            <div>데이터가 없습니다</div>
+          {/if}
+        </div>
+      </div>
 
-<div class="formContainer">
-  <section class="rowSection">
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-  </section>
-
-  <section class="rowSection">
-
-  <section class="rowSection">
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-  </section>
-  <section class="rowSection">
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-  </section>
-  </section>
-
-  <section class="rowSection">
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
-    </div>
-    <div class="inputRow">
-      <label>점검계획제목</label>
-      <input type="text" />
+      <button
+        id="nextBtn"
+        class="arrow-btn"
+        on:click="{() => handleScroll('next')}"
+      >
+        ▶
+      </button>
     </div>
   </section>
 
+  <div class="formContainer">
+    <section class="rowSection">
+      <div class="inputRow">
+        <label>점검대상체계</label>
+        <input type="text" />
+      </div>
+      <div class="inputRow">
+        <label>점검관</label>
+        <input type="text" />
+      </div>
+    </section>
 
+    <section class="rowSection">
+      <section class="rowSection">
+        <div class="inputRow">
+          <label>체계담당자명</label>
+          <input type="text" />
+        </div>
+        <div class="inputRow">
+          <label>부대</label>
+          <input type="text" />
+        </div>
+      </section>
+      <section class="rowSection">
+        <div class="inputRow">
+          <label>아이디</label>
+          <input type="text" />
+        </div>
+        <div class="inputRow">
+          <label>연락처</label>
+          <input type="text" />
+        </div>
+      </section>
+    </section>
 
-  <div class="inputRow">
-    <label>점검계획제목</label>
-    <div style="display: flex; flex-direction:column; width:91%">
+    <section class="rowSection">
+      <div class="inputRow">
+        <label>점검일시</label>
+        <input type="date" />
+      </div>
+      <div class="inputRow">
+        <label>점검구분</label>
+        <input type="text" />
+      </div>
+    </section>
+    <div class="inputRow">
+      <label>점검대상</label>
       <input type="text" />
-      <input type="text">
+    </div>
+
+    <div class="inputRow">
+      <label>점검항목</label>
+      <input type="text" />
+    </div>
+
+    <div class="inputRow">
+      <label>점검기준</label>
+      <div style="display: flex; flex-direction:column; width:91%">
+        <input type="text" />
+        <input type="text" />
+      </div>
+    </div>
+
+    <div class="inputRow">
+      <label>점검결과</label>
+      <div style="display: flex; gap:10px; flex-direction:row; width:91%">
+        <select name="operating_system" id="operating_system">
+          <option value="양호" selected>양호</option>
+          <option value="취약">취약</option>
+          <option value="예외처리">예외처리</option>
+          <option value="기타">기타</option>
+        </select>
+        <button class="btnSave" on:click="{() => (showModal = true)}"
+          >edit</button
+        >
+        <input type="text" />
+      </div>
+    </div>
+
+    <div class="inputRow">
+      <label>점검현황</label>
+      <input type="text" />
+    </div>
+
+    <div class="inputRo">
+      <label>증적파일 첨부 </label>
+      <input class="fileupload" type="file" />
+    </div>
+    <div class="inputRow">
+      <label>조치방법</label>
+      <input type="text" />
+    </div>
+    <div class="lastButtons">
+      <button class="btnSave">저장</button>
+      <button class="btnUpload">취약점이력추적</button>
+      <button class="btnUpload">변경내역이력조회</button>
     </div>
   </div>
-
-  <div class="inputRow">
-    <label>점검계획내용</label>
-    <div style="display: flex; gap:10px; flex-direction:row; width:91%">
-    <select>
-      <option value="good">good</option>
-      <option value="good">good</option>
-      <option value="good">good</option>
-    </select>
-    <button class="btnSave " on:click={()=>showModal=true}>edit</button>
-    <input type="text">
-    </div>
-  </div>
-
-  <div class="inputRow">
-    <label>첨부파일</label>
-    <input type="text" />
-  </div>
-
-  <div class="inputRo">
-    <label>점검관정보</label>
-    <input class="fileupload" type="file" />
-  </div>
-  <div class="inputRow">
-    <label>점검관정보</label>
-    <input type="text" />
-  </div>
-  <div class="lastButtons">
-    <button class="btnSave">save</button>
-    <button class="btnSave">edit</button>
-    <button class="btnSave">change</button>
-  </div>
-</div>
 </div>
 {#if showModal}
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<div
-  class="modal-open-wrap"
-  on:click={() => (showModal = false)}
-  on:keydown={handleKeyDown}
-  tabindex="0"
->
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <dialog
-    open
-    on:close={() => (showModal = false)}
-    on:click|stopPropagation
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click="{() => (showModal = false)}"
+    on:keydown="{handleKeyDown}"
+    tabindex="0"
   >
-    <ModalPopEdit {closeShowModal}
-    />
-  </dialog>
-</div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog
+      open
+      on:close="{() => (showModal = false)}"
+      on:click|stopPropagation
+    >
+      <ModalPopEdit {closeShowModal} />
+    </dialog>
+  </div>
 {/if}
 
 <style>
-  .btnSave{
+  .btnSave {
     height: 34px;
   }
-  .lastButtons{
+  .lastButtons {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-gap: 10px;
+    gap: 10px;
     width: 100%;
   }
-.rowSection{
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  width: 100%;
-}
+  .rowSection {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+  }
   .formContainer {
     max-width: 85%;
     display: flex;
@@ -316,8 +323,6 @@ gap: 10px;
     column-gap: 10px;
     width: 100%;
   }
-
- 
 
   .inputRow label {
     width: 120px;
@@ -361,7 +366,7 @@ gap: 10px;
     right: 0;
     background-color: rgba(167, 167, 167, 0.6);
   }
- 
+
   /****Modal Container*/
   dialog {
     position: fixed;
@@ -386,5 +391,4 @@ gap: 10px;
     background: rgba(0, 0, 0, 0.5);
     animation: fadeInBackdrop 0.3s ease;
   }
-
 </style>
