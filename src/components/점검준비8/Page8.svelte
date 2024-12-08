@@ -210,6 +210,10 @@
   }
   a {
     color: #333333;
+    font-size: 12px;
+  }
+  th {
+    font-size: 12px;
   }
   .section2 {
     width: 85%;
