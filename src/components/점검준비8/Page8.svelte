@@ -135,7 +135,69 @@
       </div>
     </div>
   </section>
-  <section class="section2"></section>
+  <section class="section2">
+    <article class="contentArea">
+      <section class="filterWrap">
+        <div>
+          <select style="width: 200px;">
+            <option value="" selected disabled>프로젝트</option>
+            <option value="{'프로젝트'}">프로젝트</option>
+          </select>
+
+          <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
+            ><img src="assets/images/reset.png" alt="search" />초기화</button
+          >
+        </div>
+      </section>
+      <table style="width: 60%;">
+        <colgroup>
+          <col style="width: 60px;" />
+          <col style="width:83%" />
+        </colgroup>
+        <tr style="position: sticky;top: -1px;">
+          <th
+            class="center-align"
+            style="color: black;font-weight:bold;background: #F7FAFC; border-radius:4px;padding:10px; font-size:12px;"
+            >구분</th
+          >
+          <th
+            class="center-align"
+            style="border-radius:4px; color: black; font-weight:bold; background: #F7FAFC; padding:10px; font-size:12px;"
+            >다운로드 링크
+          </th>
+        </tr>
+        <tbody>
+          <tr>
+            <th class="center-align">이동식 점검 모듈 </th>
+            <td class="line-height">
+              <ul>
+                <li>
+                  <a href="#">유닉스/리눅스 점검 프로그램 </a>
+                </li>
+                <li>
+                  <a href="#">윈도우 서버 점검 프로그램 </a>
+                </li>
+                <li>
+                  <a href="#">윈도우 PC 점검 프로그램 </a>
+                </li>
+                <li>
+                  <a href="#">수작업 점검을 위한 엑셀 파일 </a>
+                </li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th class="center-align">에이전트 명령 등록 </th>
+            <td class="line-height">
+              <ul>
+                <li><a href="">점검 명령 등록을 위한 엑셀 파일 </a></li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
 </main>
 
 <style>
@@ -145,6 +207,13 @@
     height: calc(100vh - 200px);
     display: flex;
     flex-direction: row;
+  }
+  a {
+    color: #333333;
+    font-size: 12px;
+  }
+  th {
+    font-size: 12px;
   }
   .section2 {
     width: 85%;

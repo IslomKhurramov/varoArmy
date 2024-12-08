@@ -2808,6 +2808,7 @@ label.file-label {
 }
 /*****************************************
    /* Menu Container */
+<<<<<<< HEAD
 .menuContainer {
   max-width: 900px;
   height: 80vh;
@@ -2817,6 +2818,17 @@ label.file-label {
   flex-direction: column;
   justify-content: space-between;
 }
+=======
+   .menuContainer {
+    max-width: 900px;
+    height: 78vh;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+>>>>>>> bd4ef1b3c77ace63bc7f3bab3b643f54f103325e
 
 /* Header */
 .menuHeader {
@@ -2917,6 +2929,7 @@ label.file-label {
   transition: background-color 0.3s ease;
 }
 
+<<<<<<< HEAD
 .buttons button:hover {
   opacity: 0.9;
   color: #ffffff;
@@ -2926,3 +2939,39 @@ label.file-label {
   font-size: 14px;
   border-radius: 4px;
 }
+=======
+  .buttons button:hover {
+    opacity: 0.9;
+    color: #ffffff;
+    background-color: #333333;
+    border: none;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+ 
+    .btnDone{
+      background-color: #FFFFFF;
+      color: #999999;
+      border:none;
+      height:auto;
+      width: auto;
+      font-family: 'Malgun Gothic', sans-serif;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #999999;
+    }
+    .btnDone:hover{
+      background-color: #333333;
+      color: #FFFFFF;
+      border:none;
+      height: auto;
+      width: auto;
+      font-family: 'Malgun Gothic', sans-serif;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  
+>>>>>>> bd4ef1b3c77ace63bc7f3bab3b643f54f103325e

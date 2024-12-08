@@ -140,7 +140,7 @@
       <section class="filterWrap" style="margin-bottom: 0px;">
         <div>
           <select>
-            <option value="" selected disabled>점검대상체계</option>
+            <option value="" selected>점검대상체계</option>
 
             <option value="{'점검대상체계'}">점검대상체계</option>
           </select>
@@ -157,12 +157,7 @@
           </select>
           <select id="result">
             <option value="" selected>점검구분 </option>
-
-            <option
-              value="점검구분
-        "
-              >점검구분
-            </option>
+            <option value="점검구분">점검구분 </option>
           </select>
 
           <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
