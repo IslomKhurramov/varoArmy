@@ -4,6 +4,7 @@
   import Swiper from "./Swiper.svelte";
   import { allPlanList, viewPlanResult } from "../../services/store";
   import { getViewPlanResults } from "../../services/callApi";
+  import ModalPopDetail from "./ModalPopDetail.svelte";
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -94,6 +95,9 @@
     currentPage = Swiper;
   }
   /***********************************/
+  let closeShowModalDetail=false;
+  const validOptions = ["양호", "취약", "인터뷰", "수동점검"];
+
   let planIndex = "";
   let target = "";
   let hostName = "";
@@ -122,6 +126,32 @@
   }
 
   $: console.log("viewPlanResult", $viewPlanResult);
+    // Close modal when Esc key is pressed
+    function handleKeyDown(event) {
+    if (event.key === "Escape") {
+      closeShowModal();
+    }
+  }
+  function closeShowModal() {
+    closeShowModalDetail = false;
+  }
+
+  onMount(() => {
+    // Listen for keydown event when the modal is open
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      // Remove the event listener when the component is destroyed
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+  let selectedData=null;
+  function handleRowClick(data) {
+    selectedData = data;
+    closeShowModalDetail = true;  // Open the modal
+  }
+  $: console.log("selectedData", selectedData);
+/**************PAGINATION*/
 </script>
 
 <main class="table-container">
@@ -247,7 +277,7 @@
             </thead>
             <tbody>
               {#each $viewPlanResult as data, index}
-                <tr>
+                <tr on:click={() => handleRowClick(data)}>
                   <!-- 번호: Reverse index to display latest first -->
                   <td class="text-center">{$viewPlanResult.length - index}</td>
 
@@ -270,21 +300,19 @@
 
                   <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
                   <td>
-                    {data?.ccr_item_no__ccc_item_criteria || "N/A"}
+                    {@html data?.ccr_item_no__ccc_item_criteria.replace(/\n/g, "<br/>") || "N/A"}
                   </td>
 
                   <!-- 점검결과 (Actions): -->
                   <td class="text-center">
                     <div class="lastBox">
-                      <select style="width: 100px;" class="xs">
-                        <option value="" disabled selected>선택</option>
-                        <option value="양호">양호</option>
-                        <option value="취약">취약</option>
-                        <option value="수동점검">수동점검</option>
-                        <option value="예외처리">예외처리</option>
-                        <option value="해당없음">해당없음</option>
+                      <select style="width: 100px;" class="xs" on:click|stopPropagation>
+                        {#each validOptions as option}
+                        <option value={option} selected={data.ccr_item_result === option}>
+                          {option}
+                        </option>
+                      {/each}
                       </select>
-
                       <input
                         type="text"
                         class="inputDefault"
@@ -307,8 +335,62 @@
     {/if}
   </section>
 </main>
+{#if closeShowModalDetail}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click="{() => (closeShowModalDetail = false)}"
+    on:keydown="{handleKeyDown}"
+    tabindex="0"
+  >
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog
+      open
+      on:close="{() => (closeShowModalDetail = false)}"
+      on:click|stopPropagation
+    >
+      <ModalPopDetail {closeShowModal} {selectedData}/>
+    </dialog>
+  </div>
+{/if}
 
 <style>
+
+.modal-open-wrap {
+    display: block;
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(167, 167, 167, 0.6);
+  }
+
+  /****Modal Container*/
+  dialog {
+    position: fixed;
+    /* height: 600px; */
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1103px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: svelte-s7onsa-fadeIn 0.3s ease;
+    z-index: 100;
+  }
+
+  /* Modal backdrop */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeInBackdrop 0.3s ease;
+  }
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;

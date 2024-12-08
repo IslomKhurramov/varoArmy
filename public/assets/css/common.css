@@ -2808,17 +2808,6 @@ label.file-label {
 }
 /*****************************************
    /* Menu Container */
-<<<<<<< HEAD
-.menuContainer {
-  max-width: 900px;
-  height: 80vh;
-  padding: 15px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-=======
    .menuContainer {
     max-width: 900px;
     height: 78vh;
@@ -2828,8 +2817,6 @@ label.file-label {
     flex-direction: column;
     justify-content: space-between;
   }
->>>>>>> bd4ef1b3c77ace63bc7f3bab3b643f54f103325e
-
 /* Header */
 .menuHeader {
   font-size: 16px;
