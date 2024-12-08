@@ -271,6 +271,7 @@
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
   }
+  
   thead {
     position: sticky; /* Make the header sticky */
     top: 0; /* Stick the header to the top */
