@@ -1,5 +1,7 @@
 <script>
+  import ModalDynamic from "../../shared/ModalDynamic.svelte";
   import LeftContainer from "../LeftContainer.svelte";
+  import InspectionTargetAssignment from "./InspectionTargetAssignment.svelte";
 
   let formData = {
     planTitle: "",
@@ -17,6 +19,16 @@
     startDate: "2024-09-01 12:00:00",
     endDate: "2024-09-01 12:00:00",
   };
+
+  let units = [ {name: 'Unit 1'}, {name: 'Unit 2'}, {name: 'Unit 3'}, {name: 'Unit 4'} ]; let systems = [ {name: 'System 1'}, {name: 'System 2'}, {name: 'System 3'}, {name: 'System 4'} ]; let ipRanges = [ '192.168.0.1/24', '192.168.1.1/24', '10.0.0.1/24', '172.16.0.1/24' ];
+
+  let showModal = false;
+  let modalData = null;
+  let resultStatus = null;
+
+  $: {
+    console.log("resultStatus:", resultStatus);
+  }
 
   const handleFileUpload = (event) => {
     formData.attachment = event.target.files[0];
@@ -186,7 +198,11 @@
         <div class="inputRow">
           <label>점검분야</label>
           <input type="text" />
-          <button class="buttons1">검색</button>
+          <button class="buttons1"      
+          on:click="{() => {
+            showModal = true;
+            modalData = resultStatus;
+          }}">검색</button>
         </div>
 
         <div class="inputRow1">
@@ -294,6 +310,13 @@
       </div>
   </section>
 </main>
+
+
+{#if showModal}
+  <ModalDynamic bind:showModal modalWidth="{60}" modalHeight="{700}">
+    <InspectionTargetAssignment {units} {systems} {ipRanges} bind:modalData />
+  </ModalDynamic>
+{/if}
 
 <style>
   .table-container {
