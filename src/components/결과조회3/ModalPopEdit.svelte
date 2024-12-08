@@ -23,12 +23,16 @@
         <col style="width:80%" />
       </colgroup>
       <tr style="height: 50px; position: sticky;top: -1px;">
-        <th class="center-align" style="color: white;background: #0072fd;"
+        <th
+          class="center-align"
+          style="color: black;font-weight:bold;background: #F2F2F2; border-radius:4px"
           >구분</th
         >
-        <td class="center-align" style="color: white;background: #0072fd;"
-          >설명</td
-        >
+        <th
+          class="center-align"
+          style="border-radius:4px; color: black; font-weight:bold; background: #F2F2F2;"
+          >설명
+        </th>
       </tr>
       <tbody>
         {#if selectedItem}
