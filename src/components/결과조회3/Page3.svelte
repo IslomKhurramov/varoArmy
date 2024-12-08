@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
   import Swiper from "./Swiper.svelte";
+  import { allPlanList, viewPlanResult } from "../../services/store";
+  import { getViewPlanResults } from "../../services/callApi";
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -91,6 +93,35 @@
   function selectPage() {
     currentPage = Swiper;
   }
+  /***********************************/
+  let planIndex = "";
+  let target = "";
+  let hostName = "";
+  let checkList_item_no = "";
+  let check_result = "";
+  let show_option = "";
+  async function viewPlanResultFunction() {
+    try {
+      const response = await getViewPlanResults(
+        planIndex,
+        target,
+        hostName,
+        checkList_item_no,
+        check_result,
+        show_option
+      );
+
+      if (response) {
+        viewPlanResult.set(response.CODE);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  $: console.log("viewPlanResult", $viewPlanResult);
 </script>
 
 <main class="table-container">
@@ -149,26 +180,44 @@
       <article class="contentArea">
         <section class="filterWrap">
           <div>
-            <select>
+            <select
+              bind:value="{planIndex}"
+              on:change="{viewPlanResultFunction}"
+            >
               <option value="" selected disabled>프로젝트</option>
-
-              <option value="{'프로젝트'}">프로젝트</option>
+              {#each $allPlanList as plan}
+                <option value="{plan.ccp_index}">{plan.ccp_title}</option>
+              {/each}
             </select>
-            <select>
+            <select bind:value="{target}" on:change="{viewPlanResultFunction}">
               <option value="" selected>점검대상</option>
-
-              <option value="점검대상">점검대상</option>
+              <option value="UNIX">UNIX</option>
+              <option value="WINDOWS">WINDOWS</option>
+              <option value="PC">PC</option>
+              <option value="NETWORK">NETWORK</option>
+              <option value="DBMS">DBMS</option>
+              <option value="WEB">WEB</option>
+              <option value="WAS">WAS</option>
+              <option value="CLOUD">CLOUD</option>
+              <option value="SECURITY">SECURITY</option>
             </select>
 
-            <select>
+            <select
+              bind:value="{hostName}"
+              on:change="{viewPlanResultFunction}"
+            >
               <option value="" selected>호스트</option>
-
               <option value="호스트">호스트</option>
             </select>
-            <select id="result">
+            <select
+              bind:value="{check_result}"
+              on:change="{viewPlanResultFunction}"
+            >
               <option value="" selected>점검항목</option>
-
-              <option value="점검항목">점검항목</option>
+              <option value="양호">양호</option>
+              <option value="취약">취약</option>
+              <option value="인터뷰">인터뷰</option>
+              <option value="인터뷰">수동점검</option>
             </select>
 
             <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
@@ -197,31 +246,43 @@
               </tr>
             </thead>
             <tbody>
-              {#each resultData as data, index}
+              {#each $viewPlanResult as data, index}
                 <tr>
-                  <td class="text-center">{resultData.length - index}</td>
+                  <!-- 번호: Reverse index to display latest first -->
+                  <td class="text-center">{$viewPlanResult.length - index}</td>
 
+                  <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
                   <td class="text-center">
-                    {data?.ast_uuid__ass_uuid__ast_hostname}
+                    {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
                   </td>
+
+                  <!-- 점검항목: ccr_item_no__ccc_item_no -->
                   <td class="text-center">
                     <div>
-                      {data?.ccr_item_no__ccc_item_no}
+                      {data?.ccr_item_no__ccc_item_no || "N/A"}
                     </div>
                   </td>
+
+                  <!-- 점검이름: ccr_item_no__ccc_item_title -->
                   <td class="text-center">
-                    {data.ccr_item_no__ccc_item_title}
+                    {data?.ccr_item_no__ccc_item_title || "N/A"}
                   </td>
-                  <td> {data.ccr_item_no__ccc_item_criteria}</td>
+
+                  <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
+                  <td>
+                    {data?.ccr_item_no__ccc_item_criteria || "N/A"}
+                  </td>
+
+                  <!-- 점검결과 (Actions): -->
                   <td class="text-center">
                     <div class="lastBox">
-                      <select style=" width: 100px;" class="xs">
-                        <option value="" disabled> </option>
-                        <option value="양호"> 양호 </option>
-                        <option value="취약"> 취약 </option>
-                        <option value="수동점검"> 수동점검 </option>
-                        <option value="예외처리"> 예외처리 </option>
-                        <option value="해당없음"> 해당없음 </option>
+                      <select style="width: 100px;" class="xs">
+                        <option value="" disabled selected>선택</option>
+                        <option value="양호">양호</option>
+                        <option value="취약">취약</option>
+                        <option value="수동점검">수동점검</option>
+                        <option value="예외처리">예외처리</option>
+                        <option value="해당없음">해당없음</option>
                       </select>
 
                       <input
@@ -230,11 +291,8 @@
                         placeholder="사유"
                       />
 
-                      <button class=" btnSave">저장 </button><button
-                        class=" btnUpload"
-                        >관련시스템보기
-                      </button>
-                      <!-- <button type="button" class="btn btnBlue xs">변경</button> -->
+                      <button class="btnSave">저장</button>
+                      <button class="btnUpload">관련시스템보기</button>
                     </div>
                   </td>
                 </tr>

@@ -11,9 +11,8 @@
   import Page8 from "./점검준비8/Page8.svelte";
   import Page9 from "./취약점현황9/Page9.svelte";
   import { Route } from "svelte-routing";
-  import LeftContainer from "./LeftContainer.svelte";
-  import { comment, current_component } from "svelte/internal";
-  import LeftMenu from "./LeftMenu.svelte";
+  import { getAllPlanLists } from "../services/callApi";
+  import { allPlanList } from "../services/store";
 
   export let activeMenu = "신규계획등록";
   let currentPage = null;
@@ -50,6 +49,26 @@
         activeMenu = "신규계획등록";
     }
   });
+  /**********GETALLPLANLIST******************/
+  let page_cnt = "1";
+  let list_cnt = "100";
+  async function getPlanList() {
+    try {
+      const response = await getAllPlanLists(page_cnt, list_cnt);
+
+      if (response) {
+        allPlanList.set(response.data);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+  onMount(() => {
+    getPlanList();
+  });
+  $: console.log("allPlanList", $allPlanList);
 </script>
 
 <section class="search_box">
