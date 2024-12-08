@@ -208,7 +208,6 @@
 
 <main class="table-container">
   <section class="section1">
-    <!-- <div class="header_menu"><h2>kjkjkjkjkjk</h2></div> -->
     <div class="body_menu">
       <div class="menuContainer">
         <!-- Header -->
@@ -327,7 +326,7 @@
             {/each}
           </tbody>
         </table>
-        <div class="buttons">
+        <div class="buttons1">
           <button
             class="btn btn-primary"
             on:click="{() => {
@@ -481,7 +480,7 @@
     text-align: center;
   }
 
-  .buttons {
+  .buttons1 {
     display: flex;
     justify-content: flex-end;
     gap: 10px;

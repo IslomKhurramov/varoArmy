@@ -2,6 +2,7 @@
   import ModalDynamic from "../../shared/ModalDynamic.svelte";
   import LeftContainer from "../LeftContainer.svelte";
   import InspectionTargetAssignment from "./InspectionTargetAssignment.svelte";
+  import TargetAssignment from "./TargetAssignment.svelte";
 
   let formData = {
     planTitle: "",
@@ -25,9 +26,25 @@
   let showModal = false;
   let modalData = null;
   let resultStatus = null;
+  let resultErrors = null;
+  let showErrorModal = false;
+
+  let selectedFiles = {};
+  let fileNames = {};
+
+  function handleFileSelect(event, hostname) {
+    const file = event.target.files[0];
+    if (file) {
+      selectedFiles[hostname] = file;
+      fileNames[hostname] = file.name;
+    } else {
+      fileNames[hostname] = "선택된 파일 없음";
+    }
+  }
 
   $: {
     console.log("resultStatus:", resultStatus);
+    console.log("resultErrors:", resultErrors);
   }
 
   const handleFileUpload = (event) => {
@@ -167,10 +184,12 @@
   <section class="section2">
   
       <div class="formContainer">
+
         <div class="inputRow">
           <label>점검계획제목</label>
           <input type="text" />
         </div>
+  
         <div class="inputRow">
           <label>점검기간</label>
           <div class="riskLevels">
@@ -181,12 +200,10 @@
               <input type="text" />
             </div>
             <div class="riskLevelItem">
-              <input type="text" />
-            </div>
-            <div class="riskLevelItem">
+              <span>점검분류</span>
               <select class="inputRow" id="asset_group">
                 <option value="전체" selected>정기점검 </option>
-
+  
                 <option value="UNIX">수시점검</option>
                 <option value="WINDOWS">긴시점검</option>
                 <option value="PC">기타</option>
@@ -194,19 +211,20 @@
             </div>
           </div>
         </div>
-
+  
         <div class="inputRow">
-          <label>점검분야</label>
+          <label>점검체계</label>
           <input type="text" />
-          <button class="buttons1"      
-          on:click="{() => {
-            showModal = true;
-            modalData = resultStatus;
-          }}">검색</button>
+          <button class="buttons1"
+            on:click="{() => {
+              showModal = true;
+              modalData = resultStatus;
+            }}"
+          >검색</button>
         </div>
-
+  
         <div class="inputRow1">
-          <p>점검체계</p>
+          <p>점검분야</p>
           <div class="box_2">
             <div class="box2_radio">
               <label
@@ -232,40 +250,61 @@
             </div>
           </div>
         </div>
-
+  
         <div class="inputRow box_1">
           <label>점검항목</label>
           <select class="inputRow" id="asset_group">
             <option value="전체" selected>전체 </option>
-
+  
             <option value="UNIX">2022년도</option>
             <option value="WINDOWS">2023년도</option>
             <option value="PC">2024년도</option>
           </select>
         </div>
-
+  
         <div class="inputRow">
           <label>점검계획내용</label>
-          <input type="text" />
+          <textarea type="text" />
         </div>
-
+  
         <div class="inputRow">
           <label>첨부파일</label>
           <input type="text" />
         </div>
-
+  
         <div class="inputRow">
           <label>점검관정보</label>
           <input type="text" />
-          <button class="buttons1">검색</button>
+          <button class="buttons1"
+          on:click="{() => {
+            showErrorModal = true;
+            resultErrors = resultStatus;
+          }}"
+          >검색</button>
         </div>
+  
         <div class="inputRow">
           <label>점검스케줄</label>
-          <select bind:value="{formData.executionCondition}">
+          <!-- <select bind:value="{formData.executionCondition}">
             <option>즉시/예약</option>
-          </select>
+          </select> -->
+          <div class="riskLevels">
+            <div class="riskLevelItem">
+              <p>수행조건</p>
+              <select bind:value="{formData.repeatPeriod}">
+                <option>분</option>
+                <option>시간</option>
+                <option>일</option>
+                <option>주</option>
+                <option>월</option>
+              </select>
+            </div>
+  
+            <div class="riskLevelItem">
+            </div>
+          </div>
         </div>
-
+  
         <div class="inputRow">
           <label></label>
           <div class="riskLevels">
@@ -280,7 +319,7 @@
                 <option>월</option>
               </select>
             </div>
-
+  
             <div class="riskLevelItem">
               <span>반복횟수</span>
               <select bind:value="{formData.repeatPeriod}">
@@ -293,21 +332,58 @@
             </div>
           </div>
         </div>
+  
         <div class="inputRow">
           <label></label>
           <div class="riskLevels">
             <div class="riskLevelItem">
               <p>시작일</p>
-              <input type="datetime-local" bind:value="{formData.startDate}" />
+              <input type="datetime-local" style="margin-left: 12px;" bind:value="{formData.startDate}" />
             </div>
-
+  
             <div class="riskLevelItem">
               <span>종료일</span>
-              <input type="datetime-local" bind:value="{formData.endDate}" />
+              <input type="datetime-local" style="margin-left: 12px;" bind:value="{formData.endDate}" />
             </div>
           </div>
         </div>
+  
+        <div class="inputRow">
+          <label>점검명령</label>
+  
+          <div style="width: 100%; display:flex; gap:10px; justify-content:center">
+          <label class="btn btnPrimary"
+                style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px">
+            <input
+              type="file"
+              class="file-input"
+              on:change={(event) =>
+                handleFileSelect(event)}
+            />
+          <img src="./assets/images/download.svg" class="excel-img" />
+          <span>파일업로드</span>
+          </label>
+            <input
+              type="text"
+              placeholder="선택된 파일 없음"
+              value={fileNames|| "선택된 파일 없음"}
+              readonly
+              class="file-name-input"
+            />
+          </div>
+        </div>
+      
+        <div class="inputRow_btn">
+          <label></label>
+          <div class="buttons2">
+            <button class="btn-primary">임시저장</button>
+            <button class="btn-secondary">등록</button>
+          </div>
+        </div>
+        
       </div>
+
+
   </section>
 </main>
 
@@ -315,6 +391,16 @@
 {#if showModal}
   <ModalDynamic bind:showModal modalWidth="{60}" modalHeight="{700}">
     <InspectionTargetAssignment {units} {systems} {ipRanges} bind:modalData />
+  </ModalDynamic>
+{/if}
+
+{#if showErrorModal}
+  <ModalDynamic
+    bind:showModal="{showErrorModal}"
+    modalWidth="{40}"
+    modalHeight="{600}"
+  >
+    <TargetAssignment {units} {systems} {ipRanges} bind:resultErrors />
   </ModalDynamic>
 {/if}
 
@@ -368,6 +454,14 @@
     column-gap: 10px;
   }
 
+  .inputRow_btn {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    row-gap: 20px;
+    column-gap: 10px;
+  }
+
   .inputRow1 p {
     width: 120px;
     font-weight: 600;
@@ -379,6 +473,7 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
+    font-size: 14px;
   }
 
   .box2_radio {
@@ -410,6 +505,16 @@
     flex: 1;
     width: 100%;
     height: 34px;
+    padding: 17px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .inputRow textarea {
+    flex: 1;
+    width: 100%;
+    height: 60px;
     padding: 17px;
     border: 1px solid #cccccc;
     border-radius: 5px;
@@ -450,7 +555,6 @@
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 12px;
-    text-align: center;
     box-sizing: border-box;
   }
 
@@ -501,5 +605,66 @@
     font-weight: bold;
     font-size: 14px;
     border-radius: 4px;
+  }
+
+  .inputRow_btn .buttons2 {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 500px;
+    height: 34px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+    height: 34px;
+  }
+
+  .btn-primary {
+    width: 100px;
+    height: 34px;
+    font-size: 14px;
+    border-radius: 4px;
+    color: #333333;
+    border: 1px solid #333333;
+    font-weight: bold;
+  }
+
+  .btn-primary:hover {
+    color: #ffffff;
+    background-color: #333333;
+    border: none;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+
+  .btn-secondary {
+    width: 100px;
+    height: 34px;
+    border-radius: 4px;
+    color: #333333;
+    font-size: 14px;
+    border: 1px solid #333333;
+    font-weight: bold;
+  }
+
+  .btn-secondary:hover {
+    background-color: #c43840;
+    color: #ffffff;
+    border: none;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+
+  .excel-img {
+    filter: invert(45%) sepia(100%) saturate(550%) hue-rotate(195deg)
+      brightness(100%) contrast(98%);
   }
 </style>
