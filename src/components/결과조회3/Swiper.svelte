@@ -221,7 +221,7 @@
       <input type="text" />
     </div>
 
-    <div class="inputRow">
+    <div class="inputRow" style="height: 120px;">
       <label>점검기준</label>
       <div style="display: flex; flex-direction:column; width:91%">
         <input type="text" />
@@ -300,6 +300,7 @@
     flex-direction: row;
     gap: 10px;
     width: 100%;
+    height: 60px;
   }
   .formContainer {
     max-width: 85%;
@@ -315,6 +316,7 @@
     row-gap: 20px;
     column-gap: 10px;
     width: 100%;
+    height: 60px;
   }
   .inputRo {
     display: flex;
