@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
+  import SwiperPage5 from "./SwiperPage5.svelte";
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -88,6 +89,10 @@
   const toggleAccordion = (index) => {
     isOpen[index] = !isOpen[index];
   };
+  let currentPage = null;
+  function selectPage() {
+    currentPage = SwiperPage5;
+  }
 </script>
 
 <main class="table-container">
@@ -115,7 +120,11 @@
                 >
                   <ul>
                     {#each item.subItems as subItem}
-                      <li on:click="{() => (activeMenu = subItem.title)}">
+                      <li
+                        on:click="{() => {
+                          (activeMenu = subItem.title), selectPage();
+                        }}"
+                      >
                         {subItem.title}
                       </li>
                     {/each}
@@ -135,7 +144,12 @@
       </div>
     </div>
   </section>
+
   <section class="section2">
+    {#if currentPage}
+       <svelte:component this="{currentPage}" />
+    {:else}
+
     <article class="contentArea">
       <section class="filterWrap" style="margin-bottom: 0px;">
         <div>
@@ -240,7 +254,9 @@
         </table>
       </div>
     </article>
+    {/if}
   </section>
+
 </main>
 
 <style>
