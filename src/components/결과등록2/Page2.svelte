@@ -7,8 +7,6 @@
     getUploadedResultErrors,
   } from "../../services/result/resultService";
   import ResultErrorPopup from "./ResultErrorPopup.svelte";
-  import Modal2 from "../../shared/Modal2.svelte";
-  import LeftContainer from "../LeftContainer.svelte";
 
   let jsonInput;
   let txtInput;
@@ -48,6 +46,17 @@
     ];
     showErrorModal = true;
   };
+
+  let selectedFiles = {};
+  // let fileNames = {};
+
+  let fileNames = "";
+
+function handleFileSelect(event) {
+  const files = event.target.files;
+  fileNames = files.length > 0 ? files[0].name : "(멀티파일등록가능)";
+}
+
 
   $: if (selectedPlan) {
     (async () => {
@@ -207,6 +216,7 @@
 </script>
 
 <main class="table-container">
+
   <section class="section1">
     <div class="body_menu">
       <div class="menuContainer">
@@ -251,6 +261,7 @@
       </div>
     </div>
   </section>
+
   <section class="section2">
     <div class="inspection-container">
       <!-- Header -->
@@ -341,27 +352,97 @@
       </div>
 
       <!-- File Upload Section -->
+    </div>
+    
+    <div class="page2_headir_bottom">
+      <p>이동식점검 결과 파일등록</p>
+
       <div class="upload-section">
+  
+  
         <div class="upload-box">
-          <button class="upload-button"
-            >JSON 파일등록<br />(멀티파일등록가능)</button
-          >
+  
+          <button class="upload-button">
+            JSON 파일등록<br />
+            <input
+              type="text"
+              placeholder="멀티파일등록가능"
+              value={fileNames || "(멀티파일등록가능)"}
+              readonly
+              class="file-name-input"
+            />
+          </button>
+  
+          <label class="plus-icon">
+            <span>+</span>
+            <input
+              type="file"
+              class="file-input"
+              on:change={(event) => handleFileSelect(event)}
+            />
+          </label>
+  
         </div>
+        
+  
         <div class="upload-box">
-          <button class="upload-button"
-            >네트워크 설정파일등록<br />(멀티파일등록가능)</button
-          >
+  
+          <button class="upload-button">
+            네트워크 설정파일등록<br />
+            <input
+              type="text"
+              placeholder="멀티파일등록가능"
+              value={fileNames || "(멀티파일등록가능)"}
+              readonly
+              class="file-name-input"
+            />
+          </button>
+  
+          <label class="plus-icon">
+            <span>+</span>
+            <input
+              type="file"
+              class="file-input"
+              on:change={(event) => handleFileSelect(event)}
+            />
+          </label>
+  
         </div>
+  
         <div class="upload-box">
-          <button class="upload-button">수기등록<br />.EXCEL 파일만 허용</button
-          >
+  
+          <button class="upload-button">
+            수기등록<br />
+            <input
+              type="text"
+              placeholder=".EXCEL 파일만 허용"
+              value={fileNames || "(.EXCEL 파일만 허용)"}
+              readonly
+              class="file-name-input"
+            />
+          </button>
+  
+          <label class="plus-icon">
+            <span>+</span>
+            <input
+              type="file"
+              class="file-input"
+              on:change={(event) => handleFileSelect(event)}
+            />
+          </label>
+  
         </div>
+  
         <div class="upload-submit">
           <button class="btn btn-upload">업로드</button>
         </div>
+  
       </div>
+
     </div>
+
   </section>
+
 </main>
 
 {#if showModal}
@@ -381,19 +462,6 @@
   </ModalDynamic>
 {/if}
 
-<!-- {#if uploadStatusModalData && uploadStatusModalData?.length !== 0}
-  <ModalDynamic
-    bind:showModal={uploadStatusModalData}
-    modalWidth={80}
-    modalHeight={uploadStatusModalData?.uploaded_status?.length > 10
-      ? 600
-      : null}
-    bind:modalData={uploadStatusModalData}
-  >
-    <ResultUploadStatusPopup bind:uploadStatusModalData />
-  </ModalDynamic>
-{/if} -->
-
 <style>
   .table-container {
     /* overflow-y: auto; */
@@ -404,10 +472,11 @@
   }
   .section2 {
     width: 85%;
-    height: 90vh;
+    height: 80vh;
     margin-top: 5px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     border-radius: 10px;
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
@@ -422,6 +491,7 @@
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
   }
+
   .inspection-container {
     font-family: Arial, sans-serif;
     padding: 20px;
@@ -537,16 +607,73 @@
     border-radius: 4px;
   }
 
+  .page2_headir_bottom {
+    display: flex;
+    flex-direction: column;
+
+  }
+
+  .page2_headir_bottom p {
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 20px;
+  }
+
   .upload-section {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    margin-top: 20px;
+    padding: 0px 20px;
   }
 
   .upload-box {
+    position: relative;
     text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+
+  .plus-icon {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    width: 25px;
+    height: 25px;
+    background-color: #999999;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .plus-icon span {
+    position: absolute;
+    top: 0px;
+  }
+
+  .file-name-input {
+    margin-left: 50px;
+    border: none;
+    background: none;  
+    color: inherit; 
+    padding: 0;
+    outline: none;
+    font: inherit;
+    cursor: default;
+}
+
+  .file-input {
+    opacity: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
 
   .upload-button {
     width: 100%;
