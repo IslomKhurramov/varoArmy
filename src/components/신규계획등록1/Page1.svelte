@@ -642,6 +642,7 @@
     font-weight: bold;
     font-size: 14px;
     border-radius: 4px;
+    cursor: pointer;
   }
 
   .btn-secondary {

@@ -39,6 +39,19 @@
     };
   });
 
+  let selectedFiles = {};
+  let fileNames = {};
+
+  function handleFileSelect(event, hostname) {
+    const file = event.target.files[0];
+    if (file) {
+      selectedFiles[hostname] = file;
+      fileNames[hostname] = file.name;
+    } else {
+      fileNames[hostname] = "선택된 파일 없음";
+    }
+  }
+
   const handleScroll = (direction) => {
     if (direction === "prev") {
       scrollAmount -= itemWidth;
@@ -102,6 +115,14 @@
       window.removeEventListener("keydown", handleKeyDown);
     };
   });
+
+  const handleFileUpload = (event) => {
+    formData.attachment = event.target.files[0];
+  };
+
+  const handleSubmit = () => {
+    alert("Form submitted: " + JSON.stringify(formData, null, 2));
+  }
 </script>
 
 <div class="contentArea">
@@ -165,108 +186,175 @@
 
   <div class="formContainer">
 
-    <div style="display: flex; flex-direction: column;">
-      <span class="main_header">평가수행부대</span>
-      <div style="display: flex; flex-direction: column; row-gap: 10px">
-        <div class="inputRow">
-          <label>점검기간</label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <input type="text" />
+    <div class="main_box_page5">
+      <div style="display: flex; flex-direction: column;">
+        <span class="main_header">평가수행부대</span>
+        <div style="display: flex; flex-direction: column; row-gap: 10px">
+          <div class="inputRow">
+            <label>점검기간</label>
+            <div class="riskLevels">
+              <div class="riskLevelItem">
+                <input type="text" />
+              </div>
+              <div class="riskLevelItem">
+                <span>점검분류</span>
+                <input type="text" />
+              </div>
             </div>
-            <div class="riskLevelItem">
-              <span>점검분류</span>
-              <input type="text" />
-            </div>
+          </div>
+    
+          <div class="inputRow">
+            <label>소속기관</label>
+            <input type="text" />
           </div>
         </div>
   
-        <div class="inputRow">
-          <label>소속기관</label>
-          <input type="text" />
-        </div>
       </div>
-
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
-      <span class="main_header">취약점정보</span>
-      <div style="display: flex; flex-direction: column; row-gap: 10px">
-
-        <div class="inputRow">
-          <label>취약점구분</label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <input type="text" />
-            </div>
-            <div class="riskLevelItem">
-              <span>점검번호</span>
-              <input type="text" />
-            </div>
-          </div>
-        </div>
-
-        <div class="inputRow">
-          <label>점검결과</label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <input type="text" />
-            </div>
-            <div class="riskLevelItem">
-              <span>수집방법</span>
-              <input type="text" />
+  
+      <div style="display: flex; flex-direction: column;">
+        <span class="main_header">취약점정보</span>
+        <div style="display: flex; flex-direction: column; row-gap: 10px">
+  
+          <div class="inputRow">
+            <label>취약점구분</label>
+            <div class="riskLevels">
+              <div class="riskLevelItem">
+                <input type="text" />
+              </div>
+              <div class="riskLevelItem">
+                <span>점검번호</span>
+                <input type="text" />
+              </div>
             </div>
           </div>
+  
+          <div class="inputRow">
+            <label>점검결과</label>
+            <div class="riskLevels">
+              <div class="riskLevelItem">
+                <input type="text" />
+              </div>
+              <div class="riskLevelItem">
+                <span>수집방법</span>
+                <input type="text" />
+              </div>
+            </div>
+          </div>
+    
+          <div class="inputRow">
+            <label>점검현황</label>
+            <input type="text" />
+          </div>
+  
+          <div class="inputRow">
+            <label>점검기준(Key)</label>
+            <div class="riskLevels">
+              <div class="riskLevelItem">
+                <input type="text" />
+              </div>
+              <div class="riskLevelItem">
+                <span>점검기준</span>
+                <input type="text" />
+              </div>
+            </div>
+          </div>
+  
+          <div class="inputRow">
+            <label>조치방법</label>
+            <input type="text" />
+          </div>
+  
         </div>
   
-        <div class="inputRow">
-          <label>점검현황</label>
-          <input type="text" />
-        </div>
-
-        <div class="inputRow">
-          <label>점검기준(Key)</label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <input type="text" />
-            </div>
-            <div class="riskLevelItem">
-              <span>점검기준</span>
-              <input type="text" />
-            </div>
-          </div>
-        </div>
-
-        <div class="inputRow">
-          <label>조치방법</label>
-          <input type="text" />
-        </div>
-
       </div>
-
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
-      <span class="main_header">체계정보</span>
-      <div style="display: flex; flex-direction: column; row-gap: 10px">
   
-        <div class="inputRow">
-          <label>조치이력</label>
-          <input type="text" />
+      <div style="display: flex; flex-direction: column;">
+        <span class="main_header">체계정보</span>
+        <div style="display: flex; flex-direction: column; row-gap: 10px">
+    
+          <div class="inputRow">
+            <label>조치이력</label>
+            <input type="text" />
+          </div>
+  
+          <div class="inputRow">
+            <label>조치계획</label>
+            <input type="text" />
+          </div>
+  
+          <div class="inputRow">
+            <label>조치결과</label>
+            <input type="text" />
+          </div>
+  
         </div>
-
-        <div class="inputRow">
-          <label>조치계획</label>
-          <input type="text" />
-        </div>
-
-        <div class="inputRow">
-          <label>조치결과</label>
-          <input type="text" />
-        </div>
-
+  
       </div>
-
+  
+      <div style="display: flex; flex-direction: column;">
+        <span class="main_header">조치결과</span>
+        <div style="display: flex; flex-direction: column; row-gap: 10px">
+  
+          <div class="inputRow">
+            <label>최종조치완료처리자</label>
+  
+              <div class="riskLevels">
+                <div class="riskLevelItem">
+                  <input type="text" />
+                </div>
+                <div class="riskLevelItem">
+                  <span style="margin: 0 0 0 0;">최종조치완료일</span>
+                  <input type="datetime-local" style="margin-left: 5px;" bind:value="{formData.endDate}" />
+                </div>
+              </div>
+  
+          </div>
+  
+          <div class="inputRow">
+            <label>조치내역</label>
+            <input type="text" />
+          </div>
+  
+          <div class="inputRow">
+            <label>조치증적</label>
+            <div style="width: 100%; display:flex; gap:10px; justify-content:center">
+              <label class="btn btnPrimary"
+                    style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px">
+                <input
+                  type="file"
+                  class="file-input"
+                  on:change={(event) =>
+                    handleFileSelect(event)}
+                />
+              <img src="./assets/images/download.svg" class="excel-img" />
+              <span>파일업로드</span>
+              </label>
+                <input
+                  type="text"
+                  placeholder="선택된 파일 없음"
+                  value={fileNames|| "선택된 파일 없음"}
+                  readonly
+                  class="file-name-input"
+                />
+              </div>
+          </div>
+  
+        </div>
+  
+      </div>
+  
+      <div style="display: flex; flex-direction: column;">
+  
+        <div style="display: flex; flex-direction: column; row-gap: 10px">
+    
+          <div class="inputRow">
+            <label></label>
+            <button class="btn-primary">저장</button>
+          </div>
+  
+        </div>
+  
+      </div>
     </div>
 
   </div>
@@ -276,11 +364,18 @@
 
 <style>
   .formContainer {
+    max-width: 100%;
+    margin-top: 15px;
+    overflow-y: auto;
+    max-height: 70vh;
+    overflow-x: hidden;
+  }
+
+  .main_box_page5{
     max-width: 90%;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 10px;
   }
 
   .main_header {
@@ -384,23 +479,33 @@
     border-radius: 4px;
   }
 
-  .btn-secondary {
-    width: 100px;
-    height: 34px;
+  .btn {
+    padding: 10px 20px;
     border-radius: 4px;
-    color: #333333;
     font-size: 14px;
-    border: 1px solid #333333;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary {
+    width: 74px;
+    height: 34px;
+    font-size: 14px;
+    border-radius: 4px;
+    color: #FFFFFF;
+    background-color: #117CE9;
+    border: none;
     font-weight: bold;
   }
 
-  .btn-secondary:hover {
-    background-color: #c43840;
-    color: #ffffff;
+  .btn-primary:hover {
+    color: #FFFFFF;
+    background-color: #354D7D;
     border: none;
     font-weight: bold;
     font-size: 14px;
     border-radius: 4px;
+    cursor: pointer;
   }
 
   .excel-img {
