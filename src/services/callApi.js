@@ -1,24 +1,50 @@
 import axios from "axios";
-import { serverApi } from "../../lib/config";
+import { serverApi } from "../lib/config";
 
 export const getAllPlanLists = async (page_cnt, list_cnt) => {
-    try {
+  try {
+      // Send page_cnt and list_cnt in the request body
       const response = await axios.post(
-        `${serverApi}/api/getAllPlanLists/`,
-        {
-            page_cnt: page_cnt,
-            list_cnt:list_cnt,
-        },
+          `${serverApi}/api/getAllPlanLists/`, // API endpoint
+          { page_cnt, list_cnt }, // Request body matches Postman structure
+          { withCredentials: true } // Additional config
       );
-  
-      if (response.data.RESULT === "OK") {
-        return response.data.CODE; // Return the data from the API
+
+      console.log("API Response:", response.data);
+
+      if (response) {
+          return response.data; // Expected valid response
       } else {
-        throw new Error(
-          `Error Code on getDetailInformationOfAsset: ${response.data.CODE}`,
-        );
+          throw new Error(
+              `Error Code on getDetailInformationOfAsset: ${response.data}`
+          );
       }
-    } catch (error) {
+  } catch (error) {
+      console.error("API Call Error:", error.message);
       throw new Error(`Failed to fetch asset detail: ${error.message}`);
-    }
-  };
+  }
+};
+
+export const getViewPlanResults = async (plan_index, assessment_target,hostname,checklist_item_no,check_result,show_option) => {
+  try {
+      // Send page_cnt and list_cnt in the request body
+      const response = await axios.post(
+          `${serverApi}/api/getViewPlanResults/`, // API endpoint
+          { plan_index, assessment_target,hostname,checklist_item_no,check_result,show_option }, // Request body matches Postman structure
+          { withCredentials: true } // Additional config
+      );
+
+      console.log("API Response:", response.data);
+
+      if (response.data.RESULT==="OK") {
+          return response.data; // Expected valid response
+      } else {
+          throw new Error(
+              `Error Code on getDetailInformationOfAsset: ${response.data}`
+          );
+      }
+  } catch (error) {
+      console.error("API Call Error:", error.message);
+      throw new Error(`Failed to fetch asset detail: ${error.message}`);
+  }
+};

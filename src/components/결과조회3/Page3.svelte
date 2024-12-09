@@ -2,6 +2,9 @@
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
   import Swiper from "./Swiper.svelte";
+  import { allPlanList, viewPlanResult } from "../../services/store";
+  import { getViewPlanResults } from "../../services/callApi";
+  import ModalPopDetail from "./ModalPopDetail.svelte";
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -91,6 +94,64 @@
   function selectPage() {
     currentPage = Swiper;
   }
+  /***********************************/
+  let closeShowModalDetail=false;
+  const validOptions = ["양호", "취약", "인터뷰", "수동점검"];
+
+  let planIndex = "";
+  let target = "";
+  let hostName = "";
+  let checkList_item_no = "";
+  let check_result = "";
+  let show_option = "";
+  async function viewPlanResultFunction() {
+    try {
+      const response = await getViewPlanResults(
+        planIndex,
+        target,
+        hostName,
+        checkList_item_no,
+        check_result,
+        show_option
+      );
+
+      if (response) {
+        viewPlanResult.set(response.CODE);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  $: console.log("viewPlanResult", $viewPlanResult);
+    // Close modal when Esc key is pressed
+    function handleKeyDown(event) {
+    if (event.key === "Escape") {
+      closeShowModal();
+    }
+  }
+  function closeShowModal() {
+    closeShowModalDetail = false;
+  }
+
+  onMount(() => {
+    // Listen for keydown event when the modal is open
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      // Remove the event listener when the component is destroyed
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+  let selectedData=null;
+  function handleRowClick(data) {
+    selectedData = data;
+    closeShowModalDetail = true;  // Open the modal
+  }
+  $: console.log("selectedData", selectedData);
+/**************PAGINATION*/
 </script>
 
 <main class="table-container">
@@ -149,26 +210,44 @@
       <article class="contentArea">
         <section class="filterWrap">
           <div>
-            <select>
+            <select
+              bind:value="{planIndex}"
+              on:change="{viewPlanResultFunction}"
+            >
               <option value="" selected disabled>프로젝트</option>
-
-              <option value="{'프로젝트'}">프로젝트</option>
+              {#each $allPlanList as plan}
+                <option value="{plan.ccp_index}">{plan.ccp_title}</option>
+              {/each}
             </select>
-            <select>
+            <select bind:value="{target}" on:change="{viewPlanResultFunction}">
               <option value="" selected>점검대상</option>
-
-              <option value="점검대상">점검대상</option>
+              <option value="UNIX">UNIX</option>
+              <option value="WINDOWS">WINDOWS</option>
+              <option value="PC">PC</option>
+              <option value="NETWORK">NETWORK</option>
+              <option value="DBMS">DBMS</option>
+              <option value="WEB">WEB</option>
+              <option value="WAS">WAS</option>
+              <option value="CLOUD">CLOUD</option>
+              <option value="SECURITY">SECURITY</option>
             </select>
 
-            <select>
+            <select
+              bind:value="{hostName}"
+              on:change="{viewPlanResultFunction}"
+            >
               <option value="" selected>호스트</option>
-
               <option value="호스트">호스트</option>
             </select>
-            <select id="result">
+            <select
+              bind:value="{check_result}"
+              on:change="{viewPlanResultFunction}"
+            >
               <option value="" selected>점검항목</option>
-
-              <option value="점검항목">점검항목</option>
+              <option value="양호">양호</option>
+              <option value="취약">취약</option>
+              <option value="인터뷰">인터뷰</option>
+              <option value="인터뷰">수동점검</option>
             </select>
 
             <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
@@ -197,44 +276,51 @@
               </tr>
             </thead>
             <tbody>
-              {#each resultData as data, index}
-                <tr>
-                  <td class="text-center">{resultData.length - index}</td>
+              {#each $viewPlanResult as data, index}
+                <tr on:click={() => handleRowClick(data)}>
+                  <!-- 번호: Reverse index to display latest first -->
+                  <td class="text-center">{$viewPlanResult.length - index}</td>
 
+                  <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
                   <td class="text-center">
-                    {data?.ast_uuid__ass_uuid__ast_hostname}
+                    {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
                   </td>
+
+                  <!-- 점검항목: ccr_item_no__ccc_item_no -->
                   <td class="text-center">
                     <div>
-                      {data?.ccr_item_no__ccc_item_no}
+                      {data?.ccr_item_no__ccc_item_no || "N/A"}
                     </div>
                   </td>
+
+                  <!-- 점검이름: ccr_item_no__ccc_item_title -->
                   <td class="text-center">
-                    {data.ccr_item_no__ccc_item_title}
+                    {data?.ccr_item_no__ccc_item_title || "N/A"}
                   </td>
-                  <td> {data.ccr_item_no__ccc_item_criteria}</td>
+
+                  <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
+                  <td>
+                    {@html data?.ccr_item_no__ccc_item_criteria.replace(/\n/g, "<br/>") || "N/A"}
+                  </td>
+
+                  <!-- 점검결과 (Actions): -->
                   <td class="text-center">
                     <div class="lastBox">
-                      <select style=" width: 100px;" class="xs">
-                        <option value="" disabled> </option>
-                        <option value="양호"> 양호 </option>
-                        <option value="취약"> 취약 </option>
-                        <option value="수동점검"> 수동점검 </option>
-                        <option value="예외처리"> 예외처리 </option>
-                        <option value="해당없음"> 해당없음 </option>
+                      <select style="width: 100px;" class="xs" on:click|stopPropagation>
+                        {#each validOptions as option}
+                        <option value={option} selected={data.ccr_item_result === option}>
+                          {option}
+                        </option>
+                      {/each}
                       </select>
-
                       <input
                         type="text"
                         class="inputDefault"
                         placeholder="사유"
                       />
 
-                      <button class=" btnSave">저장 </button><button
-                        class=" btnUpload"
-                        >관련시스템보기
-                      </button>
-                      <!-- <button type="button" class="btn btnBlue xs">변경</button> -->
+                      <button class="btnSave">저장</button>
+                      <button class="btnUpload">관련시스템보기</button>
                     </div>
                   </td>
                 </tr>
@@ -249,8 +335,62 @@
     {/if}
   </section>
 </main>
+{#if closeShowModalDetail}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click="{() => (closeShowModalDetail = false)}"
+    on:keydown="{handleKeyDown}"
+    tabindex="0"
+  >
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog
+      open
+      on:close="{() => (closeShowModalDetail = false)}"
+      on:click|stopPropagation
+    >
+      <ModalPopDetail {closeShowModal} {selectedData}/>
+    </dialog>
+  </div>
+{/if}
 
 <style>
+
+.modal-open-wrap {
+    display: block;
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(167, 167, 167, 0.6);
+  }
+
+  /****Modal Container*/
+  dialog {
+    position: fixed;
+    /* height: 600px; */
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1103px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: svelte-s7onsa-fadeIn 0.3s ease;
+    z-index: 100;
+  }
+
+  /* Modal backdrop */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeInBackdrop 0.3s ease;
+  }
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;
