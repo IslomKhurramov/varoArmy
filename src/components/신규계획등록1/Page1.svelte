@@ -1,6 +1,5 @@
 <script>
   import ModalDynamic from "../../shared/ModalDynamic.svelte";
-  import LeftContainer from "../LeftContainer.svelte";
   import InspectionTargetAssignment from "./InspectionTargetAssignment.svelte";
   import TargetAssignment from "./TargetAssignment.svelte";
   import moment from "moment";
@@ -11,6 +10,7 @@
   } from "../../services/page1/newInspection";
   import { navigate, useLocation } from "svelte-routing";
   import { errorAlert, successAlert } from "../../shared/sweetAlert";
+  import SwiperPage1 from "./SwiperPage1.svelte";
 
   let formData = {
     planTitle: "",
@@ -130,9 +130,7 @@
     alert("Form submitted: " + JSON.stringify(formData, null, 2));
   };
   let currentPage = null;
-  function selectPage() {
-    currentPage = LeftContainer;
-  }
+
   /*******LEFT SIDE */
 
   let mainTitle = "점검 계획 현황";
@@ -209,9 +207,14 @@
   const toggleAccordion = (index) => {
     isOpen[index] = !isOpen[index];
   };
+
+  function selectPage() {
+    currentPage = SwiperPage1;
+  }
 </script>
 
 <main class="table-container">
+
   <section class="section1">
     <!-- LEFT SIDE -->
     <div class="body_menu">
@@ -236,7 +239,11 @@
                 >
                   <ul>
                     {#each item.subItems as subItem}
-                      <li on:click="{() => (activeMenu = subItem.title)}">
+                      <li
+                        on:click="{() => {
+                          (activeMenu = subItem.title), selectPage();
+                        }}"
+                      >
                         {subItem.title}
                       </li>
                     {/each}
@@ -256,8 +263,13 @@
       </div>
     </div>
   </section>
+
   <section class="section2">
+    {#if currentPage}
+    <svelte:component this="{currentPage}" />
+    {:else}
   
+    <div class="formContainer_main">
       <div class="formContainer">
 
         <div class="inputRow">
@@ -428,7 +440,7 @@
           <label>점검명령</label>
   
           <div style="width: 100%; display:flex; gap:10px; justify-content:center">
-          <label class="btn btnPrimary"
+          <label class="btn btnDownlod"
                 style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px">
             <input
               type="file"
@@ -458,9 +470,11 @@
         </div>
         
       </div>
+    </div>
 
-
+    {/if}
   </section>
+
 </main>
 
 
@@ -508,6 +522,15 @@
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
   }
+
+  .formContainer_main {
+    max-width: 100%;
+    margin-top: 15px;
+    overflow-y: auto;
+    max-height: 70vh;
+    overflow-x: hidden;
+  }
+
   .formContainer {
     max-width: 85%;
     display: flex;
@@ -701,39 +724,60 @@
     height: 34px;
   }
 
+  .inputRow .btnDownlod {
+    background-color: #ffffff;
+    color: #555555;
+    border: 1px solid #999999;
+    height: 34px;
+    width: 72px;
+    font-family: "Malgun Gothic", sans-serif;
+    border-radius: 4px;
+  }
+
+  .inputRow .btnDownlod:hover {
+    background-color: #39825A;
+    color: #ffffff;
+    border: none;
+    height: 34px;
+    width: 72px;
+    font-family: "Malgun Gothic", sans-serif;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
   .btn-primary {
     width: 100px;
     height: 34px;
     font-size: 14px;
     border-radius: 4px;
-    color: #333333;
-    border: 1px solid #333333;
+    color: #FFFFFF;
+    background-color: #117CE9;
     font-weight: bold;
-  }
-
+    }
+  
   .btn-primary:hover {
-    color: #ffffff;
-    background-color: #333333;
+    color: #FFFFFF;
+    background-color: #354D7D;
     border: none;
     font-weight: bold;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
   }
-
+  
   .btn-secondary {
     width: 100px;
     height: 34px;
     border-radius: 4px;
-    color: #333333;
+    color: #FFFFFF;
     font-size: 14px;
-    border: 1px solid #333333;
+    background-color: #117CE9;
     font-weight: bold;
   }
-
+  
   .btn-secondary:hover {
-    background-color: #c43840;
-    color: #ffffff;
+    background-color: #354D7D;
+    color: #FFFFFF;
     border: none;
     font-weight: bold;
     font-size: 14px;
