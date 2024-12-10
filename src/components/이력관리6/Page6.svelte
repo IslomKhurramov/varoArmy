@@ -101,6 +101,7 @@
 </script>
 
 <main class="table-container">
+
   <section class="section1">
     <!-- LEFT SIDE -->
     <div class="body_menu">
@@ -153,6 +154,7 @@
             style="height: 50px; background-color: #fff; margin-top: 8px; padding-left: 20px; border-radius: 10px"
           >
             <a
+              style="font-size: 14px;"
               href="javascript:void(0);"
               class={setView == "plan" ? "active" : ""}
               on:click={() => {
@@ -163,24 +165,24 @@
               시스템로그
             </a>
             <a
+              style="font-size: 14px; margin-left: 10px;"
               href="javascript:void(0);"
               class={setView == "plan_accept" ? "active" : ""}
               on:click={() => {
                 setView = "plan_accept";
                 selectPage(SeconMenu);
               }}
-              style="margin-left: 10px;"
             >
               감사로그
             </a>
             <a
+              style="font-size: 14px; margin-left: 10px;"
               href="javascript:void(0);"
               class={setView == "plan_siroj" ? "active" : ""}
               on:click={() => {
                 setView = "plan_siroj";
                 selectPage(ThirdMenu);
               }}
-              style="margin-left: 10px;"
             >
               수행명령조회
             </a>
