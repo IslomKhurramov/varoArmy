@@ -3,6 +3,14 @@
   import LeftContainer from "../LeftContainer.svelte";
   import InspectionTargetAssignment from "./InspectionTargetAssignment.svelte";
   import TargetAssignment from "./TargetAssignment.svelte";
+  import moment from "moment";
+  import { onMount } from "svelte";
+  import {
+    setNewPlan,
+    getOptionsForNewPlan,
+  } from "../../services/page1/newInspection";
+  import { navigate, useLocation } from "svelte-routing";
+  import { errorAlert, successAlert } from "../../shared/sweetAlert";
 
   let formData = {
     planTitle: "",
@@ -20,6 +28,73 @@
     startDate: "2024-09-01 12:00:00",
     endDate: "2024-09-01 12:00:00",
   };
+
+  const submitNewPlan = async () => {
+    try {
+      if (!projectName) throw new Error("플랜명을 확인해 주세요!");
+      if (selectedType == "0") {
+        if (!selectedCheckList) throw new Error("점검대상을 확인해 주세요!");
+      }
+
+      if (!selectedAssetList) throw new Error("점검항목을 확인해 주세요!");
+      if (!selectedPersons) throw new Error("점검자를 확인해 주세요!");
+      if (!conductorInfo) throw new Error("조치승인담당자를 확인해 주세요!");
+      if (!startDate || !endDate) throw new Error("점검일정을 확인해 주세요!");
+
+      if (schedule == "1") {
+        if (plan_execute_interval_value == 0)
+          throw new Error("주기를 0 보다 큰 숫자를 입력해 주세요!");
+      }
+
+      const sendData = {
+        plan_name: projectName,
+        plan_recheck: parseInt(selectedType),
+        plan_recheck_plan_index: parseInt(recheckplanIndex ?? 0),
+        // asset_group_index: parseInt(selectedCheckList),
+        checklist_index: parseInt(selectedAssetList),
+        plan_planer_info: parseInt(selectedPersons),
+        plan_start_date: moment(startDate).format("YYYY-MM-DD h:mm:ss"),
+        plan_end_date: moment(endDate).format("YYYY-MM-DD h:mm:ss"),
+        plan_execution_type: parseInt(schedule),
+        plan_execute_interval_value:
+          plan_execute_interval_value == 0 ? 0 : plan_execute_interval_value,
+        plan_execute_interval_term: schedule == 0 ? "hours" : repeatCycle,
+        fix_date_setup: parseInt(actionSchedule),
+        fix_start_date: actionStartDate,
+        fix_end_date: actionEndDate,
+        fix_conductor_info: parseInt(conductorInfo),
+        assessment_command: inspectionInformation,
+      };
+
+      if (parseInt(selectedType) === 0)
+        sendData.asset_group_index = parseInt(selectedCheckList);
+
+      const formData = new FormData();
+
+      for (const key in sendData) {
+        formData.append(key, sendData[key]);
+      }
+
+      const response = await setNewPlan(formData);
+
+      await successAlert(response.CODE);
+
+    } catch (error) {
+      errorAlert(error?.message);
+    }
+  };
+
+  // onMount(async () => {
+  //   try {
+  //     planOptions = await getOptionsForNewPlan();
+
+  //     // planList = await getPlanLists();
+
+  //     // assetGroup = await getAssetGroup();
+  //   } catch (err) {
+  //     error = err.message;
+  //   } 
+  // });
 
   let units = [ {name: 'Unit 1'}, {name: 'Unit 2'}, {name: 'Unit 3'}, {name: 'Unit 4'} ]; let systems = [ {name: 'System 1'}, {name: 'System 2'}, {name: 'System 3'}, {name: 'System 4'} ]; let ipRanges = [ '192.168.0.1/24', '192.168.1.1/24', '10.0.0.1/24', '172.16.0.1/24' ];
 
@@ -194,10 +269,11 @@
           <label>점검기간</label>
           <div class="riskLevels">
             <div class="riskLevelItem">
-              <input type="text" />
+              <input type="datetime-local" bind:value="{formData.startDate}" />
             </div>
+            <img src="./assets/images/dash.svg" />
             <div class="riskLevelItem">
-              <input type="text" />
+              <input type="datetime-local" bind:value="{formData.endDate}" />
             </div>
             <div class="riskLevelItem">
               <span>점검분류</span>
