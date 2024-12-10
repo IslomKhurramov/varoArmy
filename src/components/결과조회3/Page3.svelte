@@ -3,8 +3,9 @@
   import LeftContainer from "../LeftContainer.svelte";
   import Swiper from "./Swiper.svelte";
   import { allPlanList, viewPlanResult } from "../../services/store";
-  import { getViewPlanResults } from "../../services/callApi";
+  import { getViewPlanResults, setResultChanged } from "../../services/callApi";
   import ModalPopDetail from "./ModalPopDetail.svelte";
+  import {successAlert} from "../../shared/sweetAlert"
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -125,6 +126,35 @@
     }
   }
 
+  /*********************************************/
+  let result_index=null;
+  let checklist_index="";
+
+  function handleUpdateClick(data) {
+    result_index = data.ccr_index;
+  }
+  
+  async function resultUpdate() {
+    try {
+      const response = await setResultChanged(
+        planIndex,
+        result_index,
+        checklist_index,
+        check_result,
+        show_option
+      );
+
+      if (response.RESULT==="OK") {
+        console.log("response", response)
+        successAlert(response.CODE)        
+        viewPlanResultFunction();
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
   $: console.log("viewPlanResult", $viewPlanResult);
     // Close modal when Esc key is pressed
     function handleKeyDown(event) {
@@ -306,7 +336,7 @@
                   <!-- 점검결과 (Actions): -->
                   <td class="text-center">
                     <div class="lastBox">
-                      <select style="width: 100px;" class="xs" on:click|stopPropagation>
+                      <select style="width: 100px;" class="xs" on:click|stopPropagation={()=> handleUpdateClick(data)}>
                         {#each validOptions as option}
                         <option value={option} selected={data.ccr_item_result === option}>
                           {option}
@@ -319,7 +349,7 @@
                         placeholder="사유"
                       />
 
-                      <button class="btnSave">저장</button>
+                      <button class="btnSave" on:click|stopPropagation={resultUpdate}>저장</button>
                       <button class="btnUpload">관련시스템보기</button>
                     </div>
                   </td>

@@ -106,7 +106,7 @@
               <td class="text-center">완화 예시</td>
               <div class="longData">
 
-                  <td style="width: 100%;">{@html selectedData.ccr_item_no__ccc_mitigation_example.replace(/\n/g, "<br/>")}</td>
+                  <td style="width: 50%;">{@html selectedData.ccr_item_no__ccc_mitigation_example.replace(/\n/g, "<br/>")}</td>
               </div>
             </tr>
             <tr>
@@ -203,9 +203,7 @@
       transform: translateY(-2px); /* Lift effect on hover */
     }
   
-    td {
-      width: 230px;
-    }
+   
   
     .btn {
       padding: 8px 15px; /* Button padding */
