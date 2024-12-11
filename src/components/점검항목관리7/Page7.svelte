@@ -2,7 +2,42 @@
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
   import Swiper7 from "./Swiper7.svelte";
+  import { getAllCheckList } from "../../services/callApi";
+  import { allCheckList } from "../../services/store";
+  import { writable } from "svelte/store";
   let resultData = [];
+  let targets = [
+    "UNIX", "WINDOWS", "SECURITY", "PC", "NETWORK", "DBMS", "WEB", "WAS", "CLOUD"
+  ];
+
+
+  // Track the accordion states (which groups are open)
+  let isOpen = writable([]);
+
+  // Track which sub-items (like UNIX, WINDOWS) are open for each group
+  let subItemOpen = writable({});
+
+  
+
+  // Toggling accordion items (main group visibility)
+  function toggleAccordion(index) {
+    isOpen.update((state) => {
+      const newState = [...state];
+      newState[index] = !newState[index];
+      return newState;
+    });
+  }
+
+  // Toggling sub-items (e.g., UNIX, WINDOWS)
+  function toggleSubItem(group, subKey) {
+    subItemOpen.update((state) => {
+      if (!state[group]) {
+        state[group] = {};
+      }
+      state[group][subKey] = !state[group][subKey]; // Toggle visibility of the specific sub-item
+      return { ...state };
+    });
+  }
 
   for (let i = 0; i < 50; i++) {
     resultData.push({
@@ -16,7 +51,6 @@
   }
   /**********LEFT SIDE*/
   let mainTitle = "점검 계획 현황";
-  let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
   export let activeMenu = "신규계획등록";
 
   let mainItems = [
@@ -86,9 +120,6 @@
     },
   ];
 
-  const toggleAccordion = (index) => {
-    isOpen[index] = !isOpen[index];
-  };
   let currentPage = null;
   function selectPage() {
     currentPage = Swiper7;
@@ -97,6 +128,26 @@
   const cancelNewGroup = () => {
     isAddingNewGroup = false;
   };
+  /********************************/
+  async function allCheckListGet() {
+    try {
+      const response = await getAllCheckList();
+
+      if (response) {
+        allCheckList.set(response);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+  $: console.log("allchecklist", $allCheckList)
+  onMount(()=>{
+    allCheckListGet()
+  })
+
+
 </script>
 
 <main class="table-container">
@@ -110,32 +161,50 @@
 
           <!-- Accordion -->
           <div class="accordion">
-            {#each mainItems as item, index}
+            {#if $allCheckList && Object.keys($allCheckList).length > 0}
+            {#each Object.entries($allCheckList) as [key, item], index}
               <div class="accordion-item">
                 <button
-                  on:click="{() => toggleAccordion(index)}"
+                  on:click={() => toggleAccordion(index)}
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
-                  {item.title}
+                  {item.ccg_group}
                 </button>
+
+                <!-- Accordion content -->
                 <div
                   class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '150px' : '0px'}"
+                  style="max-height: {isOpen[index] ? '300px' : '0px'}"
                 >
+                  <!-- Nested List for categories like UNIX, WINDOWS, etc. -->
                   <ul>
-                    {#each item.subItems as subItem}
-                      <li
-                        on:click="{() => {
-                          (activeMenu = subItem.title), selectPage();
-                        }}"
-                      >
-                        {subItem.title}
-                      </li>
+                    {#each item.ccg_support_part.split('|') as subKey}
+                      {#if item[subKey]}
+                        <li>
+                          <button on:click={() => toggleSubItem(item.ccg_group, subKey)}>
+                            {subKey}
+                          </button>
+
+                          <!-- Nested List: Show items for UNIX, WINDOWS, etc. -->
+                          {#if subItemOpen[item.ccg_group]?.[subKey]}
+                            <ul class="nested-list">
+                              {#each item[subKey] as subItem}
+                                <li>
+                                  <span>
+                                    {subItem.ccc_item_no}: {subItem.ccc_item_title}
+                                  </span>
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
+                        </li>
+                      {/if}
                     {/each}
                   </ul>
                 </div>
               </div>
             {/each}
+          {/if}
           </div>
         </div>
 
@@ -238,6 +307,30 @@
 {/if}
 
 <style>
+  .accordion-header {
+  background-color: #f4f4f4;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.accordion-header.active {
+  background-color: #ddd;
+}
+
+.accordion-content {
+  padding: 10px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.nested-list {
+  padding-left: 20px;
+}
+
+.nested-list li {
+  margin: 5px 0;
+}
+
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;
