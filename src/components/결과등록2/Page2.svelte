@@ -12,9 +12,7 @@
   import { getAllPlanLists } from "../../services/page1/planInfoService";
   import {errorAlert} from "../../shared/sweetAlert"
 
-  let jsonInput;
-  let txtInput;
-  let excelInput;
+  let jsonInput, txtInput, excelInput;
   let jsonFiles = [];
   let txtFiles = [];
   let excelFiles = [];
@@ -35,7 +33,9 @@
   let planReports = null;
   let modalErrorData = null;
   let uploadStatusModalData = null;
-  let fileNames = "";
+  let fileNames = "(멀티파일등록가능)";
+  let fileNames2 = "(멀티파일등록가능)";
+  let fileNames3 = "(.EXCEL 파일만 허용)";
   let tableData = [
     {
       category: "에이전트 (100)",
@@ -128,10 +128,10 @@
   };
 
 
-function handleFileSelect(event) {
-  const files = event.target.files;
-  fileNames = files.length > 0 ? files[0].name : "(멀티파일등록가능)";
-}
+// function handleFileSelect(event) {
+//   const files = event.target.files;
+//   fileNames = files.length > 0 ? files[0].name : "(멀티파일등록가능)";
+// }
 
 const submitNewSystemCommand = async (target, files) => {
     try {
@@ -161,26 +161,6 @@ const submitNewSystemCommand = async (target, files) => {
       errorAlert(error?.message);
     }
   };
-
-
-let search = {
-    page_cnt: "1",
-    list_cnt: "10000000000000",
-  };
-
-// onMount(async () => {
-//     try {
-//       projectData = await getAllPlanLists(search);
-//       console.log('projectData',projectData);
-//       // projectIndex = projectData.data.map(item => item.ccp_index);
-//       if (projectData) {
-//         allPlanList.set(projectData.data);
-//       }
-//     } catch (err) {
-//       error = err.message;
-//       await errorAlert(error);
-//     }
-//   });
 
 $: console.log("uploadStatus:", uploadStatus);
 $: console.log("uploaded_status:", uploadStatus?.uploaded_status);
@@ -283,6 +263,21 @@ onMount(async () => {
   const toggleAccordion = (index) => {
     isOpen[index] = !isOpen[index];
   };
+
+  function handleFileSelect(event, fileType) {
+    const files = Array.from(event.target.files);
+    if (fileType === "json") {
+      jsonFiles = files;
+      fileNames = jsonFiles.length > 0 ? jsonFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
+    } else if (fileType === "txt") {
+      txtFiles = files;
+      fileNames2 = txtFiles.length > 0 ? txtFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
+    } else if (fileType === "excel") {
+      excelFiles = files;
+      fileNames3 = excelFiles.length > 0 ? excelFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
+    }
+    console.log(`${fileType} fayllar tanlandi:`, files);
+  }
 
 
 </script>
@@ -452,79 +447,87 @@ onMount(async () => {
 
       <div class="upload-section">
   
-  
         <div class="upload-box">
-  
-          <button class="upload-button">
-            JSON 파일등록<br />
+
+          <div class="upload-button">
+            <span>JSON 파일등록</span><br />
             <input
               type="text"
-              placeholder="멀티파일등록가능"
-              value={fileNames || "(멀티파일등록가능)"}
-              readonly
               class="file-name-input"
+              placeholder="멀티파일등록가능"
+              value={fileNames}
+              readonly
             />
-          </button>
-  
+          </div>
+        
           <label class="plus-icon">
             <span>+</span>
             <input
               type="file"
               class="file-input"
-              on:change={(event) => handleFileSelect(event)}
+              multiple
+              accept=".json"
+              bind:this={jsonInput}
+              disabled={!selectedPlan}
+              on:change={(event) => handleFileSelect(event, "json")}
             />
           </label>
-  
+        </div>
+
+        <div class="upload-box">
+
+          <div class="upload-button">
+            <span>네트워크 설정파일등록</span><br />
+            <input
+              type="text"
+              class="file-name-input"
+              placeholder="멀티파일등록가능"
+              value={fileNames2}
+              readonly
+            />
+          </div>
+        
+          <label class="plus-icon">
+            <span>+</span>
+            <input
+              type="file"
+              class="file-input"
+              multiple
+              accept=".txt"
+              bind:this={txtInput}
+              disabled={!selectedPlan}
+              on:change={(event) => handleFileSelect(event, "txt")}
+            />
+          </label>
         </div>
         
-  
         <div class="upload-box">
-  
-          <button class="upload-button">
-            네트워크 설정파일등록<br />
+
+          <div class="upload-button">
+            <span>수기등록</span><br />
             <input
               type="text"
-              placeholder="멀티파일등록가능"
-              value={fileNames || "(멀티파일등록가능)"}
-              readonly
               class="file-name-input"
-            />
-          </button>
-  
-          <label class="plus-icon">
-            <span>+</span>
-            <input
-              type="file"
-              class="file-input"
-              on:change={(event) => handleFileSelect(event)}
-            />
-          </label>
-  
-        </div>
-  
-        <div class="upload-box">
-  
-          <button class="upload-button">
-            수기등록<br />
-            <input
-              type="text"
               placeholder=".EXCEL 파일만 허용"
-              value={fileNames || "(.EXCEL 파일만 허용)"}
+              value={fileNames3}
               readonly
-              class="file-name-input"
             />
-          </button>
-  
+          </div>
+        
           <label class="plus-icon">
             <span>+</span>
             <input
               type="file"
               class="file-input"
-              on:change={(event) => handleFileSelect(event)}
+              multiple
+              accept=".xls,.xlsx"
+              bind:this={excelInput}
+              disabled={!selectedPlan}
+              on:change={(event) => handleFileSelect(event, "excel")}
             />
           </label>
-  
         </div>
+        
   
         <div class="upload-submit">
           <button class="btn btn-upload">업로드</button>
@@ -577,7 +580,7 @@ onMount(async () => {
 
   .table_scroll_bar{
     overflow-y: auto;
-    max-height: 30vh;
+    max-height: 20vh;
     margin-bottom: 10px;
   }
 
@@ -738,8 +741,8 @@ onMount(async () => {
     position: absolute;
     top: 15px;
     left: 20px;
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
     background-color: #999999;
     color: white;
     font-size: 18px;
@@ -755,6 +758,7 @@ onMount(async () => {
   .plus-icon span {
     position: absolute;
     top: 0px;
+    font-size: 25px;
   }
 
   .file-name-input {
