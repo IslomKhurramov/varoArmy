@@ -324,7 +324,7 @@
                   </td>
 
                   <!-- 점검이름: ccr_item_no__ccc_item_title -->
-                  <td class="text-center">
+                  <td >
                     {data?.ccr_item_no__ccc_item_title || "N/A"}
                   </td>
 

@@ -98,3 +98,23 @@ export const setResultChanged = async (
     throw new Error(`Failed to fetch asset detail: ${error.message}`);
   }
 };
+/*********************************** */
+export const getAllCheckList = async () => {
+  try {
+    // Send the request with proper payload and configurations
+    const response = await axios.get(`${serverApi}/api/getAllCheckList/`, {
+      withCredentials: true,
+    });
+
+    console.log("API Response:", response.data);
+
+    if (response && response.data) {
+      return response.data; // Return the API response data
+    } else {
+      throw new Error("Invalid response received from the server.");
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch checklist: ${error.message}`);
+  }
+};
