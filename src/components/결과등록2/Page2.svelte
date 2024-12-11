@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   import ModalDynamic from "../../shared/ModalDynamic.svelte";
   import ResultPopup from "./ResultPopup.svelte";
   import {
@@ -6,7 +7,10 @@
     getResultUploadStatus,
     getUploadedResultErrors,
   } from "../../services/result/resultService";
+  import { getPlanLists } from "../../services/page1/newInspection";
   import ResultErrorPopup from "./ResultErrorPopup.svelte";
+  import { getAllPlanLists } from "../../services/page1/planInfoService";
+  import {errorAlert} from "../../shared/sweetAlert"
 
   let jsonInput;
   let txtInput;
@@ -15,7 +19,12 @@
   let txtFiles = [];
   let excelFiles = [];
 
+  let error = null;
   let planList = [];
+  let projectIndex = "";
+  let selectedTargets = [];
+  let projectData = {};
+  let targetValue = "ALL";
   let selectedPlan = "";
   let resultStatus = null;
   let resultErrors = null;
@@ -23,53 +32,10 @@
   let showModal = false;
   let showErrorModal = false;
   let modalData = null;
+  let planReports = null;
   let modalErrorData = null;
   let uploadStatusModalData = null;
-
-  $: {
-    console.log("resultStatus:", resultStatus);
-    console.log("resultErrors:", resultErrors);
-  }
-
-  const fetchResultStatus = () => {
-    resultStatus = [
-      { id: 1, name: "Asset 1" },
-      { id: 2, name: "Asset 2" },
-    ];
-    showModal = true;
-  };
-
-  const fetchResultErrors = () => {
-    resultErrors = [
-      { id: 1, error: "Error 1" },
-      { id: 2, error: "Error 2" },
-    ];
-    showErrorModal = true;
-  };
-
-  let selectedFiles = {};
-  // let fileNames = {};
-
   let fileNames = "";
-
-function handleFileSelect(event) {
-  const files = event.target.files;
-  fileNames = files.length > 0 ? files[0].name : "(멀티파일등록가능)";
-}
-
-
-  $: if (selectedPlan) {
-    (async () => {
-      try {
-        resultStatus = await getCCEResultUploadStatus(selectedPlan);
-        resultErrors = await getUploadedResultErrors(selectedPlan);
-        uploadStatus = await getResultUploadStatus(selectedPlan);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    })();
-  }
-
   let tableData = [
     {
       category: "에이전트 (100)",
@@ -137,10 +103,114 @@ function handleFileSelect(event) {
       ],
     },
   ];
+
+  $: if (selectedPlan) {
+    (async () => {
+      try {
+        console.log('selectedPlan',selectedPlan);
+        
+        resultStatus = await getCCEResultUploadStatus(selectedPlan);
+        resultErrors = await getUploadedResultErrors(selectedPlan);
+        uploadStatus = await getResultUploadStatus(selectedPlan);
+        // console.log("uploadStatus",uploadStatus);
+        
+      } catch (error) {}
+    })();
+  }
+
+
+  const fetchResultErrors = () => {
+    resultErrors = [
+      { id: 1, error: "Error 1" },
+      { id: 2, error: "Error 2" },
+    ];
+    showErrorModal = true;
+  };
+
+
+function handleFileSelect(event) {
+  const files = event.target.files;
+  fileNames = files.length > 0 ? files[0].name : "(멀티파일등록가능)";
+}
+
+const submitNewSystemCommand = async (target, files) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("plan_index", selectedPlan);
+      formData.append("target_system", target);
+
+      files.forEach((file) => {
+        formData.append("result_files", file);
+      });
+
+      const response = await setUploadPlanResult(formData);
+
+      await successAlert(response);
+
+      resultStatus = await getCCEResultUploadStatus(selectedPlan);
+      resultErrors = await getUploadedResultErrors(selectedPlan);
+      uploadStatus = await getResultUploadStatus(selectedPlan);
+
+      jsonFiles = [];
+      txtFiles = [];
+      excelFiles = [];
+
+      // navigate(window.location?.pathname == "/" ? "/page1" : "/");
+    } catch (error) {
+      errorAlert(error?.message);
+    }
+  };
+
+
+let search = {
+    page_cnt: "1",
+    list_cnt: "10000000000000",
+  };
+
+// onMount(async () => {
+//     try {
+//       projectData = await getAllPlanLists(search);
+//       console.log('projectData',projectData);
+//       // projectIndex = projectData.data.map(item => item.ccp_index);
+//       if (projectData) {
+//         allPlanList.set(projectData.data);
+//       }
+//     } catch (err) {
+//       error = err.message;
+//       await errorAlert(error);
+//     }
+//   });
+
+$: console.log("uploadStatus:", uploadStatus);
+$: console.log("uploaded_status:", uploadStatus?.uploaded_status);
+
+
+
+onMount(async () => {
+    try {
+      planList = await getPlanLists();
+      console.log('planList',planList);
+      console.log('uploadStatus',uploadStatus);
+      
+    } catch (err) {}
+  });
+
+  const getResultStatus = async () => {
+    try {
+      uploadStatusModalData = uploadStatus;
+    } catch (err) {}
+  };
+
+  $: {
+    if (projectIndex) selectedPlan = projectIndex;
+  }
+
+
   /*************LEFT SIDE */
 
   let mainTitle = "점검 계획 현황";
-  let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
+  let isOpen = Array(8).fill(false);
   export let activeMenu = "신규계획등록";
 
   let mainItems2 = [
@@ -213,6 +283,8 @@ function handleFileSelect(event) {
   const toggleAccordion = (index) => {
     isOpen[index] = !isOpen[index];
   };
+
+
 </script>
 
 <main class="table-container">
@@ -264,25 +336,36 @@ function handleFileSelect(event) {
 
   <section class="section2">
     <div class="inspection-container">
-      <!-- Header -->
-      <div class="inputRow box_1">
-        <label>점검항목</label>
-        <select class="inputRow" id="asset_group">
-          {#each mainItems as item, index}
-            <option value="UNIX">{item.title}</option>
-          {/each}
-        </select>
+
+      <div class="formControlWrap">
+        <div class="formControl">
+          <label style="font-size: 14px;">점검항목</label>
+          <select bind:value={selectedPlan}>
+            <option value="" selected disabled>선택</option>
+            {#if planList}
+              {#each planList as plan}
+                <option value={plan.ccp_index}>{plan.ccp_title}</option>
+              {/each}
+            {/if}
+          </select>
+        </div>
       </div>
 
-      <div class="inputRow box_1">
-        <label>점검분류</label>
-        <select class="inputRow" id="asset_group">
-          {#each mainItems as item, index}
-            <option value="UNIX">{item.title}</option>
-          {/each}
-        </select>
+      <div class="formControlWrap">
+        <div class="formControl">
+          <label style="font-size: 14px;">점검분류</label>
+          <select bind:value={selectedPlan}>
+            <option value="" selected disabled>선택</option>
+            {#if planList}
+              {#each planList as plan}
+                <option value={plan.ccp_index}>{plan.ccp_title}</option>
+              {/each}
+            {/if}
+          </select>
+        </div>
       </div>
 
+      <div class="formControlWrap">
       <div class="inputRow box_1">
         <label>점검기간</label>
         <div class="dateWrap">
@@ -295,48 +378,58 @@ function handleFileSelect(event) {
           </div>
         </div>
       </div>
+      </div>
 
       <!-- Registration Status -->
       <div class="tableListWrap">
         <p>등록현황</p>
-        <table class="tableList hdBorder">
-          <colgroup>
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-            <col style="width:14%;" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>등록대상</th>
-              <th>UNIX</th>
-              <th>WINDOWS</th>
-              <th>NETWORK</th>
-              <th>DBMS</th>
-              <th>PC</th>
-              <th>등록오류</th>
-              <th>합계</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each tableData as row}
+        <div class="table_scroll_bar">
+          <table class="tableList hdBorder">
+            <colgroup>
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+              <col style="width:14%;" />
+            </colgroup>
+            <thead>
               <tr>
-                <td>{row.category}</td>
-                <td>{row.unix}</td>
-                <td>{row.windows}</td>
-                <td>{row.network}</td>
-                <td>{row.dbms}</td>
-                <td>{row.pc}</td>
-                <td>{row.errors}</td>
-                <td>{row.total}</td>
+                <th>등록대상</th>
+                <th>UNIX</th>
+                <th>WINDOWS</th>
+                <th>NETWORK</th>
+                <th>DBMS</th>
+                <th>PC</th>
+                <th>등록오류</th>
+                <th>합계</th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {#if Array.isArray(uploadStatus?.uploaded_status) && uploadStatus?.uploaded_status.length > 0}
+                {#each uploadStatus.uploaded_status as row, index}
+                  <tr>
+                    <td>{row.hostname || "N/A"}</td>
+                    <td>{row.ipaddr || "N/A"}</td>
+                    <td>{row.target || "N/A"}</td>
+                    <td>{row.checklist_count || 0}</td>
+                    <td>{row.checklist_count || 0}</td>
+                    <td>{row.checklist_count || 0}</td>
+                    <td>{row.checklist_count || 0}</td>
+                    <td>{row.uploaded_result_count || 0}</td>
+                  </tr>
+                {/each}
+              {:else}
+                <tr>
+                  <td colspan="8">데이터가 없습니다</td>
+                </tr>
+              {/if}
+            </tbody>
+            
+          </table>
+        </div>
         <div class="buttons1">
           <button
             class="btn btn-primary"
@@ -481,6 +574,13 @@ function handleFileSelect(event) {
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
   }
+
+  .table_scroll_bar{
+    overflow-y: auto;
+    max-height: 30vh;
+    margin-bottom: 10px;
+  }
+
   .section1 {
     width: 15%;
     height: 90vh;
@@ -610,7 +710,7 @@ function handleFileSelect(event) {
   .page2_headir_bottom {
     display: flex;
     flex-direction: column;
-
+    margin-top: 10px;
   }
 
   .page2_headir_bottom p {

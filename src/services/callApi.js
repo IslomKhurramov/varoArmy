@@ -10,7 +10,7 @@ export const getAllPlanLists = async (page_cnt, list_cnt) => {
           { withCredentials: true } // Additional config
       );
 
-      console.log("API Response:", response.data);
+    //   console.log("API Response:", response.data);
 
       if (response) {
           return response.data; // Expected valid response

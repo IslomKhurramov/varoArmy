@@ -68,7 +68,7 @@
   onMount(() => {
     getPlanList();
   });
-  $: console.log("allPlanList", $allPlanList);
+  // $: console.log("allPlanList", $allPlanList);
 </script>
 
 <section class="search_box">
