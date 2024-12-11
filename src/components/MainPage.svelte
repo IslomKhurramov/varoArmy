@@ -13,11 +13,15 @@
   import { Route } from "svelte-routing";
   import { getAllPlanLists } from "../services/callApi";
   import { allPlanList } from "../services/store";
+  import LeftMenu from "./LeftMenu.svelte";
 
-  export let activeMenu = "신규계획등록";
+  export let activeMenu = "/";
   let currentPage = null;
   onMount(() => {
     switch (window.location.pathname) {
+      case "/leftMenu":
+        activeMenu = "";
+        break;
       case "/page1":
         activeMenu = "신규계획등록";
         break;
@@ -46,7 +50,7 @@
         activeMenu = "취약점현황";
         break;
       default:
-        activeMenu = "신규계획등록";
+        activeMenu = "";
     }
   });
   /**********GETALLPLANLIST******************/
@@ -525,7 +529,7 @@
       <Route path="/page7" component="{Page7}" />
       <Route path="/page8" component="{Page8}" />
       <Route path="/page9" component="{Page9}" />
-      <!-- <Route path="/leftMenu" component="{LeftMenu}" /> -->
+      <Route path="/" component="{LeftMenu}" />
     </div>
   </section>
 </main>
