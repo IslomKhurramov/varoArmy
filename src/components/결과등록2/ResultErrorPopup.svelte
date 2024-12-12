@@ -68,26 +68,26 @@
         </tr>
       </thead>
       <tbody>
-        {#each tableData as data, index}
+        {#each modalErrorData as data, index}
           <tr>
             <td class="text-center">
-              {data?.systemName}
+              {data?.systemName || "xxxxxxxx"}
             </td>
             <td class="text-center">
               <div>
-                {data?.inspectionField}
+                {data?.clf_hostname}
               </div>
             </td>
             <td class="text-center">
-              {data.operatingSystem}
+              {data.clf_ipaddr}
             </td>
             <td class="text-center">
-              {data.hostName}</td>
+              {data.clf_orig_file}</td>
             <td class="text-center">
-              {data.ipInfo}
+              {data.clf_etc}
             </td>
             <td class="text-center">
-              {data.agent}
+              {data?.agent || "--"}
             </td>
             <td class="text-center">
               <div class="table_modal_btn">

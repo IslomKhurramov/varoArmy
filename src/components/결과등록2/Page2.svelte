@@ -12,6 +12,7 @@
   import ResultErrorPopup from "./ResultErrorPopup.svelte";
   import { getAllPlanLists } from "../../services/page1/planInfoService";
   import {errorAlert, successAlert} from "../../shared/sweetAlert"
+  import ResultUploadStatusPopup from "./ResultUploadStatusPopup.svelte";
 
   let jsonInput, txtInput, excelInput;
   let jsonFiles = [];
@@ -38,73 +39,6 @@
   let planReports = null;
   let modalErrorData = null;
   let uploadStatusModalData = null;
-  let tableData = [
-    {
-      category: "에이전트 (100)",
-      unix: 10,
-      windows: 70,
-      network: 0,
-      dbms: "-",
-      pc: "-",
-      errors: 3,
-      total: "80%",
-    },
-    {
-      category: "비에이전트 (10)",
-      unix: 1,
-      windows: 0,
-      network: 7,
-      dbms: "-",
-      pc: "-",
-      errors: "-",
-      total: "90%",
-    },
-    {
-      category: "미등록자산",
-      unix: "-",
-      windows: "-",
-      network: "-",
-      dbms: "-",
-      pc: "-",
-      errors: "-",
-      total: "-",
-    },
-  ];
-
-  let mainItems = [
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-  ];
 
   function updateAllFiles() {
     allFiles = [
@@ -128,13 +62,14 @@
   }
 
 
-  const fetchResultErrors = () => {
-    resultErrors = [
-      { id: 1, error: "Error 1" },
-      { id: 2, error: "Error 2" },
-    ];
-    showErrorModal = true;
-  };
+  // const fetchResultErrors = () => {
+  //   // resultErrors = [
+  //   //   { id: 1, error: "Error 1" },
+  //   //   { id: 2, error: "Error 2" },
+  //   // ];
+  //   showErrorModal = true;
+  //   modalErrorData = resultErrors;
+  // };
 
 const submitNewSystemCommand = async () => {
     try {
@@ -361,14 +296,15 @@ onMount(async () => {
         <div class="formControlWrap">
           <div class="formControl">
             <label style="font-size: 14px;">점검분류</label>
-            <select bind:value={selectedPlan}>
+            <input type="text">
+            <!-- <select bind:value={selectedPlan}>
               <option value="" selected disabled>선택</option>
               {#if planList}
                 {#each planList as plan}
                   <option value={plan.ccp_index}>{plan.ccp_title}</option>
                 {/each}
               {/if}
-            </select>
+            </select> -->
           </div>
         </div>
   
@@ -430,7 +366,7 @@ onMount(async () => {
                   {/each}
                 {:else}
                   <tr>
-                    <td colspan="8">데이터가 없습니다</td>
+                    <td class="data_no_color" colspan="8">데이터가 없음! 프로젝트명을 먼저 선택함</td>
                   </tr>
                 {/if}
               </tbody>
@@ -439,14 +375,25 @@ onMount(async () => {
           </div>
           <div class="buttons1">
             <button
-              class="btn btn-primary"
+              type="button"
+              class={`btn ${resultStatus?.assets_info?.length > 0 ? "btn-primary" : ""}`}
+              disabled={!resultStatus?.assets_info?.length > 0}
               on:click="{() => {
                 showModal = true;
-                modalData = resultStatus;
-              }}">결과미등록자산</button
+                modalData = resultStatus?.assets_info;
+                getResultStatus();
+              }}">결과미등록자산 ({resultStatus?.assets_info?.length || ""})
+              </button
             >
-            <button class="btn btn-secondary" on:click="{fetchResultErrors}"
-              >등록실패내역</button
+            <button 
+              type="button"
+              class={`btn ${resultErrors?.length > 0 ? "btn-secondary" : ""}`}
+              disabled={!resultErrors?.length > 0}
+              on:click={() => {
+                showErrorModal = true;
+                modalErrorData = resultErrors;
+              }}
+              >등록실패내역 ({resultErrors?.length || ""})</button
             >
           </div>
         </div>
@@ -556,20 +503,27 @@ onMount(async () => {
 
 </main>
 
-{#if showModal}
-  <ModalDynamic bind:showModal modalWidth="{60}" modalHeight="{600}">
-    <ResultPopup bind:modalData />
+{#if uploadStatusModalData && uploadStatusModalData?.length !== 0}
+  <ModalDynamic
+    bind:showModal={uploadStatusModalData}
+    modalWidth={80}
+    modalHeight={uploadStatusModalData?.uploaded_status?.length > 10
+      ? 600
+      : null}
+    bind:modalData={uploadStatusModalData}
+  >
+    <ResultUploadStatusPopup bind:uploadStatusModalData />
   </ModalDynamic>
 {/if}
 
-{#if showErrorModal}
+{#if modalErrorData && modalErrorData?.length !== 0}
   <ModalDynamic
-    bind:showModal="{showErrorModal}"
-    modalWidth="{60}"
-    modalHeight="{600}"
-    showExecuteAllButton="{true}"
+    bind:showModal={showErrorModal}
+    modalWidth={80}
+    modalHeight={modalErrorData?.length > 10 ? 600 : null}
+    bind:modalData={modalErrorData}
   >
-    <ResultErrorPopup bind:modalData="{resultErrors}" />
+    <ResultErrorPopup bind:modalErrorData />
   </ModalDynamic>
 {/if}
 
@@ -642,15 +596,10 @@ onMount(async () => {
     width: 50%;
   }
 
-  .inputRow select {
-    flex: 1;
-    width: 100%;
-    height: 34px;
-    padding: 17px;
-    border: 1px solid #cccccc;
-    border-radius: 5px;
-    font-size: 12px;
-  }
+ .data_no_color {
+  font-size: 14px;
+  color: #ccc;
+ }
 
   .inputRow input {
     flex: 1;

@@ -24,10 +24,10 @@
   $: if (dialogSecond && showModalSecond) dialogSecond.showModal();
   $: if (dialogThird && showModalRegisteredAdmin) dialogThird.showModal();
 
-    // 전체일괄재실행 tugmasi bosilganda ishlaydigan funksiya
+  
     const handleExecuteAll = () => {
     console.log("전체일괄재실행 button clicked");
-    // Sizning logikangizni shu yerda qo'shing
+    // logikani shu yerga qo'sh
   };
 </script>
 
@@ -41,7 +41,7 @@
     modalData = [];
   }}
 >
-  <div class="btn_main" style="height: 100vh; overflow: auto;" on:click|stopPropagation>
+  <div style="height: 100vh; overflow: auto;" on:click|stopPropagation>
     <slot name="header" />
     <slot />
     <div>
