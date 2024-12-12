@@ -6,16 +6,21 @@
     getCCEResultUploadStatus,
     getResultUploadStatus,
     getUploadedResultErrors,
+    setUploadPlanResult,
   } from "../../services/result/resultService";
   import { getPlanLists } from "../../services/page1/newInspection";
   import ResultErrorPopup from "./ResultErrorPopup.svelte";
   import { getAllPlanLists } from "../../services/page1/planInfoService";
-  import {errorAlert} from "../../shared/sweetAlert"
+  import {errorAlert, successAlert} from "../../shared/sweetAlert"
 
   let jsonInput, txtInput, excelInput;
   let jsonFiles = [];
   let txtFiles = [];
   let excelFiles = [];
+  let fileNames = "(멀티파일등록가능)";
+  let fileNames2 = "(멀티파일등록가능)";
+  let fileNames3 = "(.EXCEL 파일만 허용)";
+  let allFiles = [];
 
   let error = null;
   let planList = [];
@@ -33,9 +38,6 @@
   let planReports = null;
   let modalErrorData = null;
   let uploadStatusModalData = null;
-  let fileNames = "(멀티파일등록가능)";
-  let fileNames2 = "(멀티파일등록가능)";
-  let fileNames3 = "(.EXCEL 파일만 허용)";
   let tableData = [
     {
       category: "에이전트 (100)",
@@ -104,6 +106,14 @@
     },
   ];
 
+  function updateAllFiles() {
+    allFiles = [
+      ...jsonFiles.map((file) => ({ type: "JSON", file })),
+      ...txtFiles.map((file) => ({ type: "TXT", file })),
+      ...excelFiles.map((file) => ({ type: "EXCEL", file })),
+    ];
+  }
+
   $: if (selectedPlan) {
     (async () => {
       try {
@@ -112,7 +122,6 @@
         resultStatus = await getCCEResultUploadStatus(selectedPlan);
         resultErrors = await getUploadedResultErrors(selectedPlan);
         uploadStatus = await getResultUploadStatus(selectedPlan);
-        // console.log("uploadStatus",uploadStatus);
         
       } catch (error) {}
     })();
@@ -127,27 +136,34 @@
     showErrorModal = true;
   };
 
-
-// function handleFileSelect(event) {
-//   const files = event.target.files;
-//   fileNames = files.length > 0 ? files[0].name : "(멀티파일등록가능)";
-// }
-
-const submitNewSystemCommand = async (target, files) => {
+const submitNewSystemCommand = async () => {
     try {
+      if (!selectedPlan) {
+      errorAlert("프로젝트명을 먼저 선택해주세요.");
+      return;
+    }
+
+    if (!jsonFiles.length && !txtFiles.length && !excelFiles.length) {
+      errorAlert("파일을 업로드하고 계획을 선택하세요.");
+      return;
+    }
+
+    const filesToUpload = [
+      ...jsonFiles.map((file) => ({ type: "JSON", file })),
+      ...txtFiles.map((file) => ({ type: "TXT", file })),
+      ...excelFiles.map((file) => ({ type: "EXCEL", file })),
+    ];
+
+    for (const { type, file } of filesToUpload) {
       const formData = new FormData();
-
       formData.append("plan_index", selectedPlan);
-      formData.append("target_system", target);
-
-      files.forEach((file) => {
-        formData.append("result_files", file);
-      });
-
-      const response = await setUploadPlanResult(formData);
-
+      formData.append("target_system", type);
+      formData.append("result_files", file);
+  
+    const response = await setUploadPlanResult(formData);
       await successAlert(response);
-
+    }
+    
       resultStatus = await getCCEResultUploadStatus(selectedPlan);
       resultErrors = await getUploadedResultErrors(selectedPlan);
       uploadStatus = await getResultUploadStatus(selectedPlan);
@@ -155,16 +171,11 @@ const submitNewSystemCommand = async (target, files) => {
       jsonFiles = [];
       txtFiles = [];
       excelFiles = [];
-
-      // navigate(window.location?.pathname == "/" ? "/page1" : "/");
+      updateAllFiles();
     } catch (error) {
       errorAlert(error?.message);
     }
   };
-
-$: console.log("uploadStatus:", uploadStatus);
-$: console.log("uploaded_status:", uploadStatus?.uploaded_status);
-
 
 
 onMount(async () => {
@@ -276,7 +287,7 @@ onMount(async () => {
       excelFiles = files;
       fileNames3 = excelFiles.length > 0 ? excelFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
     }
-    console.log(`${fileType} fayllar tanlandi:`, files);
+    updateAllFiles();
   }
 
 
@@ -330,211 +341,215 @@ onMount(async () => {
   </section>
 
   <section class="section2">
-    <div class="inspection-container">
-
-      <div class="formControlWrap">
-        <div class="formControl">
-          <label style="font-size: 14px;">점검항목</label>
-          <select bind:value={selectedPlan}>
-            <option value="" selected disabled>선택</option>
-            {#if planList}
-              {#each planList as plan}
-                <option value={plan.ccp_index}>{plan.ccp_title}</option>
-              {/each}
-            {/if}
-          </select>
-        </div>
-      </div>
-
-      <div class="formControlWrap">
-        <div class="formControl">
-          <label style="font-size: 14px;">점검분류</label>
-          <select bind:value={selectedPlan}>
-            <option value="" selected disabled>선택</option>
-            {#if planList}
-              {#each planList as plan}
-                <option value={plan.ccp_index}>{plan.ccp_title}</option>
-              {/each}
-            {/if}
-          </select>
-        </div>
-      </div>
-
-      <div class="formControlWrap">
-      <div class="inputRow box_1">
-        <label>점검기간</label>
-        <div class="dateWrap">
-          <div class="date">
-            <input type="date" class="datepicker" placeholder="시작일시" />
-          </div>
-          <img src="./assets/images/dash.svg" />
-          <div class="date">
-            <input type="date" class="datepicker" placeholder="종료일시" />
-          </div>
-        </div>
-      </div>
-      </div>
-
-      <!-- Registration Status -->
-      <div class="tableListWrap">
-        <p>등록현황</p>
-        <div class="table_scroll_bar">
-          <table class="tableList hdBorder">
-            <colgroup>
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-              <col style="width:14%;" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>등록대상</th>
-                <th>UNIX</th>
-                <th>WINDOWS</th>
-                <th>NETWORK</th>
-                <th>DBMS</th>
-                <th>PC</th>
-                <th>등록오류</th>
-                <th>합계</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#if Array.isArray(uploadStatus?.uploaded_status) && uploadStatus?.uploaded_status.length > 0}
-                {#each uploadStatus.uploaded_status as row, index}
-                  <tr>
-                    <td>{row.hostname || "N/A"}</td>
-                    <td>{row.ipaddr || "N/A"}</td>
-                    <td>{row.target || "N/A"}</td>
-                    <td>{row.checklist_count || 0}</td>
-                    <td>{row.checklist_count || 0}</td>
-                    <td>{row.checklist_count || 0}</td>
-                    <td>{row.checklist_count || 0}</td>
-                    <td>{row.uploaded_result_count || 0}</td>
-                  </tr>
+    <div class="formContainer_main">
+      <div class="inspection-container">
+  
+        <div class="formControlWrap">
+          <div class="formControl">
+            <label style="font-size: 14px;">점검항목</label>
+            <select bind:value={selectedPlan}>
+              <option value="" selected disabled>선택</option>
+              {#if planList}
+                {#each planList as plan}
+                  <option value={plan.ccp_index}>{plan.ccp_title}</option>
                 {/each}
-              {:else}
-                <tr>
-                  <td colspan="8">데이터가 없습니다</td>
-                </tr>
               {/if}
-            </tbody>
-            
-          </table>
+            </select>
+          </div>
         </div>
-        <div class="buttons1">
-          <button
-            class="btn btn-primary"
-            on:click="{() => {
-              showModal = true;
-              modalData = resultStatus;
-            }}">결과미등록자산</button
-          >
-          <button class="btn btn-secondary" on:click="{fetchResultErrors}"
-            >등록실패내역</button
-          >
+  
+        <div class="formControlWrap">
+          <div class="formControl">
+            <label style="font-size: 14px;">점검분류</label>
+            <select bind:value={selectedPlan}>
+              <option value="" selected disabled>선택</option>
+              {#if planList}
+                {#each planList as plan}
+                  <option value={plan.ccp_index}>{plan.ccp_title}</option>
+                {/each}
+              {/if}
+            </select>
+          </div>
         </div>
+  
+        <div class="formControlWrap">
+        <div class="inputRow box_1">
+          <label>점검기간</label>
+          <div class="dateWrap">
+            <div class="date">
+              <input type="date" class="datepicker" placeholder="시작일시" />
+            </div>
+            <img src="./assets/images/dash.svg" />
+            <div class="date">
+              <input type="date" class="datepicker" placeholder="종료일시" />
+            </div>
+          </div>
+        </div>
+        </div>
+  
+        <!-- Registration Status -->
+        <div class="tableListWrap">
+          <p>등록현황</p>
+          <div class="table_scroll_bar">
+            <table class="tableList hdBorder">
+              <colgroup>
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+                <col style="width:14%;" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>등록대상</th>
+                  <th>UNIX</th>
+                  <th>WINDOWS</th>
+                  <th>NETWORK</th>
+                  <th>DBMS</th>
+                  <th>PC</th>
+                  <th>등록오류</th>
+                  <th>합계</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#if Array.isArray(uploadStatus?.uploaded_status) && uploadStatus?.uploaded_status.length > 0}
+                  {#each uploadStatus.uploaded_status as row, index}
+                    <tr>
+                      <td>{row.hostname || "N/A"}</td>
+                      <td>{row.ipaddr || "N/A"}</td>
+                      <td>{row.target || "N/A"}</td>
+                      <td>{row.checklist_count || 0}</td>
+                      <td>{row.checklist_count || 0}</td>
+                      <td>{row.checklist_count || 0}</td>
+                      <td>{row.checklist_count || 0}</td>
+                      <td>{row.uploaded_result_count || 0}</td>
+                    </tr>
+                  {/each}
+                {:else}
+                  <tr>
+                    <td colspan="8">데이터가 없습니다</td>
+                  </tr>
+                {/if}
+              </tbody>
+              
+            </table>
+          </div>
+          <div class="buttons1">
+            <button
+              class="btn btn-primary"
+              on:click="{() => {
+                showModal = true;
+                modalData = resultStatus;
+              }}">결과미등록자산</button
+            >
+            <button class="btn btn-secondary" on:click="{fetchResultErrors}"
+              >등록실패내역</button
+            >
+          </div>
+        </div>
+  
+        <!-- File Upload Section -->
       </div>
-
-      <!-- File Upload Section -->
-    </div>
+      
+      <div class="page2_headir_bottom">
+        <p>이동식점검 결과 파일등록</p>
+  
+        <div class="upload-section">
     
-    <div class="page2_headir_bottom">
-      <p>이동식점검 결과 파일등록</p>
-
-      <div class="upload-section">
+          <div class="upload-box">
   
-        <div class="upload-box">
-
-          <div class="upload-button">
-            <span>JSON 파일등록</span><br />
-            <input
-              type="text"
-              class="file-name-input"
-              placeholder="멀티파일등록가능"
-              value={fileNames}
-              readonly
-            />
+            <div class="upload-button">
+              <span>JSON 파일등록</span><br />
+              <input
+                type="text"
+                class="file-name-input"
+                placeholder="멀티파일등록가능"
+                value={fileNames}
+                readonly
+              />
+            </div>
+          
+            <label class="plus-icon">
+              <span>+</span>
+              <input
+                type="file"
+                class="file-input"
+                multiple
+                accept=".json"
+                bind:this={jsonInput}
+                disabled={!selectedPlan}
+                on:change={(event) => handleFileSelect(event, "json")}
+              />
+            </label>
           </div>
-        
-          <label class="plus-icon">
-            <span>+</span>
-            <input
-              type="file"
-              class="file-input"
-              multiple
-              accept=".json"
-              bind:this={jsonInput}
-              disabled={!selectedPlan}
-              on:change={(event) => handleFileSelect(event, "json")}
-            />
-          </label>
-        </div>
-
-        <div class="upload-box">
-
-          <div class="upload-button">
-            <span>네트워크 설정파일등록</span><br />
-            <input
-              type="text"
-              class="file-name-input"
-              placeholder="멀티파일등록가능"
-              value={fileNames2}
-              readonly
-            />
-          </div>
-        
-          <label class="plus-icon">
-            <span>+</span>
-            <input
-              type="file"
-              class="file-input"
-              multiple
-              accept=".txt"
-              bind:this={txtInput}
-              disabled={!selectedPlan}
-              on:change={(event) => handleFileSelect(event, "txt")}
-            />
-          </label>
-        </div>
-        
-        <div class="upload-box">
-
-          <div class="upload-button">
-            <span>수기등록</span><br />
-            <input
-              type="text"
-              class="file-name-input"
-              placeholder=".EXCEL 파일만 허용"
-              value={fileNames3}
-              readonly
-            />
-          </div>
-        
-          <label class="plus-icon">
-            <span>+</span>
-            <input
-              type="file"
-              class="file-input"
-              multiple
-              accept=".xls,.xlsx"
-              bind:this={excelInput}
-              disabled={!selectedPlan}
-              on:change={(event) => handleFileSelect(event, "excel")}
-            />
-          </label>
-        </div>
-        
   
-        <div class="upload-submit">
+          <div class="upload-box">
+  
+            <div class="upload-button">
+              <span>네트워크 설정파일등록</span><br />
+              <input
+                type="text"
+                class="file-name-input"
+                placeholder="멀티파일등록가능"
+                value={fileNames2}
+                readonly
+              />
+            </div>
+          
+            <label class="plus-icon">
+              <span>+</span>
+              <input
+                type="file"
+                class="file-input"
+                multiple
+                accept=".txt"
+                bind:this={txtInput}
+                disabled={!selectedPlan}
+                on:change={(event) => handleFileSelect(event, "txt")}
+              />
+            </label>
+          </div>
+          
+          <div class="upload-box">
+  
+            <div class="upload-button">
+              <span>수기등록</span><br />
+              <input
+                type="text"
+                class="file-name-input"
+                placeholder=".EXCEL 파일만 허용"
+                value={fileNames3}
+                readonly
+              />
+            </div>
+          
+            <label class="plus-icon">
+              <span>+</span>
+              <input
+                type="file"
+                class="file-input"
+                multiple
+                accept=".xls,.xlsx"
+                bind:this={excelInput}
+                disabled={!selectedPlan}
+                on:change={(event) => handleFileSelect(event, "excel")}
+              />
+            </label>
+          </div>
+             
+        </div>
+
+        <div class="upload-submit"
+          on:click={submitNewSystemCommand}
+          disabled={!selectedPlan || !allFiles.length}
+        >
           <button class="btn btn-upload">업로드</button>
         </div>
   
       </div>
-
     </div>
 
   </section>
@@ -576,6 +591,14 @@ onMount(async () => {
     border-radius: 10px;
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
+  }
+
+  .formContainer_main {
+    max-width: 100%;
+    margin-top: 15px;
+    overflow-y: auto;
+    max-height: 70vh;
+    overflow-x: hidden;
   }
 
   .table_scroll_bar{
@@ -794,7 +817,9 @@ onMount(async () => {
   }
 
   .upload-submit {
-    grid-column: 1 / -1;
+    display: flex;
+    padding: 20px;
+    justify-content: flex-end;
     text-align: center;
   }
 
