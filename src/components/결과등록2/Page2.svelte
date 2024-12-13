@@ -297,14 +297,6 @@ onMount(async () => {
           <div class="formControl">
             <label style="font-size: 14px;">점검분류</label>
             <input type="text">
-            <!-- <select bind:value={selectedPlan}>
-              <option value="" selected disabled>선택</option>
-              {#if planList}
-                {#each planList as plan}
-                  <option value={plan.ccp_index}>{plan.ccp_title}</option>
-                {/each}
-              {/if}
-            </select> -->
           </div>
         </div>
   
@@ -507,9 +499,7 @@ onMount(async () => {
   <ModalDynamic
     bind:showModal={uploadStatusModalData}
     modalWidth={80}
-    modalHeight={uploadStatusModalData?.uploaded_status?.length > 10
-      ? 600
-      : null}
+    modalHeight={500}
     bind:modalData={uploadStatusModalData}
   >
     <ResultUploadStatusPopup bind:uploadStatusModalData />
@@ -520,8 +510,9 @@ onMount(async () => {
   <ModalDynamic
     bind:showModal={showErrorModal}
     modalWidth={80}
-    modalHeight={modalErrorData?.length > 10 ? 600 : null}
+    modalHeight={500}
     bind:modalData={modalErrorData}
+    showExecuteAllButton={true}
   >
     <ResultErrorPopup bind:modalErrorData />
   </ModalDynamic>
@@ -551,7 +542,7 @@ onMount(async () => {
     max-width: 100%;
     margin-top: 15px;
     overflow-y: auto;
-    max-height: 70vh;
+    max-height: 80vh;
     overflow-x: hidden;
   }
 

@@ -100,14 +100,11 @@
 <style>
   .tableListWrap {
     position: relative;
-    max-height: 70vh;
-    padding: 0%;
   }
   
   .modal_page2 {
     overflow-y: auto;
-    max-height: 40vh;
-
+    max-height: 380px;
   }
 
   thead {

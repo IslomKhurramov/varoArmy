@@ -59,6 +59,30 @@ export function successAlert(message) {
   });
 }
 
+// Reusable function for error alerts
+export async function errorAlert(message) {
+  const willRedirect = await swal({
+    title: "Error!",
+    text: message,
+    icon: "error",
+    button: {
+      text: "OK",
+      className: "custom-confirm-btn",
+    },
+  });
+
+  if (willRedirect && message.includes("로그인")) {
+    localStorage.removeItem("userInfo");
+    document.cookie =
+      "sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    userData.set({
+      isLoggedIn: false,
+      userInfo: null,
+    });
+    navigate("/login");
+  }
+}
+
 export function warningAlert(message) {
   return swal({
     title: "Warning!",

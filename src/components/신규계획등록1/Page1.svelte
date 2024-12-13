@@ -117,11 +117,6 @@
     }
   }
 
-  // $: {
-  //   console.log("resultStatus:", resultStatus);
-  //   console.log("resultErrors:", resultErrors);
-  // }
-
   const handleFileUpload = (event) => {
     formData.attachment = event.target.files[0];
   };
