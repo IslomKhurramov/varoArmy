@@ -18,7 +18,7 @@ export const postNewPlanInformation = async (planInfo) => {
 };
 
 // Post request to submit the full plan
-export const setNewPlan = async (planData) => {
+export const setNewPlanSave = async (planData) => {
   try {
     const response = await axios.post(
       `${serverApi}/api/setNewPlanSave/`,
@@ -100,6 +100,18 @@ export const getAssetGroups = async () => {
     }
   } catch (error) {
     throw error; // Re-throw the error for the calling function to handle
+  }
+};
+
+export const getAssetGroup = async () => {
+  try {
+    const response = await axios.get(`${serverApi}/api/getAssetGroup/`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    await errorAlert(err?.message);
+    // loading = false;
   }
 };
 
