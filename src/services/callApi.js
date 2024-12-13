@@ -118,3 +118,50 @@ export const getAllCheckList = async () => {
     throw new Error(`Failed to fetch checklist: ${error.message}`);
   }
 };
+/***********DELETE CHECKLIST ITEM****************** */
+export const setDeleteChecklistItem = async (checklist_group_no, selected_items) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/setDeleteChecklistItem/`, // API endpoint
+      { checklist_group_no:checklist_group_no, selected_items:selected_items }, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on getDetailInformationOfAsset: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch asset detail: ${error.message}`);
+  }
+};
+export const setNewChecklistGroup = async (source_chk, destion_name) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/setNewChecklistGroup/`, // API endpoint
+      { source_chk:source_chk, destion_name:destion_name }, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on getDetailInformationOfAsset: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch asset detail: ${error.message}`);
+  }
+};

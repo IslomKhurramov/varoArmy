@@ -5,7 +5,7 @@
   import { allPlanList, viewPlanResult } from "../../services/store";
   import { getViewPlanResults, setResultChanged } from "../../services/callApi";
   import ModalPopDetail from "./ModalPopDetail.svelte";
-  import {successAlert} from "../../shared/sweetAlert"
+  import { successAlert } from "../../shared/sweetAlert";
   let resultData = [];
 
   for (let i = 0; i < 50; i++) {
@@ -96,7 +96,7 @@
     currentPage = Swiper;
   }
   /***********************************/
-  let closeShowModalDetail=false;
+  let closeShowModalDetail = false;
   const validOptions = ["양호", "취약", "인터뷰", "수동점검"];
 
   let planIndex = "";
@@ -127,13 +127,13 @@
   }
 
   /*********************************************/
-  let result_index=null;
-  let checklist_index="";
+  let result_index = null;
+  let checklist_index = "";
 
   function handleUpdateClick(data) {
     result_index = data.ccr_index;
   }
-  
+
   async function resultUpdate() {
     try {
       const response = await setResultChanged(
@@ -144,9 +144,9 @@
         show_option
       );
 
-      if (response.RESULT==="OK") {
-        console.log("response", response)
-        successAlert(response.CODE)        
+      if (response.RESULT === "OK") {
+        console.log("response", response);
+        successAlert(response.CODE);
         viewPlanResultFunction();
       } else {
       }
@@ -156,8 +156,8 @@
     }
   }
   $: console.log("viewPlanResult", $viewPlanResult);
-    // Close modal when Esc key is pressed
-    function handleKeyDown(event) {
+  // Close modal when Esc key is pressed
+  function handleKeyDown(event) {
     if (event.key === "Escape") {
       closeShowModal();
     }
@@ -175,13 +175,48 @@
       window.removeEventListener("keydown", handleKeyDown);
     };
   });
-  let selectedData=null;
+  let selectedData = null;
   function handleRowClick(data) {
     selectedData = data;
-    closeShowModalDetail = true;  // Open the modal
+    closeShowModalDetail = true; // Open the modal
   }
   $: console.log("selectedData", selectedData);
-/**************PAGINATION*/
+  /**************PAGINATION*/
+  let currentPagePagination = 1; // Current page number
+  let itemsPerPage = 100; // Items per page
+
+  // Calculate the start and end index of items for the current page
+  $: startIndex = (currentPagePagination - 1) * itemsPerPage;
+  $: endIndex = startIndex + itemsPerPage;
+
+  // Slice the data for the current page
+  $: paginatedData = $viewPlanResult.slice(startIndex, endIndex);
+
+  // Calculate total pages
+  $: totalPages = Math.ceil($viewPlanResult.length / itemsPerPage);
+
+  // Dynamic range for pagination numbers
+  const maxButtons = 10; // Maximum number of visible page buttons
+  let paginationStart, paginationEnd; // Declare these variables once
+
+  $: {
+    paginationStart = Math.max(
+      1,
+      currentPagePagination - Math.floor(maxButtons / 2)
+    );
+    paginationEnd = Math.min(totalPages, paginationStart + maxButtons - 1);
+    paginationStart = Math.max(
+      1,
+      Math.min(paginationStart, totalPages - maxButtons + 1)
+    );
+  }
+
+  // Function to handle page change
+  function goToPage(pageNumber) {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      currentPagePagination = pageNumber;
+    }
+  }
 </script>
 
 <main class="table-container">
@@ -306,11 +341,12 @@
               </tr>
             </thead>
             <tbody>
-              {#each $viewPlanResult as data, index}
-                <tr on:click={() => handleRowClick(data)}>
+              {#each paginatedData as data, index}
+                <tr on:click="{() => handleRowClick(data)}">
                   <!-- 번호: Reverse index to display latest first -->
-                  <td class="text-center">{$viewPlanResult.length - index}</td>
-
+                  <td class="text-center"
+                    >{$viewPlanResult.length - (startIndex + index)}</td
+                  >
                   <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
                   <td class="text-center">
                     {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
@@ -324,24 +360,35 @@
                   </td>
 
                   <!-- 점검이름: ccr_item_no__ccc_item_title -->
-                  <td >
+                  <td>
                     {data?.ccr_item_no__ccc_item_title || "N/A"}
                   </td>
 
                   <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
                   <td>
-                    {@html data?.ccr_item_no__ccc_item_criteria.replace(/\n/g, "<br/>") || "N/A"}
+                    {@html data?.ccr_item_no__ccc_item_criteria.replace(
+                      /\n/g,
+                      "<br/>"
+                    ) || "N/A"}
                   </td>
 
                   <!-- 점검결과 (Actions): -->
                   <td class="text-center">
                     <div class="lastBox">
-                      <select style="width: 100px;" class="xs" on:click|stopPropagation={()=> handleUpdateClick(data)}>
+                      <select
+                        style="width: 100px;"
+                        class="xs"
+                        on:click|stopPropagation="{() =>
+                          handleUpdateClick(data)}"
+                      >
                         {#each validOptions as option}
-                        <option value={option} selected={data.ccr_item_result === option}>
-                          {option}
-                        </option>
-                      {/each}
+                          <option
+                            value="{option}"
+                            selected="{data.ccr_item_result === option}"
+                          >
+                            {option}
+                          </option>
+                        {/each}
                       </select>
                       <input
                         type="text"
@@ -349,7 +396,10 @@
                         placeholder="사유"
                       />
 
-                      <button class="btnSave" on:click|stopPropagation={resultUpdate}>저장</button>
+                      <button
+                        class="btnSave"
+                        on:click|stopPropagation="{resultUpdate}">저장</button
+                      >
                       <button class="btnUpload">관련시스템보기</button>
                     </div>
                   </td>
@@ -357,6 +407,51 @@
               {/each}
             </tbody>
           </table>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination">
+          <!-- First Page Button -->
+          <button
+            on:click="{() => goToPage(1)}"
+            disabled="{currentPagePagination === 1}"
+          >
+            {"<<"}
+          </button>
+
+          <!-- Previous Page Button -->
+          <button
+            on:click="{() => goToPage(currentPagePagination - 1)}"
+            disabled="{currentPagePagination === 1}"
+          >
+            {"<"}
+          </button>
+
+          <!-- Visible Page Buttons -->
+          {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
+            <button
+              class:selected="{currentPagePagination ===
+                paginationStart + index}"
+              on:click="{() => goToPage(paginationStart + index)}"
+            >
+              {paginationStart + index}
+            </button>
+          {/each}
+
+          <!-- Next Page Button -->
+          <button
+            on:click="{() => goToPage(currentPagePagination + 1)}"
+            disabled="{currentPagePagination === totalPages}"
+          >
+            {">"}
+          </button>
+
+          <!-- Last Page Button -->
+          <button
+            on:click="{() => goToPage(totalPages)}"
+            disabled="{currentPagePagination === totalPages}"
+          >
+            {">>"}
+          </button>
         </div>
         <div class="last_button">
           <button class="btn btnSave">변경내역이력조회 </button>
@@ -379,14 +474,32 @@
       on:close="{() => (closeShowModalDetail = false)}"
       on:click|stopPropagation
     >
-      <ModalPopDetail {closeShowModal} {selectedData}/>
+      <ModalPopDetail {closeShowModal} {selectedData} />
     </dialog>
   </div>
 {/if}
 
 <style>
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+  }
+  .pagination button {
+    border: none !important;
+    padding: 8px 12px;
+    margin: 0 4px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
 
-.modal-open-wrap {
+  .pagination button.selected {
+    background-color: #007bff; /* Change to your desired color */
+    color: white;
+    font-weight: bold;
+  }
+  .modal-open-wrap {
     display: block;
     z-index: 99;
     position: fixed;
