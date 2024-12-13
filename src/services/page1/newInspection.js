@@ -18,7 +18,7 @@ export const postNewPlanInformation = async (planInfo) => {
 };
 
 // Post request to submit the full plan
-export const setNewPlan = async (planData) => {
+export const setNewPlanSave = async (planData) => {
   try {
     const response = await axios.post(
       `${serverApi}/api/setNewPlanSave/`,

@@ -5,7 +5,7 @@
   import moment from "moment";
   import { onMount } from "svelte";
   import {
-    setNewPlan,
+    setNewPlanSave,
     getOptionsForNewPlan,
     getAssetGroup,
     getPlanLists,
@@ -99,20 +99,20 @@
 
   const submitNewPlan = async () => {
     try {
-      if (!projectName) throw new Error("플랜명을 확인해 주세요!");
-      if (selectedType == "0") {
-        if (!selectedCheckList) throw new Error("점검대상을 확인해 주세요!");
-      }
+      // if (!projectName) throw new Error("플랜명을 확인해 주세요!");
+      // if (selectedType == "0") {
+      //   if (!selectedCheckList) throw new Error("점검대상을 확인해 주세요!");
+      // }
 
-      if (!selectedAssetList) throw new Error("점검항목을 확인해 주세요!");
-      if (!selectedPersons) throw new Error("점검자를 확인해 주세요!");
-      if (!conductorInfo) throw new Error("조치승인담당자를 확인해 주세요!");
-      if (!startDate || !endDate) throw new Error("점검일정을 확인해 주세요!");
+      // if (!selectedAssetList) throw new Error("점검항목을 확인해 주세요!");
+      // if (!selectedPersons) throw new Error("점검자를 확인해 주세요!");
+      // if (!conductorInfo) throw new Error("조치승인담당자를 확인해 주세요!");
+      // if (!startDate || !endDate) throw new Error("점검일정을 확인해 주세요!");
 
-      if (schedule == "1") {
-        if (plan_execute_interval_value == 0)
-          throw new Error("주기를 0 보다 큰 숫자를 입력해 주세요!");
-      }
+      // if (schedule == "1") {
+      //   if (plan_execute_interval_value == 0)
+      //     throw new Error("주기를 0 보다 큰 숫자를 입력해 주세요!");
+      // }
 
       const sendData = {
         plan_name: projectName,
@@ -143,9 +143,18 @@
         formData.append(key, sendData[key]);
       }
 
-      const response = await setNewPlan(formData);
+      const response = await setNewPlanSave(formData);
 
-      await successAlert(response.CODE);
+      
+      
+      if (response.RESULT === "OK") {
+        await successAlert(response.CODE);
+        getPlanLists()
+
+      } else if (response.RESULT === "ERROR") {
+        await errorAlert(response.CODE);
+        getPlanLists()
+      }
 
       navigate(window.location?.pathname == "/" ? "/page1" : "/");
     } catch (error) {
