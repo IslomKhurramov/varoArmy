@@ -103,6 +103,18 @@ export const getAssetGroups = async () => {
   }
 };
 
+export const getAssetGroup = async () => {
+  try {
+    const response = await axios.get(`${serverApi}/api/getAssetGroup/`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    await errorAlert(err?.message);
+    // loading = false;
+  }
+};
+
 export const getOptionsForNewPlan = async () => {
   try {
     const response = await axios.get(`${serverApi}/api/getOptionsForNewPlan/`, {
