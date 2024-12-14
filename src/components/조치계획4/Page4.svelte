@@ -91,6 +91,7 @@
 </script>
 
 <main class="table-container">
+  
   <section class="section1">
     <!-- LEFT SIDE -->
     <div class="body_menu">
@@ -135,6 +136,7 @@
       </div>
     </div>
   </section>
+
   <section class="section2">
     <article class="contentArea">
       <section class="filterWrap" style="margin-bottom: 0px;">

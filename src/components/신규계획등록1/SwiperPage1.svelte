@@ -4,10 +4,10 @@ import InspectionTargetAssignment from "./InspectionTargetAssignment.svelte";
 import TargetAssignment from "./TargetAssignment.svelte";
 import moment from "moment";
 import { onMount } from "svelte";
-import {
-  setNewPlan,
-  getOptionsForNewPlan,
-} from "../../services/page1/newInspection";
+// import {
+//   setNewPlan,
+//   getOptionsForNewPlan,
+// } from "../../services/page1/newInspection";
 import { navigate, useLocation } from "svelte-routing";
 import { errorAlert, successAlert } from "../../shared/sweetAlert";
   
