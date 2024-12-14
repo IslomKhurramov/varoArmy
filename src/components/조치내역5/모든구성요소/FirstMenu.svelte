@@ -142,7 +142,7 @@ function selectAll(event) {
     }
 
     .tableListWrap {
-      height: 66vh;
+      height: 60vh;
       /* margin-bottom: 20px; */
       overflow-y: auto;
     }
