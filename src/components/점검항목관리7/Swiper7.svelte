@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
+  import { allCheckList, swiperTargetData } from "../../services/store";
 
   let swiperContainer;
   let scrollAmount = 0;
@@ -10,6 +11,7 @@
   let menuWrapper;
   let swiperInstance;
   let showModal = false;
+
   onMount(() => {
     // Ensure swiperContainer is bound
     if (swiperContainer) {
@@ -69,22 +71,6 @@
     console.log("Selected Slide:", slide);
   }
 
-  let formData = {
-    planTitle: "",
-    inspectionPeriod: "",
-    category: "",
-    system: "",
-    domain: "전체",
-    item: "",
-    description: "",
-    attachment: null,
-    inspectorInfo: "",
-    executionCondition: "즉시/예약",
-    repeatPeriod: "",
-    repeatCount: 1,
-    startDate: "2024-09-01 12:00:00",
-    endDate: "2024-09-01 12:00:00",
-  };
   // Close modal when Esc key is pressed
   function handleKeyDown(event) {
     if (event.key === "Escape") {
@@ -139,20 +125,25 @@
           style="background-color: white; z-index:99;"
           bind:this="{menuWrapper}"
         >
-          {#if slides.length > 0}
-            {#each slides as slide}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <div
-                value="{slide.ccc_item_no}"
-                name="{slide}"
-                class="menu-item {activeAsset &&
-                activeAsset.ccc_item_no === slide.ccc_item_no
-                  ? 'active'
-                  : ''}"
-                on:click="{() => handleSlideclick(slide)}"
-              >
-                {slide.ccc_item_no}
-              </div>
+          {#if $allCheckList && Object.keys($allCheckList).length > 0}
+            {#each Object.entries($allCheckList) as [key, item], index}
+              <!-- Render UNIX section if it exists -->
+              {#if item.UNIX && item.UNIX.length > 0}
+                {#each item.UNIX as subItem}
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <div
+                    value="{subItem.ccc_item_no}"
+                    name="{subItem}"
+                    class="menu-item {activeAsset &&
+                    activeAsset.ccc_item_no === subItem.ccc_item_no
+                      ? 'active'
+                      : ''}"
+                    on:click="{() => handleSlideclick(subItem)}"
+                  >
+                    {subItem.ccc_item_no}
+                  </div>
+                {/each}
+              {/if}
             {/each}
           {:else}
             <div>데이터가 없습니다</div>

@@ -7,7 +7,7 @@
     setDeleteChecklistItem,
     setNewChecklistGroup,
   } from "../../services/callApi";
-  import { allCheckList } from "../../services/store";
+  import { allCheckList, swiperTargetData } from "../../services/store";
   import { successAlert, warningAlert } from "../../shared/sweetAlert";
   import { writable } from "svelte/store";
   import Swiper from "../결과조회3/Swiper.svelte";
@@ -20,9 +20,15 @@
   const toggleAccordion = (index) => {
     isOpen[index] = !isOpen[index];
   };
-  const toggleCategory = (category) => {
-    categoryToggles[category] = !categoryToggles[category];
-  };
+  let isSectionOpen = {}; // Tracks toggle state for each section in allCheckList
+
+  // Function to toggle specific sections
+  function toggleSection(itemKey, sectionKey) {
+    if (!isSectionOpen[itemKey]) {
+      isSectionOpen[itemKey] = {};
+    }
+    isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey];
+  }
 
   for (let i = 0; i < 50; i++) {
     resultData.push({
@@ -38,77 +44,12 @@
   let mainTitle = "점검 계획 현황";
   export let activeMenu = "신규계획등록";
 
-  let mainItems = [
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-  ];
-
   let currentPage = null;
-  // function selectPage() {
-  //   currentPage = Swiper7;
-  // }
+  function selectPage(data) {
+    currentPage = Swiper7;
+    $swiperTargetData = data;
+  }
+  $: console.log("swiper", $swiperTargetData);
   let isAddingNewGroup = false;
   const cancelNewGroup = () => {
     isAddingNewGroup = false;
@@ -291,17 +232,27 @@
                         <!-- Render UNIX section if it exists -->
                         {#if item.UNIX && item.UNIX.length > 0}
                           <p
-                            on:click="{() =>
-                              handleClickTarget(item.UNIX, item, 'UNIX')}"
+                            on:click="{() => {
+                              toggleSection(key, 'UNIX');
+                              handleClickTarget(item.UNIX, item, 'UNIX');
+                            }}"
+                            class="{isSectionOpen[key]?.UNIX ? 'active' : ''}"
                           >
                             UNIX
                           </p>
-                          <ul>
+                          <ul
+                            class="sublist {isSectionOpen[key]?.UNIX
+                              ? 'open'
+                              : ''}"
+                            style="max-height: {isSectionOpen[key]?.UNIX
+                              ? '100%'
+                              : '0px'}"
+                          >
                             {#each item.UNIX as subItem}
                               <li
                                 on:click="{() => {
                                   (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
+                                    selectPage(subItem);
                                 }}"
                               >
                                 {subItem.ccc_item_group}
@@ -310,20 +261,32 @@
                           </ul>
                         {/if}
 
-                        <!-- Render WINDOWS section if it exists -->
+                        <!-- WINDOWS Section -->
                         {#if item.WINDOWS && item.WINDOWS.length > 0}
                           <p
-                            on:click="{() =>
-                              handleClickTarget(item.WINDOWS, item, 'WINDOWS')}"
+                            on:click="{() => {
+                              toggleSection(key, 'WINDOWS');
+                              handleClickTarget(item.WINDOWS, item, 'WINDOWS');
+                            }}"
+                            class="{isSectionOpen[key]?.WINDOWS
+                              ? 'active'
+                              : ''}"
                           >
                             WINDOWS
                           </p>
-                          <ul>
+                          <ul
+                            class="sublist {isSectionOpen[key]?.WINDOWS
+                              ? 'open'
+                              : ''}"
+                            style="max-height: {isSectionOpen[key]?.WINDOWS
+                              ? '100%'
+                              : '0px'}"
+                          >
                             {#each item.WINDOWS as subItem}
                               <li
                                 on:click="{() => {
                                   (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
+                                    selectPage(subItem);
                                 }}"
                               >
                                 {subItem.ccc_item_group}
@@ -332,20 +295,32 @@
                           </ul>
                         {/if}
 
-                        <!-- Render NETWORK section if it exists -->
+                        <!-- NETWORK Section -->
                         {#if item.NETWORK && item.NETWORK.length > 0}
                           <p
-                            on:click="{() =>
-                              handleClickTarget(item.NETWORK, item, 'NETWORK')}"
+                            on:click="{() => {
+                              toggleSection(key, 'NETWORK');
+                              handleClickTarget(item.NETWORK, item, 'NETWORK');
+                            }}"
+                            class="{isSectionOpen[key]?.NETWORK
+                              ? 'active'
+                              : ''}"
                           >
                             NETWORK
                           </p>
-                          <ul>
+                          <ul
+                            class="sublist {isSectionOpen[key]?.NETWORK
+                              ? 'open'
+                              : ''}"
+                            style="max-height: {isSectionOpen[key]?.NETWORK
+                              ? '100%'
+                              : '0px'}"
+                          >
                             {#each item.NETWORK as subItem}
                               <li
                                 on:click="{() => {
                                   (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
+                                    selectPage(subItem);
                                 }}"
                               >
                                 {subItem.ccc_item_group}
@@ -354,20 +329,30 @@
                           </ul>
                         {/if}
 
-                        <!-- Render DBMS section if it exists -->
+                        <!-- DBMS Section -->
                         {#if item.DBMS && item.DBMS.length > 0}
                           <p
-                            on:click="{() =>
-                              handleClickTarget(item.DBMS, item, 'DBMS')}"
+                            on:click="{() => {
+                              toggleSection(key, 'DBMS');
+                              handleClickTarget(item.DBMS, item, 'DBMS');
+                            }}"
+                            class="{isSectionOpen[key]?.DBMS ? 'active' : ''}"
                           >
                             DBMS
                           </p>
-                          <ul>
+                          <ul
+                            class="sublist {isSectionOpen[key]?.DBMS
+                              ? 'open'
+                              : ''}"
+                            style="max-height: {isSectionOpen[key]?.DBMS
+                              ? '100%'
+                              : '0px'}"
+                          >
                             {#each item.DBMS as subItem}
                               <li
                                 on:click="{() => {
                                   (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
+                                    selectPage(subItem);
                                 }}"
                               >
                                 {subItem.ccc_item_group}
@@ -376,112 +361,31 @@
                           </ul>
                         {/if}
 
-                        <!-- Render WAS section if it exists -->
+                        <!-- Repeat the same pattern for other sections -->
+                        <!-- WAS Section -->
                         {#if item.WAS && item.WAS.length > 0}
                           <p
-                            on:click="{() =>
-                              handleClickTarget(item.WAS, item, 'WAS')}"
+                            on:click="{() => {
+                              toggleSection(key, 'WAS');
+                              handleClickTarget(item.WAS, item, 'WAS');
+                            }}"
+                            class="{isSectionOpen[key]?.WAS ? 'active' : ''}"
                           >
                             WAS
                           </p>
-                          <ul>
+                          <ul
+                            class="sublist {isSectionOpen[key]?.WAS
+                              ? 'open'
+                              : ''}"
+                            style="max-height: {isSectionOpen[key]?.WAS
+                              ? '100%'
+                              : '0px'}"
+                          >
                             {#each item.WAS as subItem}
                               <li
                                 on:click="{() => {
                                   (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
-                                }}"
-                              >
-                                {subItem.ccc_item_group}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
-
-                        <!-- Render WEB section if it exists -->
-                        {#if item.WEB && item.WEB.length > 0}
-                          <p
-                            on:click="{() =>
-                              handleClickTarget(item.WEB, item, 'WEB')}"
-                          >
-                            WEB
-                          </p>
-                          <ul>
-                            {#each item.WEB as subItem}
-                              <li
-                                on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
-                                }}"
-                              >
-                                {subItem.ccc_item_group}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
-
-                        <!-- Render PC section if it exists -->
-                        {#if item.PC && item.PC.length > 0}
-                          <p
-                            on:click="{() =>
-                              handleClickTarget(item.PC, item, 'PC')}"
-                          >
-                            PC
-                          </p>
-                          <ul>
-                            {#each item.PC as subItem}
-                              <li
-                                on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
-                                }}"
-                              >
-                                {subItem.ccc_item_group}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
-
-                        <!-- Render CLOUD section if it exists -->
-                        {#if item.CLOUD && item.CLOUD.length > 0}
-                          <p
-                            on:click="{() =>
-                              handleClickTarget(item.CLOUD, item, 'CLOUD')}"
-                          >
-                            CLOUD
-                          </p>
-                          <ul>
-                            {#each item.CLOUD as subItem}
-                              <li
-                                on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
-                                }}"
-                              >
-                                {subItem.ccc_item_group}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
-
-                        <!-- Render SECURITY section if it exists -->
-                        {#if item.SECURITY && item.SECURITY.length > 0}
-                          <p
-                            on:click="{() =>
-                              handleClickTarget(
-                                item.SECURITY,
-                                item,
-                                'SECURITY'
-                              )}"
-                          >
-                            SECURITY
-                          </p>
-                          <ul>
-                            {#each item.SECURITY as subItem}
-                              <li
-                                on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
-                                    selectPage();
+                                    selectPage(subItem);
                                 }}"
                               >
                                 {subItem.ccc_item_group}
@@ -653,6 +557,13 @@
 {/if}
 
 <style>
+  .sublist {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  .sublist.open {
+    max-height: 100%;
+  }
   .pagination {
     display: flex;
     justify-content: center;
