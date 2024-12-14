@@ -194,10 +194,6 @@ let mainItems = [
 
 <style>
 
-  *{
-    font-size: 14px;
-  }
-
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;

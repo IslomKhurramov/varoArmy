@@ -3,6 +3,7 @@
     
     // Hardcoded data for logData
     let resultData = [];
+    let allSelected = false;
 
 for (let i = 0; i < 20; i++) {
   resultData.push({
@@ -14,7 +15,18 @@ for (let i = 0; i < 20; i++) {
     ccr_item_no__ccc_item_result: "조치승인",
   });
 }
+function selectAll(event) {
+    allSelected = event.target.checked;
+    selected = allSelected ? [...paginatedData] : [];
+  }
 
+    // Clear the checkboxes and reset selection states
+    function clearSelection() {
+    selected = [];
+    allSelected = false;
+    ccg_index_id = "";
+    ccc_index = [];
+  }
 
 </script>
 
@@ -22,8 +34,8 @@ for (let i = 0; i < 20; i++) {
     
     <div class="last_button">
         <select>
-          <option value="미등록" selected>미등록</option>
-          <option value="조치예정">조치예정</option>
+          <option value="미등록" selected>조치승인</option>
+          <option value="조치예정">조치반려</option>
         </select>
         <select>
           <option
@@ -66,6 +78,7 @@ for (let i = 0; i < 20; i++) {
           <tbody>
             {#each resultData as data, index}
               <tr>
+                <tr>
                 <td class="text-center">{resultData.length - index}</td>
 
                 <td class="text-center">
