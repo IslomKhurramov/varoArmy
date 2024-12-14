@@ -19,6 +19,7 @@ export const getAllPlanLists = async (page_cnt, list_cnt) => {
         `Error Code on getDetailInformationOfAsset: ${response.data}`
       );
     }
+
   } catch (error) {
     console.error("API Call Error:", error.message);
     throw new Error(`Failed to fetch asset detail: ${error.message}`);

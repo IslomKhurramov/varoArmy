@@ -24,51 +24,62 @@
   $: if (dialogSecond && showModalSecond) dialogSecond.showModal();
   $: if (dialogThird && showModalRegisteredAdmin) dialogThird.showModal();
 
-    // 전체일괄재실행 tugmasi bosilganda ishlaydigan funksiya
+  
     const handleExecuteAll = () => {
     console.log("전체일괄재실행 button clicked");
-    // Sizning logikangizni shu yerda qo'shing
+    // logikani shu yerga qo'sh
   };
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<dialog
-  style="width: {modalWidth}%; height: {modalHeight}px; overflow: hidden;"
-  bind:this={dialog}
-  on:close={() => (showModal = false)}
-  on:click|self={() => {
-    dialog.close();
-    modalData = [];
-  }}
->
-  <div class="btn_main" style="height: 100vh; overflow: auto;" on:click|stopPropagation>
-    <slot name="header" />
-    <slot />
-    <div>
-      <button
-      class="btn-box_12"
-        on:click={() => {
-          dialog.close();
-          modalData = [];
-        }}>닫기</button
-      >
-    </div>
+ <div class="modal_All_mani">
 
-    <div>
-        {#if showExecuteAllButton}
-        <button
-          class="btn-secondary"
-          on:click={handleExecuteAll}
-        >
-          전체일괄재실행
-        </button>
-        {/if}
-    </div>
+   <dialog
+     style="width: {modalWidth}%; height: {modalHeight}px; overflow: hidden;"
+     bind:this={dialog}
+     on:close={() => (showModal = false)}
+     on:click|self={() => {
+       dialog.close();
+       modalData = [];
+     }}
+   >
+     <div style="height: 100vh; overflow: auto;" on:click|stopPropagation>
+       <slot name="header" />
+       <slot />
+       <div>
+         <button
+         class="btn-box_12"
+           on:click={() => {
+             dialog.close();
+             modalData = [];
+           }}>닫기</button
+         >
+       </div>
+   
+       <div>
+           {#if showExecuteAllButton}
+           <button
+             class="btn-secondary"
+             on:click={handleExecuteAll}
+           >
+             전체일괄재실행
+           </button>
+           {/if}
+       </div>
+   
+     </div>
+     
+    </dialog>
 
-  </div>
-</dialog>
+ </div>
 
 <style>
+.modal_All_mani{
+  display: flex;
+  flex-direction: column;
+ justify-content: flex-end;
+}
+
   dialog {
     border-radius: 0.2em;
     border: none;
