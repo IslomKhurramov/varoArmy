@@ -413,7 +413,11 @@
   </section>
   <section class="section2">
     {#if currentPage}
-      <svelte:component this="{currentPage}" />
+      <svelte:component
+        this="{currentPage}"
+        bind:selectedTargetData
+        bind:selectedTarget
+      />
     {:else}
       <article class="contentArea">
         <div class="last_button2">

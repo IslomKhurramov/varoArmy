@@ -11,6 +11,8 @@
   let menuWrapper;
   let swiperInstance;
   let showModal = false;
+  export let selectedTargetData;
+  export let selectedTarget;
 
   onMount(() => {
     // Ensure swiperContainer is bound
@@ -65,9 +67,15 @@
   }
 
   let activeAsset = null;
+  // Update activeAsset reactively whenever swiperTargetData changes
+  $: if ($swiperTargetData) {
+    activeAsset = $swiperTargetData; // Keep the current selection
+  }
 
+  // Handle click on a swiper item
   function handleSlideclick(slide) {
-    activeAsset = slide; // Set the clicked slide as active
+    activeAsset = slide; // Update activeAsset
+    $swiperTargetData = slide;
     console.log("Selected Slide:", slide);
   }
 
@@ -95,6 +103,7 @@
     newGroupName = "";
     isAddingNewGroup = false;
   };
+  $: console.log("selectedTargetdataswiper", selectedTarget);
 </script>
 
 <div class="contentArea">
@@ -125,29 +134,20 @@
           style="background-color: white; z-index:99;"
           bind:this="{menuWrapper}"
         >
-          {#if $allCheckList && Object.keys($allCheckList).length > 0}
-            {#each Object.entries($allCheckList) as [key, item], index}
-              <!-- Render UNIX section if it exists -->
-              {#if item.UNIX && item.UNIX.length > 0}
-                {#each item.UNIX as subItem}
-                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                  <div
-                    value="{subItem.ccc_item_no}"
-                    name="{subItem}"
-                    class="menu-item {activeAsset &&
-                    activeAsset.ccc_item_no === subItem.ccc_item_no
-                      ? 'active'
-                      : ''}"
-                    on:click="{() => handleSlideclick(subItem)}"
-                  >
-                    {subItem.ccc_item_no}
-                  </div>
-                {/each}
-              {/if}
-            {/each}
-          {:else}
-            <div>데이터가 없습니다</div>
-          {/if}
+          {#each selectedTargetData as subItem}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div
+              value="{subItem.ccg_index_id}"
+              name="{subItem}"
+              class="menu-item {activeAsset &&
+              activeAsset.ccc_item_no === subItem.ccc_item_no
+                ? 'active'
+                : ''}"
+              on:click="{() => handleSlideclick(subItem)}"
+            >
+              {subItem.ccc_item_no}
+            </div>
+          {/each}
         </div>
       </div>
 
@@ -165,42 +165,63 @@
     <section class="rowSection">
       <div class="inputRow">
         <label>점검대상</label>
-        <input type="text" />
+        <span>UNIX</span>
       </div>
       <div class="inputRow">
         <label>점검번호</label>
-        <input type="text" />
+        <span>{$swiperTargetData.ccc_item_no}</span>
       </div>
     </section>
 
     <div class="inputRow">
       <label>취약점설명</label>
-      <input type="text" />
+      <span
+        >{@html $swiperTargetData.ccc_security_threat.replace(
+          /\n/g,
+          "<br/>"
+        )}</span
+      >
     </div>
 
     <div class="inputRow">
       <label>취약점 점검방법 </label>
-      <input type="text" />
+      <span
+        >{@html $swiperTargetData.ccc_item_criteria.replace(
+          /\n/g,
+          "<br/>"
+        )}</span
+      >
     </div>
-    <section class="rowSection">
-      <div class="inputRow">
-        <label>점검기준(Key) </label>
-        <input type="text" />
-      </div>
-
-      <div class="inputRow">
-        <label>점검기준(Value) </label>
-        <input type="text" />
-      </div>
-    </section>
 
     <div class="inputRow">
-      <label>점검기준</label>
-      <input type="text" />
+      <label>점검기준(Key) </label>
+      <span
+        >{@html $swiperTargetData.ccc_item_criteria.replace(
+          /\n/g,
+          "<br/>"
+        )}</span
+      >
     </div>
+
+    <div class="inputRow">
+      <label>점검기준(Value) </label>
+
+      <span style="max-height: 250px; overflow-y:auto; width:100%"
+        >{@html $swiperTargetData.ccc_mitigation_example.replace(
+          /\n/g,
+          "<br/>"
+        )}</span
+      >
+    </div>
+
     <div class="inputRow">
       <label>보호대책 </label>
-      <input type="text" />
+      <span
+        >{@html $swiperTargetData.ccc_mitigation_method.replace(
+          /\n/g,
+          "<br/>"
+        )}</span
+      >
     </div>
     <div class="lastButtons">
       <button>업데이트</button>
@@ -272,7 +293,7 @@
     row-gap: 20px;
     column-gap: 10px;
     width: 100%;
-    height: 60px;
+    /* height: 60px; */
   }
 
   .inputRow label {
@@ -282,10 +303,10 @@
     margin-left: 20px;
   }
 
-  .inputRow input {
+  .inputRow span {
     flex: 1;
     width: 100%;
-    height: 34px;
+    height: auto;
     padding: 17px;
     border: 1px solid #cccccc;
     border-radius: 5px;
