@@ -4,23 +4,32 @@
   import Swiper7 from "./Swiper7.svelte";
   import {
     getAllCheckList,
+    setDeleteChecklistGroup,
     setDeleteChecklistItem,
     setNewChecklistGroup,
   } from "../../services/callApi";
   import { allCheckList, swiperTargetData } from "../../services/store";
-  import { successAlert, warningAlert } from "../../shared/sweetAlert";
+  import {
+    confirmDelete,
+    successAlert,
+    warningAlert,
+  } from "../../shared/sweetAlert";
   import { writable } from "svelte/store";
   import Swiper from "../결과조회3/Swiper.svelte";
+  import { groupSort } from "d3";
   let resultData = [];
   let categoryToggles = {};
   let isOpen = Array(8).fill(false); // Initializing states for 8 accordion items
   let subIsOpen = {}; // For tracking open states of submenus (like UNIX)
 
   // Toggle top-level accordion
-  const toggleAccordion = (index) => {
+  let groupIndex = "";
+  const toggleAccordion = (index, item) => {
     isOpen[index] = !isOpen[index];
+    groupIndex = item.ccg_index;
+    console.log("gttgtg", groupIndex);
   };
-  let isSectionOpen = {}; // Tracks toggle state for each section in allCheckList
+  let isSectionOpen = {};
 
   // Function to toggle specific sections
   function toggleSection(itemKey, sectionKey) {
@@ -82,11 +91,9 @@
   let currentPagePagination = 1; // Current page number
   let itemsPerPage = 10; // Items per page
 
-  // Calculate the start and end index of items for the current page
   $: startIndex = (currentPagePagination - 1) * itemsPerPage;
   $: endIndex = startIndex + itemsPerPage;
 
-  // Slice the data for the current page
   $: paginatedData = selectedTargetData.slice(startIndex, endIndex);
 
   // Calculate total pages
@@ -196,6 +203,24 @@
       console.error(err);
     }
   }
+  /**********************************************/
+  async function deleteGroup() {
+    const isConfirmed = await confirmDelete();
+    if (!isConfirmed) return;
+    try {
+      const response = await setDeleteChecklistGroup(groupIndex);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+        await allCheckListGet(); // Fetch updated data after deletion
+        groupIndex = "";
+      } else {
+        console.log(response.CODE);
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
 </script>
 
 <main class="table-container">
@@ -213,7 +238,7 @@
               {#each Object.entries($allCheckList) as [key, item], index}
                 <div class="accordion-item">
                   <button
-                    on:click="{() => toggleAccordion(index)}"
+                    on:click="{() => toggleAccordion(index, item)}"
                     class="accordion-header {isOpen[index] ? 'active' : ''}"
                   >
                     {item.ccg_group}
@@ -405,7 +430,7 @@
         <!-- Buttons -->
         <div class="buttons">
           <button on:click="{() => (isAddingNewGroup = true)}">복사</button>
-          <button>삭제</button>
+          <button on:click="{deleteGroup}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>

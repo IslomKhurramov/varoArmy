@@ -166,3 +166,27 @@ export const setNewChecklistGroup = async (source_chk, destion_name) => {
     throw new Error(`Failed to fetch asset detail: ${error.message}`);
   }
 };
+
+export const setDeleteChecklistGroup = async (checklist_group_no) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/setDeleteChecklistGroup/`, // API endpoint
+      { checklist_group_no:checklist_group_no}, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on getDetailInformationOfAsset: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch asset detail: ${error.message}`);
+  }
+};

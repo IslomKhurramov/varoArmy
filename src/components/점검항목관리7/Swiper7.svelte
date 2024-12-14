@@ -42,6 +42,26 @@
       }
     };
   });
+  // Function to scroll the menu to the active slide automatically
+
+  $: {
+    if (activeAsset) {
+      scrollToActiveSlide(activeAsset); // Trigger scroll when activeAsset changes
+    }
+  }
+
+  function scrollToActiveSlide(activeSlide) {
+    const activeItem = document.querySelector(
+      `.menu-item[data-item-no="${activeSlide.ccc_item_no}"]`
+    );
+
+    if (activeItem) {
+      activeItem.scrollIntoView({
+        behavior: "smooth", // Smooth scrolling
+        block: "nearest", // Align to the nearest position
+      });
+    }
+  }
 
   const handleScroll = (direction) => {
     if (direction === "prev") {
@@ -67,7 +87,7 @@
   }
 
   let activeAsset = null;
-  // Update activeAsset reactively whenever swiperTargetData changes
+  // Reactively update activeAsset when swiperTargetData changes
   $: if ($swiperTargetData) {
     activeAsset = $swiperTargetData; // Keep the current selection
   }
@@ -107,15 +127,8 @@
 </script>
 
 <div class="contentArea">
-  <section
-    bind:this="{swiperContainer}"
-    style="position: sticky;  z-index:99; background-color:white;"
-    class="topCon swiper-container"
-  >
-    <div
-      class="menu-container"
-      style="position: sticky; z-index:99; background-color:white;"
-    >
+  <section bind:this="{swiperContainer}" class="topCon swiper-container">
+    <div class="menu-container">
       <button
         class="arrow-btn"
         id="prevBtn"
@@ -124,19 +137,11 @@
         ◀
       </button>
 
-      <div
-        class="menu-wrapper-container"
-        style="background-color: white; z-index:99;"
-      >
-        <div
-          class="menu-wrapper"
-          id="menuWrapper"
-          style="background-color: white; z-index:99;"
-          bind:this="{menuWrapper}"
-        >
+      <div class="menu-wrapper-container">
+        <div class="menu-wrapper" id="menuWrapper" bind:this="{menuWrapper}">
           {#each selectedTargetData as subItem}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
+              data-item-no="{subItem.ccc_item_no}"
               value="{subItem.ccg_index_id}"
               name="{subItem}"
               class="menu-item {activeAsset &&
@@ -160,7 +165,6 @@
       </button>
     </div>
   </section>
-
   <div class="formContainer">
     <section class="rowSection">
       <div class="inputRow">
@@ -249,6 +253,11 @@
 {/if}
 
 <style>
+  .menu-container,
+  .menu-wrapper-container {
+    overflow-x: hidden;
+  }
+
   .lastButtons {
     display: flex;
     flex-direction: row;
