@@ -7,6 +7,15 @@
   import ModalPopDetail from "./ModalPopDetail.svelte";
   import { successAlert } from "../../shared/sweetAlert";
   let resultData = [];
+  let isSectionOpen = {}; // To manage the open/close state of the sections
+
+  // Function to toggle the section (asset category, like UNIX or NETWORK)
+  function toggleSection(itemKey, sectionKey) {
+    if (!isSectionOpen[itemKey]) {
+      isSectionOpen[itemKey] = {}; // Ensure a nested object exists for each itemKey
+    }
+    isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey]; // Toggle the section
+  }
 
   for (let i = 0; i < 50; i++) {
     resultData.push({
@@ -20,73 +29,6 @@
   let mainTitle = "점검 계획 현황";
   let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
   export let activeMenu = "신규계획등록";
-
-  let mainItems = [
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-  ];
 
   const toggleAccordion = (index) => {
     isOpen[index] = !isOpen[index];
@@ -125,15 +67,23 @@
       throw err;
     }
   }
+  function resetSearch() {
+    planIndex = "";
+    target = "";
+    hostName = "";
+    checkList_item_no = "";
+    check_result = "";
+    show_option = "";
+  }
 
   /*********************************************/
   let result_index = null;
   let checklist_index = "";
-
+  let change_option = "ONE";
   function handleUpdateClick(data) {
     result_index = data.ccr_index;
   }
-
+  $: console.log("chaangeoption", change_option);
   async function resultUpdate() {
     try {
       const response = await setResultChanged(
@@ -141,7 +91,7 @@
         result_index,
         checklist_index,
         check_result,
-        show_option
+        change_option
       );
 
       if (response.RESULT === "OK") {
@@ -230,28 +180,70 @@
 
           <!-- Accordion -->
           <div class="accordion">
-            {#each mainItems as item, index}
+            {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
                   on:click="{() => toggleAccordion(index)}"
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
-                  {item.title}
+                  {item.ccp_title}
+                  <!-- ccp_title will be displayed here -->
                 </button>
+
                 <div
                   class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '150px' : '0px'}"
+                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
                 >
                   <ul>
-                    {#each item.subItems as subItem}
-                      <li
-                        on:click="{() => {
-                          (activeMenu = subItem.title), selectPage();
-                        }}"
-                      >
-                        {subItem.title}
-                      </li>
-                    {/each}
+                    <div
+                      class="accordion-content {isOpen[index] ? 'open' : ''}"
+                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                    >
+                      {#if item.asset && typeof item.asset === "object"}
+                        {#each Object.entries(item.asset) as [targetName, targetData]}
+                          <p
+                            on:click="{() => {
+                              toggleSection(index, targetName); // Toggle for each asset category
+                              handleClickTarget(targetData, item, targetName);
+                            }}"
+                            class="{isSectionOpen[index]?.[targetName]
+                              ? 'active'
+                              : ''}"
+                          >
+                            {targetName}
+                          </p>
+                          <!-- This will display UNIX, NETWORK, etc. -->
+
+                          {#if targetData && targetData.length > 0}
+                            <ul
+                              class="sublist {isSectionOpen[index]?.[targetName]
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[index]?.[
+                                targetName
+                              ]
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each targetData as subItem}
+                                <li
+                                  on:click="{() => {
+                                    activeMenu = subItem; // Set active menu to the clicked item
+                                    selectPage(); // Handle page selection
+                                  }}"
+                                >
+                                  <strong>{subItem.hostname}</strong>
+                                  <!-- Display the hostname -->
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
+                        {/each}
+                      {:else}
+                        <li>No assets available</li>
+                        <!-- In case there are no assets -->
+                      {/if}
+                    </div>
                   </ul>
                 </div>
               </div>
@@ -302,7 +294,17 @@
               on:change="{viewPlanResultFunction}"
             >
               <option value="" selected>호스트</option>
-              <option value="호스트">호스트</option>
+              {#each $allPlanList as item, index}
+                {#if item.asset && typeof item.asset === "object"}
+                  {#each Object.entries(item.asset) as [targetName, targetData]}
+                    {#each targetData as subItem}
+                      <option value="{subItem.hostname}"
+                        >{subItem.hostname}</option
+                      >
+                    {/each}
+                  {/each}
+                {/if}
+              {/each}
             </select>
             <select
               bind:value="{check_result}"
@@ -315,7 +317,10 @@
               <option value="인터뷰">수동점검</option>
             </select>
 
-            <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
+            <button
+              on:click="{resetSearch}"
+              class="btn btnSearch"
+              style="width: 98px; font-size: 14px;"
               ><img src="assets/images/reset.png" alt="search" />초기화</button
             >
           </div>
@@ -390,12 +395,19 @@
                           </option>
                         {/each}
                       </select>
-                      <input
-                        type="text"
-                        class="inputDefault"
-                        placeholder="사유"
-                      />
-
+                      <!-- Bind change_method directly to the data object for each row -->
+                      <select
+                        style="width: 100px;"
+                        class="xs"
+                        on:click|stopPropagation
+                        on:change="{(e) => {
+                          e.stopPropagation(); // Stop the event from bubbling up
+                          change_option = e.target.value; // Set the selected value to change_option
+                        }}"
+                      >
+                        <option value="ALL">천제</option>
+                        <option value="ONE">해당</option>
+                      </select>
                       <button
                         class="btnSave"
                         on:click|stopPropagation="{resultUpdate}">저장</button
@@ -480,6 +492,33 @@
 {/if}
 
 <style>
+  .sublist {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  .sublist.open {
+    max-height: 100%;
+  }
+  .accordion-content ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid black;
+  }
+  .accordion-content.open {
+    padding: 0px 10px 0px 10px;
+  }
+  .accordion-content p {
+    cursor: pointer;
+  }
+  .accordion-content p:hover {
+    background-color: #3d5878;
+    cursor: pointer;
+    border-radius: 5px;
+    /* padding: 15px; */
+
+    color: white;
+  }
   .pagination {
     display: flex;
     justify-content: center;
