@@ -45,6 +45,8 @@
   let repeatCycle = "";
   let inspectionInformation = "";
   let inputFile;
+  let fileName = "선택된 파일 없음";
+  let excelFiles = [];
 
   let assetGroup = [];
 
@@ -92,8 +94,6 @@
   let resultErrors = null;
   let showErrorModal = false;
 
-  let selectedFiles = {};
-  let fileNames = {};
   let planOptions = [];
   let planList = [];
 
@@ -174,23 +174,34 @@
     }
   });
 
-  function handleFileSelect(event, hostname) {
-    const file = event.target.files[0];
-    if (file) {
-      selectedFiles[hostname] = file;
-      fileNames[hostname] = file.name;
-    } else {
-      fileNames[hostname] = "선택된 파일 없음";
+  // function handleFileSelect(event, hostname) {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     selectedFiles[hostname] = file;
+  //     fileNames[hostname] = file.name;
+  //   } else {
+  //     fileNames[hostname] = "선택된 파일 없음";
+  //   }
+  // }
+
+  const handleFileUpload = (event, fileType) => {
+    const files = Array.from(event.target.files);
+    if (fileType === "excel") {
+      excelFiles = files;
+      fileName =
+        excelFiles.length > 0
+          ? excelFiles.map((file) => file.name).join(", ")
+          : "선택된 파일 없음";
     }
-  }
-
-  const handleFileUpload = (event) => {
-    formData.attachment = event.target.files[0];
   };
 
-  const handleSubmit = () => {
-    alert("Form submitted: " + JSON.stringify(formData, null, 2));
-  };
+  // const handleFileUpload = (event) => {
+  //   formData.attachment = event.target.files[0];
+  // };
+
+  // const handleSubmit = () => {
+  //   alert("Form submitted: " + JSON.stringify(formData, null, 2));
+  // };
   let currentPage = null;
 
   /*******LEFT SIDE */
@@ -224,46 +235,7 @@
         { title: "--'21 교육사 정기점검3차" },
       ],
     },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
+
   ];
 
   const toggleAccordion = (index) => {
@@ -532,8 +504,10 @@
             <input
               type="file"
               class="file-input"
-              on:change={(event) =>
-                handleFileSelect(event)}
+              id="file-upload"
+              accept=".xls,.xlsx"
+              bind:this={inputFile}
+              on:change={(event) => handleFileUpload(event, "excel")}
             />
           <img src="./assets/images/download.svg" class="excel-img" />
           <span>파일업로드</span>
@@ -541,7 +515,7 @@
             <input
               type="text"
               placeholder="선택된 파일 없음"
-              value={fileNames|| "선택된 파일 없음"}
+              value={fileName}
               readonly
               class="file-name-input"
             />
