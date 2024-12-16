@@ -3,6 +3,8 @@
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
   import { allCheckList, swiperTargetData } from "../../services/store";
+  import { setDeleteChecklistItem } from "../../services/callApi";
+  import { successAlert, warningAlert } from "../../shared/sweetAlert";
 
   let swiperContainer;
   let scrollAmount = 0;
@@ -13,6 +15,7 @@
   let showModal = false;
   export let selectedTargetData;
   export let selectedTarget;
+  export let allCheckListGet;
 
   onMount(() => {
     // Ensure swiperContainer is bound
@@ -124,6 +127,30 @@
     isAddingNewGroup = false;
   };
   $: console.log("selectedTargetdataswiper", selectedTarget);
+
+  async function deleteChecklist() {
+    try {
+      const response = await setDeleteChecklistItem(
+        selectedTarget.ccg_index,
+        selectedTargetData.ccc_index
+      );
+
+      if (response.RESULT === "OK") {
+        if (response.CODE === "기본 제공된 체크리스트는 삭제가 불가능합니다.") {
+          warningAlert("기본 제공된 체크리스트는 삭제가 불가능합니다");
+          selected = [];
+          allSelected = false;
+        } else {
+          successAlert(`${response.CODE}`);
+          await allCheckListGet(); // Fetch updated data after deletion
+        }
+      } else {
+        console.log(response.CODE);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 </script>
 
 <div class="contentArea">
@@ -197,26 +224,17 @@
       >
     </div>
 
-    <div class="inputRow">
-      <label>점검기준(Key) </label>
-      <span
-        >{@html $swiperTargetData.ccc_item_criteria.replace(
-          /\n/g,
-          "<br/>"
-        )}</span
-      >
-    </div>
+    <section class="rowSection">
+      <div class="inputRow">
+        <label>점검기준(Key) </label>
+        <input type="text" />
+      </div>
+      <div class="inputRow">
+        <label>점검기준(Value) </label>
 
-    <div class="inputRow">
-      <label>점검기준(Value) </label>
-
-      <span style="max-height: 250px; overflow-y:auto; width:100%"
-        >{@html $swiperTargetData.ccc_mitigation_example.replace(
-          /\n/g,
-          "<br/>"
-        )}</span
-      >
-    </div>
+        <input type="text" />
+      </div>
+    </section>
 
     <div class="inputRow">
       <label>보호대책 </label>
@@ -228,6 +246,7 @@
       >
     </div>
     <div class="lastButtons">
+      <button on:click="{deleteChecklist}">삭제하기</button>
       <button>업데이트</button>
     </div>
   </div>
@@ -310,6 +329,15 @@
     font-weight: 600;
     font-size: 14px;
     margin-left: 20px;
+  }
+  .inputRow input {
+    flex: 1;
+    width: 100%;
+    height: auto;
+    padding: 17px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 14px;
   }
 
   .inputRow span {
