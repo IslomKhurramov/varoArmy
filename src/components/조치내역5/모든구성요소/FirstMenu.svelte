@@ -94,6 +94,26 @@ let selectedTargetData = [];
         "
             >20줄
           </option>
+          <option
+          value="30줄
+      "
+          >30줄
+        </option>
+        <option
+        value="40줄
+    "
+        >40줄
+      </option>
+      <option
+      value="50줄
+  "
+      >50줄
+    </option>
+    <option
+    value="60줄
+"
+    >60줄
+  </option>
         </select>
     </div>
     
