@@ -10,12 +10,12 @@
   let menuWrapper;
   let swiperInstance;
   let showModal = false;
-  
+
   onMount(() => {
     if (swiperContainer) {
       swiperInstance = new Swiper(swiperContainer, {
         modules: [Navigation, Pagination],
-        loop: false, 
+        loop: false,
         slidesPerView: 4,
         spaceBetween: 10,
         pagination: {
@@ -28,7 +28,6 @@
         },
       });
     }
-
 
     menuWrapper = document.getElementById("menuWrapper");
 
@@ -67,7 +66,6 @@
   };
   let slides = [];
 
-  
   for (let i = 1; i <= 100; i++) {
     slides.push({
       ccc_item_no: `Item ${i}`,
@@ -122,7 +120,7 @@
 
   const handleSubmit = () => {
     alert("Form submitted: " + JSON.stringify(formData, null, 2));
-  }
+  };
 </script>
 
 <div class="contentArea">
@@ -185,11 +183,12 @@
   </section>
 
   <div class="formContainer">
-
     <div class="main_box_page5">
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">평가수행부대</span>
-        <div style="display: flex; flex-direction: column; row-gap: 10px">
+        <div
+          style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
+        >
           <div class="inputRow">
             <label>점검기간</label>
             <div class="riskLevels">
@@ -202,19 +201,19 @@
               </div>
             </div>
           </div>
-    
+
           <div class="inputRow">
             <label>소속기관</label>
             <input type="text" />
           </div>
         </div>
-  
       </div>
-  
+
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">취약점정보</span>
-        <div style="display: flex; flex-direction: column; row-gap: 10px">
-  
+        <div
+          style="display: flex; flex-direction: column; row-gap: 10px;border:1px solid #cccccc; padding:20px"
+        >
           <div class="inputRow">
             <label>취약점구분</label>
             <div class="riskLevels">
@@ -227,7 +226,7 @@
               </div>
             </div>
           </div>
-  
+
           <div class="inputRow">
             <label>점검결과</label>
             <div class="riskLevels">
@@ -240,12 +239,12 @@
               </div>
             </div>
           </div>
-    
+
           <div class="inputRow">
             <label>점검현황</label>
             <input type="text" />
           </div>
-  
+
           <div class="inputRow">
             <label>점검기준(Key)</label>
             <div class="riskLevels">
@@ -258,108 +257,102 @@
               </div>
             </div>
           </div>
-  
+
           <div class="inputRow">
             <label>조치방법</label>
             <input type="text" />
           </div>
-  
         </div>
-  
       </div>
-  
+
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">체계정보</span>
-        <div style="display: flex; flex-direction: column; row-gap: 10px">
-    
+        <div
+          style="display: flex; flex-direction: column; row-gap: 10px;border:1px solid #cccccc; padding:20px"
+        >
           <div class="inputRow">
             <label>조치이력</label>
             <input type="text" />
           </div>
-  
+
           <div class="inputRow">
             <label>조치계획</label>
             <input type="text" />
           </div>
-  
+
           <div class="inputRow">
             <label>조치결과</label>
             <input type="text" />
           </div>
-  
         </div>
-  
       </div>
-  
+
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">조치결과</span>
-        <div style="display: flex; flex-direction: column; row-gap: 10px">
-  
+        <div
+          style="display: flex; flex-direction: column; row-gap: 10px;border:1px solid #cccccc; padding:20px"
+        >
           <div class="inputRow">
             <label>최종조치완료처리자</label>
-  
-              <div class="riskLevels">
-                <div class="riskLevelItem">
-                  <input type="text" />
-                </div>
-                <div class="riskLevelItem">
-                  <span style="margin: 0 0 0 0;">최종조치완료일</span>
-                  <input type="datetime-local" style="margin-left: 5px;" bind:value="{formData.endDate}" />
-                </div>
+
+            <div class="riskLevels">
+              <div class="riskLevelItem">
+                <input type="text" />
               </div>
-  
+              <div class="riskLevelItem">
+                <span style="margin: 0 0 0 0;">최종조치완료일</span>
+                <input
+                  type="datetime-local"
+                  style="margin-left: 5px;"
+                  bind:value="{formData.endDate}"
+                />
+              </div>
+            </div>
           </div>
-  
+
           <div class="inputRow">
             <label>조치내역</label>
             <input type="text" />
           </div>
-  
+
           <div class="inputRow">
             <label>조치증적</label>
-            <div style="width: 100%; display:flex; gap:10px; justify-content:center">
-              <label class="btn btnPrimary"
-                    style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px">
+            <div
+              style="width: 100%; display:flex; gap:10px; justify-content:center"
+            >
+              <label
+                class="btn btnPrimary"
+                style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px"
+              >
                 <input
                   type="file"
                   class="file-input"
-                  on:change={(event) =>
-                    handleFileSelect(event)}
+                  on:change="{(event) => handleFileSelect(event)}"
                 />
-              <img src="./assets/images/download.svg" class="excel-img" />
-              <span>파일업로드</span>
+                <img src="./assets/images/download.svg" class="excel-img" />
+                <span>파일업로드</span>
               </label>
-                <input
-                  type="text"
-                  placeholder="선택된 파일 없음"
-                  value={fileNames|| "선택된 파일 없음"}
-                  readonly
-                  class="file-name-input"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="선택된 파일 없음"
+                value="{fileNames || '선택된 파일 없음'}"
+                readonly
+                class="file-name-input"
+              />
+            </div>
           </div>
-  
         </div>
-  
       </div>
-  
+
       <div style="display: flex; flex-direction: column;">
-  
         <div style="display: flex; flex-direction: column; row-gap: 10px">
-    
           <div class="inputRow">
-            <label></label>
             <button class="btn-primary">저장</button>
           </div>
-  
         </div>
-  
       </div>
     </div>
-
   </div>
-
-
 </div>
 
 <style>
@@ -371,7 +364,7 @@
     overflow-x: hidden;
   }
 
-  .main_box_page5{
+  .main_box_page5 {
     max-width: 90%;
     display: flex;
     flex-direction: column;
@@ -381,6 +374,7 @@
   .main_header {
     font-weight: 800;
     font-size: 16px;
+    margin-bottom: 5px;
   }
 
   .inputRow {
@@ -399,11 +393,11 @@
 
   .inputRow input {
     flex: 1;
-    width: 100%;
-    height: 34px;
-    padding: 17px;
+    min-width: 48px;
+    height: 28px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 14px;
   }
 
@@ -457,7 +451,7 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
     width: auto;
-    height: 34px;
+    height: 28px;
   }
 
   .btn-primary {
@@ -492,15 +486,15 @@
     height: 34px;
     font-size: 14px;
     border-radius: 4px;
-    color: #FFFFFF;
-    background-color: #117CE9;
+    color: #ffffff;
+    background-color: #117ce9;
     border: none;
     font-weight: bold;
   }
 
   .btn-primary:hover {
-    color: #FFFFFF;
-    background-color: #354D7D;
+    color: #ffffff;
+    background-color: #354d7d;
     border: none;
     font-weight: bold;
     font-size: 14px;
