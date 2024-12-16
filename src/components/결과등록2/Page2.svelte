@@ -304,12 +304,12 @@ onMount(async () => {
         <div class="inputRow box_1">
           <label>점검기간</label>
           <div class="dateWrap">
-            <div class="date">
-              <input type="date" class="datepicker" placeholder="시작일시" />
+            <div class="date_1">
+              <input type="date" class="" placeholder="시작일시" />
             </div>
             <img src="./assets/images/dash.svg" />
-            <div class="date">
-              <input type="date" class="datepicker" placeholder="종료일시" />
+            <div class="date_1">
+              <input type="date" class="" placeholder="종료일시" />
             </div>
           </div>
         </div>
@@ -561,6 +561,30 @@ onMount(async () => {
     flex-direction: column;
     border: 1px solid rgba(242, 242, 242, 1);
     background-color: #fff;
+  }
+
+  .formControl select {
+    min-width: 78px;
+    height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .formControl input {
+    min-width: 48px;
+    height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+   .date_1 input {
+    min-width: 78px;
+    height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+    border-radius: 4px;
   }
 
   .inspection-container {
