@@ -3,14 +3,49 @@
   import SwiperPage5 from "./SwiperPage5.svelte";
   import FirstMenu from "./모든구성요소/FirstMenu.svelte";
   import SeconMenu from "./모든구성요소/SeconMenu.svelte";
+  import {getVulnsOfAsset} from "../../services/vulns/vulnsService"
+  import { errorAlert } from "../../shared/sweetAlert";
 
   // Dinamik o'zgaruvchilar
   let resultData = [];
   let setView = "plan";
   let currentPage1 = FirstMenu; // Default sahifa
   let currentPage = null; // Hozirgi komponent
+  let tableData;
+  let totalRecords = 0;
 
+    // DATA
+  let plans = [];
+  let targetData = null;
+  let assets = [];
+  let search = {
+    plan_index: "19",
+    asset_target_uuid: "",
+    step_vuln: "1",
+    page_cnt: "1",
+    list_cnt: "15",
+    search_opt: "취약",
+  };
 
+  onMount(async () => {
+    try {
+
+      plans = await getVulnsOfAsset(search);
+      console.log('plans', plans);
+      
+
+      tableData = plans?.vulns;
+      totalRecords = plans?.total_rec_cnt;
+
+      assets = await getVulnsOfAsset(search);
+      tableData = assets?.vulns;
+      totalRecords = assets?.total_rec_cnt;
+    } catch (err) {
+      await errorAlert(err?.message);
+    }
+  });
+
+  // ///////////////////////////////////////////////////////////////////////
   let selectedTargetData = [];
   let selectedTarget = [];
   function handleClickTarget(targetData, item) {
@@ -68,9 +103,8 @@
     allSelected = event.target.checked;
     selected = allSelected ? [...paginatedData] : [];
   }
+// //////////////////////////////////////////////////////////////////////////////////////
 
-
-  // Funksiyalar orqali komponentlarni tanlash
   const selectPage1 = (page) => {
     currentPage1 = page;
   };
@@ -264,7 +298,7 @@ let mainItems = [
 
   .section2 {
     width: 85%;
-    height: 80vh;
+    height: 90vh;
     margin-top: 5px;
     display: flex;
     flex-direction: column;

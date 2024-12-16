@@ -79,21 +79,13 @@ function selectAll(event) {
   
   <div class="last_button">
       <select>
-        <option value="미등록" selected>조치승인</option>
-        <option value="조치예정">조치반려</option>
+        <option value="미등록" selected>조치완료</option>
+        <option value="조치예정">조치전</option>
       </select>
       <select>
-        <option
-          value="10줄
-      "
-          selected
-          >10줄
-        </option>
-        <option
-          value="20줄
-      "
-          >20줄
-        </option>
+        <option value="승인" selected>승인</option>
+        <option value="조치예정">반려</option>
+        <option value="조치예정">미결정</option>
       </select>
   </div>
   
@@ -108,6 +100,7 @@ function selectAll(event) {
           <col />
           <col />
           <col />
+          <col />
         </colgroup>
         <thead>
           <tr>
@@ -118,6 +111,7 @@ function selectAll(event) {
             <th class="text-center">점검명</th>
             <th class="text-center">점검결과 </th>
             <th class="text-center">처리유형 </th>
+            <th class="text-center">비고 </th>
           </tr>
         </thead>
         <tbody>
@@ -144,6 +138,11 @@ function selectAll(event) {
               <td class="text-center"
                 >{data.ccr_item_no__ccc_item_result}
               </td>
+              <td class="text-center"
+              >     
+              <button class="btnSave">승인</button>
+              <button class="btnSave">반려</button>
+            </td>
             </tr>
           {/each}
         </tbody>
