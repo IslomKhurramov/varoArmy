@@ -247,41 +247,6 @@ let mainItems = [
         {#if currentPage1}
           <svelte:component this={currentPage1} />
         {/if}
-        <!-- Pagination -->
-        <div class="pagination">
-          <button
-            on:click="{() => goToPage(1)}"
-            disabled="{currentPagePagination === 1}"
-          >
-            {"<<"}
-          </button>
-          <button
-            on:click="{() => goToPage(currentPagePagination - 1)}"
-            disabled="{currentPagePagination === 1}"
-          >
-            {"<"}
-          </button>
-          {#each Array(totalPages).fill(0) as _, pageIndex}
-            <button
-              class:selected="{currentPagePagination === pageIndex + 1}"
-              on:click="{() => goToPage(pageIndex + 1)}"
-            >
-              {pageIndex + 1}
-            </button>
-          {/each}
-          <button
-            on:click="{() => goToPage(currentPagePagination + 1)}"
-            disabled="{currentPagePagination === totalPages}"
-          >
-            {">"}
-          </button>
-          <button
-            on:click="{() => goToPage(totalPages)}"
-            disabled="{currentPagePagination === totalPages}"
-          >
-            {">>"}
-          </button>
-        </div>
     </article>
     {/if}
   </section>
