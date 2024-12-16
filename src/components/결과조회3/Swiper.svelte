@@ -22,6 +22,10 @@
       selectedData = { ...selectedHostnameData }; // Shallow copy to trigger reactivity
     }
   }
+  let insertData = {};
+  if (selectedData) {
+    insertData.change_status_text = selectedData.ccr_item_status || "";
+  }
 
   onMount(() => {
     // Ensure swiperContainer is bound
@@ -209,12 +213,14 @@
   <div class="formContainer">
     <section class="rowSection">
       <div class="inputRow">
-        <label>점검대상체계</label>
-        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
+        <label>점검항목</label>
+        <span
+          >[{selectedData?.ccr_item_no__ccc_item_no}] {selectedData?.ccr_item_no__ccc_item_title}</span
+        >
       </div>
       <div class="inputRow">
-        <label>점검관</label>
-        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
+        <label>항목그룹</label>
+        <span>{selectedData?.ccr_item_no__ccc_item_group}</span>
       </div>
     </section>
 
@@ -225,11 +231,11 @@
           <span>{selectedData.ccr_item_no__ccc_target_system}</span>
         </div>
         <div class="inputRow">
-          <label>부대</label>
-          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
+          <label>위험도</label>
+          <span>{selectedData?.ccr_item_no__ccc_item_level}</span>
         </div>
       </section>
-      <section class="rowSection">
+      <!-- <section class="rowSection">
         <div class="inputRow">
           <label>아이디</label>
           <span>{selectedData.ccr_item_no__ccc_target_system}</span>
@@ -238,9 +244,9 @@
           <label>연락처</label>
           <span>{selectedData.ccr_item_no__ccc_target_system}</span>
         </div>
-      </section>
+      </section> -->
     </section>
-
+    <!-- 
     <section class="rowSection">
       <div class="inputRow">
         <label>점검일시</label>
@@ -250,22 +256,21 @@
         <label>점검구분</label>
         <span>{selectedData.ccr_item_no__ccc_target_system}</span>
       </div>
-    </section>
+    </section> -->
     <div class="inputRow">
-      <label>점검대상</label>
-      <span>{selectedData.ccr_item_no__ccc_target_system}</span>
-    </div>
-
-    <div class="inputRow">
-      <label>점검항목</label>
-      <span>{selectedData.ccr_item_no__ccc_item_title}</span>
-    </div>
-
-    <div class="inputRow" style="height: 120px;">
       <label>점검기준</label>
-      <div style="display: flex; flex-direction:column; width:91%">
-        <span>{selectedData.ccr_item_no__ccc_item_criteria}</span>
-      </div>
+      <span> {@html selectedData?.ccr_item_no__ccc_item_criteria}</span>
+    </div>
+
+    <div class="inputRow">
+      <label>점검내용</label>
+      <span> {selectedData?.ccr_item_no__ccc_check_content}</span>
+    </div>
+
+    <div class="inputRow">
+      <label>점검목적</label>
+
+      <span> {selectedData?.ccr_item_no__ccc_check_purpose}</span>
     </div>
 
     <div class="inputRow">
@@ -285,18 +290,44 @@
     </div>
 
     <div class="inputRow">
-      <label>점검현황</label>
-      <span>{selectedData.ccr_item_status}</span>
+      <label>보안위협</label>
+      <span> {selectedData?.ccr_item_no__ccc_security_threat}</span>
     </div>
 
-    <div class="inputRo">
-      <label>증적파일 첨부 </label>
-      <input class="fileupload" type="file" />
-    </div>
     <div class="inputRow">
-      <label>조치방법</label>
+      <label>영향도</label>
+      <span> {selectedData?.ccr_item_no__ccc_impact}</span>
+    </div>
+
+    <div class="inputRow" style="height: 170px;">
+      <label>점검현황</label>
+
+      <textarea
+        class="line-height"
+        name=""
+        id=""
+        rows="5"
+        cols="50"
+        style="width: 100%;"
+        bind:value="{insertData["change_status_text"]}"
+      ></textarea>
+    </div>
+
+    <div class="inputRow">
+      <label>개선방법</label>
       <span>{selectedData.ccr_item_no__ccc_mitigation_method}</span>
     </div>
+
+    <div class="inputRow">
+      <label>개선예시</label>
+      <span style="overflow-y: auto;"
+        >{@html selectedData?.ccr_item_no__ccc_mitigation_example.replace(
+          /\n/g,
+          "<br/>"
+        )}</span
+      >
+    </div>
+
     <div class="lastButtons">
       <button class="btnSave">저장</button>
       <button class="btnUpload">취약점이력추적</button>
