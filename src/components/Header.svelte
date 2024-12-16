@@ -11,7 +11,7 @@
   } from "@fortawesome/free-solid-svg-icons";
   import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
 
-  export let activeMenu = "신규계획등록";
+  export let activeMenu = "/";
   const menuItems = [
     { label: "신규계획등록", icon: faCalendarAlt, link: "/page1" },
     { label: "결과등록", icon: faClipboardList, link: "/page2" },
@@ -26,7 +26,7 @@
   onMount(() => {
     const currentPath = window.location.pathname;
     const currentItem = menuItems.find((item) => item.link === currentPath);
-    activeMenu = currentItem ? currentItem.label : "신규계획등록";
+    activeMenu = currentItem ? currentItem.label : "/";
   });
 </script>
 

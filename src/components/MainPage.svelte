@@ -11,14 +11,17 @@
   import Page8 from "./점검준비8/Page8.svelte";
   import Page9 from "./취약점현황9/Page9.svelte";
   import { Route } from "svelte-routing";
-  import LeftContainer from "./LeftContainer.svelte";
-  import { comment, current_component } from "svelte/internal";
+  import { getAllPlanLists } from "../services/callApi";
+  import { allPlanList } from "../services/store";
   import LeftMenu from "./LeftMenu.svelte";
 
-  export let activeMenu = "신규계획등록";
+  export let activeMenu = "/";
   let currentPage = null;
   onMount(() => {
     switch (window.location.pathname) {
+      case "/leftMenu":
+        activeMenu = "";
+        break;
       case "/page1":
         activeMenu = "신규계획등록";
         break;
@@ -47,9 +50,29 @@
         activeMenu = "취약점현황";
         break;
       default:
-        activeMenu = "신규계획등록";
+        activeMenu = "";
     }
   });
+  /**********GETALLPLANLIST******************/
+  let page_cnt = "1";
+  let list_cnt = "100";
+  async function getPlanList() {
+    try {
+      const response = await getAllPlanLists(page_cnt, list_cnt);
+
+      if (response) {
+        allPlanList.set(response.data);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+  onMount(() => {
+    getPlanList();
+  });
+  // $: console.log("allPlanList", $allPlanList);
 </script>
 
 <section class="search_box">
@@ -506,7 +529,7 @@
       <Route path="/page7" component="{Page7}" />
       <Route path="/page8" component="{Page8}" />
       <Route path="/page9" component="{Page9}" />
-      <!-- <Route path="/leftMenu" component="{LeftMenu}" /> -->
+      <Route path="/" component="{LeftMenu}" />
     </div>
   </section>
 </main>

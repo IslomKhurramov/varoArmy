@@ -22,11 +22,25 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.1",
     "@fortawesome/svelte-fontawesome": "^0.2.3",
     "bootstrap": "^5.3.3",
-    "sirv-cli": "^2.0.0",
     "svelte-routing": "^2.13.0",
+    "@smui/tooltip": "^7.0.0",
+    "animejs": "^3.2.2",
+    "axios": "^1.7.7",
+    "chart.js": "^3.5.0",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0",
+    "d3": "^7.9.0",
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.2",
+    "js-cookie": "^3.0.5",
+    "local-cors-proxy": "^1.1.0",
+    "moment": "^2.30.1",
+    "sirv-cli": "^2.0.0",
+    "svelte-chartjs": "^2.1.1",
+    "svelte-i18n": "^4.0.0",
+    "svelte-material-ui": "^7.0.0",
     "sweetalert": "^2.1.2",
     "swiper": "^6.8.4",
-    "d3": "^7.9.0",
-    "axios": "^1.7.7"
+    "xlsx": "^0.18.5"
   }
 }

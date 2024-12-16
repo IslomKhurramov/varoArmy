@@ -1,6 +1,5 @@
 import { navigate } from "svelte-routing";
 import swal from "sweetalert";
-import { userData } from "../stores/user.store";
 
 export function confirmDelete2(dataName) {
   return swal({
