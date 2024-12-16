@@ -193,9 +193,9 @@ let selectedTargetData = [];
 <style>
     .first_nenu{
       margin-top: 10px;
-      display: flex;
+      /* display: flex;
       flex-direction: column;
-      height: 70vh;
+      height: 70vh; */
     }
 
     thead {

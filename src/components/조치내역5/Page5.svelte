@@ -264,7 +264,7 @@ let mainItems = [
 
   .section2 {
     width: 85%;
-    height: 80vh;
+    height: 90vh;
     margin-top: 5px;
     display: flex;
     flex-direction: column;
