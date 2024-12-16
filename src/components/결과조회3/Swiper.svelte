@@ -3,6 +3,8 @@
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
   import ModalPopEdit from "./ModalPopEdit.svelte";
+  import { viewPlanResult } from "../../services/store";
+  import { active } from "d3";
 
   let swiperContainer;
   let scrollAmount = 0;
@@ -11,6 +13,16 @@
   let menuWrapper;
   let swiperInstance;
   let showModal = false;
+  export let selectedData;
+  export let selectedHostnameData;
+  $: console.log("swiper selected data", selectedHostnameData);
+
+  $: {
+    if (selectedHostnameData) {
+      selectedData = { ...selectedHostnameData }; // Shallow copy to trigger reactivity
+    }
+  }
+
   onMount(() => {
     // Ensure swiperContainer is bound
     if (swiperContainer) {
@@ -67,7 +79,29 @@
 
   function handleSlideclick(slide) {
     activeAsset = slide; // Set the clicked slide as active
+    selectedData = slide;
     console.log("Selected Slide:", slide);
+  }
+  $: if (selectedData) {
+    activeAsset = selectedData;
+  }
+
+  $: {
+    if (activeAsset) {
+      scrollToActiveSlide(activeAsset); // Trigger scroll when activeAsset changes
+    }
+  }
+  function scrollToActiveSlide(activeSlide) {
+    const activeItem = document.querySelector(
+      `.menu-item[data-item-no="${activeSlide.ccr_item_no__ccc_item_no}"]`
+    );
+
+    if (activeItem) {
+      activeItem.scrollIntoView({
+        behavior: "smooth", // Smooth scrolling
+        block: "nearest", // Align to the nearest position
+      });
+    }
   }
 
   let formData = {
@@ -105,6 +139,11 @@
       window.removeEventListener("keydown", handleKeyDown);
     };
   });
+
+  // Function to handle selection from filtered data
+  function selectData(item) {
+    selectedData = item;
+  }
 </script>
 
 <div class="contentArea">
@@ -135,19 +174,20 @@
           style="background-color: white; z-index:99;"
           bind:this="{menuWrapper}"
         >
-          {#if slides.length > 0}
-            {#each slides as slide}
+          {#if $viewPlanResult.length > 0}
+            {#each $viewPlanResult as slide}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div
-                value="{slide.ccc_item_no}"
+                value="{slide.ccr_index}"
                 name="{slide}"
                 class="menu-item {activeAsset &&
-                activeAsset.ccc_item_no === slide.ccc_item_no
+                activeAsset.ccr_item_no__ccc_item_no ===
+                  slide.ccr_item_no__ccc_item_no
                   ? 'active'
                   : ''}"
                 on:click="{() => handleSlideclick(slide)}"
               >
-                {slide.ccc_item_no}
+                {slide.ccr_item_no__ccc_item_no}
               </div>
             {/each}
           {:else}
@@ -170,11 +210,11 @@
     <section class="rowSection">
       <div class="inputRow">
         <label>점검대상체계</label>
-        <input type="text" />
+        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
       </div>
       <div class="inputRow">
         <label>점검관</label>
-        <input type="text" />
+        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
       </div>
     </section>
 
@@ -182,21 +222,21 @@
       <section class="rowSection">
         <div class="inputRow">
           <label>체계담당자명</label>
-          <input type="text" />
+          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
         </div>
         <div class="inputRow">
           <label>부대</label>
-          <input type="text" />
+          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
         </div>
       </section>
       <section class="rowSection">
         <div class="inputRow">
           <label>아이디</label>
-          <input type="text" />
+          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
         </div>
         <div class="inputRow">
           <label>연락처</label>
-          <input type="text" />
+          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
         </div>
       </section>
     </section>
@@ -204,28 +244,27 @@
     <section class="rowSection">
       <div class="inputRow">
         <label>점검일시</label>
-        <input type="date" />
+        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
       </div>
       <div class="inputRow">
         <label>점검구분</label>
-        <input type="text" />
+        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
       </div>
     </section>
     <div class="inputRow">
       <label>점검대상</label>
-      <input type="text" />
+      <span>{selectedData.ccr_item_no__ccc_target_system}</span>
     </div>
 
     <div class="inputRow">
       <label>점검항목</label>
-      <input type="text" />
+      <span>{selectedData.ccr_item_no__ccc_item_title}</span>
     </div>
 
     <div class="inputRow" style="height: 120px;">
       <label>점검기준</label>
       <div style="display: flex; flex-direction:column; width:91%">
-        <input type="text" />
-        <input type="text" />
+        <span>{selectedData.ccr_item_no__ccc_item_criteria}</span>
       </div>
     </div>
 
@@ -247,7 +286,7 @@
 
     <div class="inputRow">
       <label>점검현황</label>
-      <input type="text" />
+      <span>{selectedData.ccr_item_status}</span>
     </div>
 
     <div class="inputRo">
@@ -256,7 +295,7 @@
     </div>
     <div class="inputRow">
       <label>조치방법</label>
-      <input type="text" />
+      <span>{selectedData.ccr_item_no__ccc_mitigation_method}</span>
     </div>
     <div class="lastButtons">
       <button class="btnSave">저장</button>
@@ -339,14 +378,17 @@
     margin-left: 20px;
   }
 
-  .inputRow input {
+  .inputRow span {
     flex: 1;
     width: 100%;
     height: 34px;
-    padding: 17px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;
+    padding: 10px;
+    /* text-align: right; */
+    align-items: center;
+    display: flex;
   }
 
   .inputRow select {

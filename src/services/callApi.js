@@ -190,3 +190,52 @@ export const setDeleteChecklistGroup = async (checklist_group_no) => {
     throw new Error(`Failed to fetch asset detail: ${error.message}`);
   }
 };
+/*************************************************************************** */
+
+export const setDeletePlan = async (plan_index) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/setDeletePlan/`, // API endpoint
+      { plan_index:plan_index}, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on setDeletePlan: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch setDeletePlan detail: ${error.message}`);
+  }
+};
+
+export const getPlanDetailInformation = async (plan_index) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/getPlanDetailInformation/`, // API endpoint
+      { plan_index:plan_index}, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on getPlanDetailInformation: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch getPlanDetailInformation detail: ${error.message}`);
+  }
+};

@@ -2,12 +2,23 @@
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
   import Swiper from "./Swiper.svelte";
-  import { allPlanList, viewPlanResult } from "../../services/store";
-  import { getViewPlanResults, setResultChanged } from "../../services/callApi";
+  import {
+    allPlanList,
+    detailInfoPlan,
+    viewPlanResult,
+  } from "../../services/store";
+  import {
+    getPlanDetailInformation,
+    getViewPlanResults,
+    setDeletePlan,
+    setResultChanged,
+  } from "../../services/callApi";
   import ModalPopDetail from "./ModalPopDetail.svelte";
-  import { successAlert } from "../../shared/sweetAlert";
+  import { confirmDelete, successAlert } from "../../shared/sweetAlert";
+  import Swiper7 from "../점검항목관리7/Swiper7.svelte";
   let resultData = [];
   let isSectionOpen = {}; // To manage the open/close state of the sections
+  export let getPlanList;
 
   // Function to toggle the section (asset category, like UNIX or NETWORK)
   function toggleSection(itemKey, sectionKey) {
@@ -29,13 +40,18 @@
   let mainTitle = "점검 계획 현황";
   let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
   export let activeMenu = "신규계획등록";
-
-  const toggleAccordion = (index) => {
+  let plan_index = "";
+  const toggleAccordion = (index, item) => {
     isOpen[index] = !isOpen[index];
+    plan_index = item.ccp_index;
   };
+
+  let selectedData = null;
+
   let currentPage = null;
-  function selectPage() {
+  function selectPage(data) {
     currentPage = Swiper;
+    selectedData = data;
   }
   /***********************************/
   let closeShowModalDetail = false;
@@ -125,11 +141,7 @@
       window.removeEventListener("keydown", handleKeyDown);
     };
   });
-  let selectedData = null;
-  function handleRowClick(data) {
-    selectedData = data;
-    closeShowModalDetail = true; // Open the modal
-  }
+
   $: console.log("selectedData", selectedData);
   /**************PAGINATION*/
   let currentPagePagination = 1; // Current page number
@@ -167,6 +179,49 @@
       currentPagePagination = pageNumber;
     }
   }
+  async function deletePlan() {
+    const isConfirmed = await confirmDelete();
+    if (!isConfirmed) return;
+    try {
+      const response = await setDeletePlan(plan_index);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+        await getPlanList(); // Fetch updated data after deletion
+        plan_index = "";
+      } else {
+        console.log(response.CODE);
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+  async function getPlanDetail(item) {
+    try {
+      const response = await getPlanDetailInformation(item.ccp_index);
+
+      if (response) {
+        console.log("response from funct", response);
+        detailInfoPlan.set(response);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  let selectedHostnameData = null;
+  function handleClickHostname(data) {
+    console.log("handle data", data);
+    currentPage = Swiper;
+    selectedHostname = data.hostname;
+    selectedHostnameData = data;
+  }
+  $: console.log("detailPlan", $detailInfoPlan);
+  // Function to filter data based on selected target and hostname
+  let selectedTarget = "";
+  let selectedHostname = "";
 </script>
 
 <main class="table-container">
@@ -183,7 +238,10 @@
             {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
-                  on:click="{() => toggleAccordion(index)}"
+                  on:click="{() => {
+                    toggleAccordion(index, item);
+                    getPlanDetail(item); // Direct function call in Svelte
+                  }}"
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
                   {item.ccp_title}
@@ -203,8 +261,7 @@
                         {#each Object.entries(item.asset) as [targetName, targetData]}
                           <p
                             on:click="{() => {
-                              toggleSection(index, targetName); // Toggle for each asset category
-                              handleClickTarget(targetData, item, targetName);
+                              toggleSection(index, targetName);
                             }}"
                             class="{isSectionOpen[index]?.[targetName]
                               ? 'active'
@@ -228,8 +285,8 @@
                               {#each targetData as subItem}
                                 <li
                                   on:click="{() => {
-                                    activeMenu = subItem; // Set active menu to the clicked item
-                                    selectPage(); // Handle page selection
+                                    activeMenu = subItem;
+                                    handleClickHostname(subItem); // Set selected hostname
                                   }}"
                                 >
                                   <strong>{subItem.hostname}</strong>
@@ -254,7 +311,7 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button>삭제</button>
+          <button on:click="{deletePlan}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -262,7 +319,11 @@
   </section>
   <section class="section2">
     {#if currentPage}
-      <svelte:component this="{currentPage}" />
+      <svelte:component
+        this="{currentPage}"
+        {selectedData}
+        {selectedHostnameData}
+      />
     {:else}
       <article class="contentArea">
         <section class="filterWrap">
@@ -347,7 +408,7 @@
             </thead>
             <tbody>
               {#each paginatedData as data, index}
-                <tr on:click="{() => handleRowClick(data)}">
+                <tr on:click="{() => selectPage(data)}">
                   <!-- 번호: Reverse index to display latest first -->
                   <td class="text-center"
                     >{$viewPlanResult.length - (startIndex + index)}</td
