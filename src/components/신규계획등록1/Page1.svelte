@@ -666,8 +666,8 @@
   .inputRow input {
     flex: 1;
     width: 100%;
-    height: 34px;
-    padding: 17px;
+    height: 28px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;
@@ -677,7 +677,7 @@
     flex: 1;
     width: 100%;
     height: 60px;
-    padding: 17px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;
@@ -690,10 +690,11 @@
   .inputRow select {
     flex: 1;
     width: 100%;
-    height: 34px;
+    min-width: 72px;
+    height: 28px;
     border: 1px solid #cccccc;
-    border-radius: 5px;
-    font-size: 12px;
+    border-radius: 4px;
+    font-size: 14px;
   }
 
   .inputRow .page1_slect3 select {
@@ -716,9 +717,11 @@
 
   .riskLevelItem input {
     flex: 1;
-    padding: 10px;
+    min-width: 48px;
+    height: 28px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 12px;
     box-sizing: border-box;
   }
@@ -752,7 +755,7 @@
 
   .inputRow .buttons1 {
     width: 72px;
-    height: 34px;
+    height: 28px;
     font-family: "Franklin Gothic Medium";
     color: #ffffff;
     background-color: #117ce9;
@@ -787,14 +790,14 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
     width: auto;
-    height: 34px;
+    height: 28px;
   }
 
   .inputRow .btnDownlod {
     background-color: #ffffff;
     color: #555555;
     border: 1px solid #999999;
-    height: 34px;
+    height: 28px;
     width: 72px;
     font-family: "Malgun Gothic", sans-serif;
     border-radius: 4px;
@@ -804,7 +807,7 @@
     background-color: #39825A;
     color: #ffffff;
     border: none;
-    height: 34px;
+    height: 28px;
     width: 72px;
     font-family: "Malgun Gothic", sans-serif;
     border-radius: 4px;

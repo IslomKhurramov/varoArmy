@@ -276,11 +276,11 @@
                             {#each item.UNIX as subItem}
                               <li
                                 on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
+                                  (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
                                 }}"
                               >
-                                {subItem.ccc_item_group}
+                                {subItem.ccc_item_no}
                               </li>
                             {/each}
                           </ul>
@@ -310,11 +310,11 @@
                             {#each item.WINDOWS as subItem}
                               <li
                                 on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
+                                  (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
                                 }}"
                               >
-                                {subItem.ccc_item_group}
+                                {subItem.ccc_item_no}
                               </li>
                             {/each}
                           </ul>
@@ -344,11 +344,11 @@
                             {#each item.NETWORK as subItem}
                               <li
                                 on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
+                                  (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
                                 }}"
                               >
-                                {subItem.ccc_item_group}
+                                {subItem.ccc_item_no}
                               </li>
                             {/each}
                           </ul>
@@ -376,11 +376,11 @@
                             {#each item.DBMS as subItem}
                               <li
                                 on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
+                                  (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
                                 }}"
                               >
-                                {subItem.ccc_item_group}
+                                {subItem.ccc_item_no}
                               </li>
                             {/each}
                           </ul>
@@ -409,11 +409,11 @@
                             {#each item.WAS as subItem}
                               <li
                                 on:click="{() => {
-                                  (activeMenu = subItem.ccc_item_group),
+                                  (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
                                 }}"
                               >
-                                {subItem.ccc_item_group}
+                                {subItem.ccc_item_no}
                               </li>
                             {/each}
                           </ul>
@@ -442,6 +442,7 @@
         this="{currentPage}"
         bind:selectedTargetData
         bind:selectedTarget
+        {allCheckListGet}
       />
     {:else}
       <article class="contentArea">
