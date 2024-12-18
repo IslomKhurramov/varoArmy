@@ -164,117 +164,118 @@
             
 
         </table>
-
-                <!-- Pagination -->
-                <div class="pagination">
-                    <button
-                      on:click="{() => goToPage(1)}"
-                      disabled="{currentPagePagination === 1}"
-                    >
-                      {"<<"}
-                    </button>
-                    <button
-                      on:click="{() => goToPage(currentPagePagination - 1)}"
-                      disabled="{currentPagePagination === 1}"
-                    >
-                      {"<"}
-                    </button>
-                    {#each Array(totalPages).fill(0) as _, pageIndex}
-                      <button
-                        class:selected="{currentPagePagination === pageIndex + 1}"
-                        on:click="{() => goToPage(pageIndex + 1)}"
-                      >
-                        {pageIndex + 1}
-                      </button>
-                    {/each}
-                    <button
-                      on:click="{() => goToPage(currentPagePagination + 1)}"
-                      disabled="{currentPagePagination === totalPages}"
-                    >
-                      {">"}
-                    </button>
-                    <button
-                      on:click="{() => goToPage(totalPages)}"
-                      disabled="{currentPagePagination === totalPages}"
-                    >
-                      {">>"}
-                    </button>
-                </div>
     </div>
+
+    <div class="pagination-wrapper">
+      <!-- Paginatsiya -->
+      <div class="pagination">
+        <button
+          on:click="{() => goToPage(1)}"
+          disabled="{currentPagePagination === 1}"
+        >
+          {"<<"}
+        </button>
+        <button
+          on:click="{() => goToPage(currentPagePagination - 1)}"
+          disabled="{currentPagePagination === 1}"
+        >
+          {"<"}
+        </button>
+        {#each Array(totalPages).fill(0) as _, pageIndex}
+          <button
+            class:selected="{currentPagePagination === pageIndex + 1}"
+            on:click="{() => goToPage(pageIndex + 1)}"
+          >
+            {pageIndex + 1}
+          </button>
+        {/each}
+        <button
+          on:click="{() => goToPage(currentPagePagination + 1)}"
+          disabled="{currentPagePagination === totalPages}"
+        >
+          {">"}
+        </button>
+        <button
+          on:click="{() => goToPage(totalPages)}"
+          disabled="{currentPagePagination === totalPages}"
+        >
+          {">>"}
+        </button>
+      </div>
+    </div>
+
 </main>
 
   
-  <style>
-    * {
-      font-size: 14px;
-    }
-  
-    .tableListWrap {
-      overflow-y: auto;
-      max-height: 65vh;
-      padding: 0 20px 20px 20px;
-    }
-  
-    thead {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
-    }
+<style>
+  * {
+    font-size: 14px;
+  }
 
-    table {
+  .table-container {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+  }
+
+  .tableListWrap {
+    overflow-y: auto;
+    max-height: 70vh;
+    padding: 0 20px 20px 20px;
+  }
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+  }
+
+  table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 10px;
   }
 
-  .tableListWrap .hdBorder th:not(:last-child)::after {
-  content: "";
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 15px;
-  width: 1px;
-  height: 17px;
-  background-color: #e4e4e4;
-}
-
   table th {
     font-weight: bold;
   }
+
   table th,
   table td {
     padding: 10px;
     font-size: 12px;
   }
-  table td {
-    font-weight: normal;
-    height: 40px;
-  }
-  
+
   table tbody tr:hover td {
-        background-color: #f5f5f5;
-        cursor: pointer;
-    }
-  
-    .pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-    gap: 5px;
-  }
-  .pagination button {
-    border: none !important;
-    padding: 8px 12px;
-    margin: 0 4px;
+    background-color: #f5f5f5;
     cursor: pointer;
-    border-radius: 5px;
   }
 
-  .pagination button.selected {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
+  .pagination-wrapper {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
   }
-  </style>
+
+  .pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+.pagination button {
+  border: none !important;
+  padding: 8px 12px;
+  margin: 0 4px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.pagination button.selected {
+  background-color: #007bff; /* Change to your desired color */
+  color: white;
+  font-weight: bold;
+}
+</style>
   
