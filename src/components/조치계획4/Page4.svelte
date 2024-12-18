@@ -222,6 +222,7 @@
 
         <section class="subTabWrap">
           <a
+            style="font-size: 14px;"
             class="{setView == 'plan' ? 'active' : ''}"
             on:click="{() => {
               setView = 'plan';
@@ -231,6 +232,7 @@
             조치계획등록
           </a>
           <a
+            style="font-size: 14px;"
             class="{setView == 'plan_accept' ? 'active' : ''}"
             on:click="{() => {
               setView = 'plan_accept';

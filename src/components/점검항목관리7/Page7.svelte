@@ -27,7 +27,7 @@
   const toggleAccordion = (index, item) => {
     isOpen[index] = !isOpen[index];
     groupIndex = item.ccg_index;
-    console.log("gttgtg", groupIndex);
+    // console.log("gttgtg", groupIndex);
   };
   let isSectionOpen = {};
 
