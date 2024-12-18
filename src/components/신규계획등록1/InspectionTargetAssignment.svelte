@@ -7,7 +7,7 @@
       { id: "체계1", children: [{ id: "체계11", children: [{ id: "체계111", children: ["체계1111"] }] }, { id: "체계12" }] },
     ];
   
-    let ipRanges = ["192.168.0.1/24", "192.168.1.1/24"];
+    let ipRanges = ["192.168.0.1/24", "192.168.1.1/24","192.168.1.1/24","192.168.1.1/24"];
     let availableTargets = ["제1xxxxx 부대", "제2xxxxx 부대", "제3xxxxx 부대"];
     let selectedTargets = ["제1xxxxx 부대", "제3xxxxx 부대"];
   
@@ -22,7 +22,7 @@
     function removeTarget() {
       selectedTargets = [];
     }
-  </script>
+</script>
 
   <div  style="padding: 0%;">
     <div style="text-align: center;">
@@ -34,7 +34,6 @@
         <div class="left-section">
             <div class="header">
               <label>점검대상부대</label>
-              <button class="search-btn">조회</button>
             </div>
           <div class="box">
             <div class="content scrollable">
@@ -76,9 +75,7 @@
           </div>
     
           <div class="header">
-            <label>점검대상체계</label>
-            <button class="search-btn">조회</button>
-          </div>
+            <label>점검대상체계</label> </div>
           <div class="box">
             <div class="content scrollable">
               <ul class="tree">
@@ -120,9 +117,8 @@
     
           <div class="header">
             <label>IP대역</label>
-            <button class="search-btn">조회</button>
           </div>
-          <div class="box">
+          <div class="box_1">
             <div class="content1 scrollable">
               {#each ipRanges as ip}
                 <label><input type="checkbox" /> {ip}</label>
@@ -157,10 +153,12 @@
         </div>
       </div>
   </div>
+  
+<style>
 
-  
-  
-  <style>
+    *{
+      font-size: 14px;
+    }
 
      .main_box {
         border-bottom: 1px solid #cccccc;
@@ -175,6 +173,7 @@
       flex: 2;
       display: flex;
       flex-direction: column;
+      margin-top: 35px;
     }
 
     .right-section {
@@ -194,6 +193,23 @@
     .box {
       border: 1px solid #cccccc;
       padding: 10px;
+      overflow-y: auto;
+      max-height: 150px;
+      height: 150px;
+      overflow-x: hidden;
+      border-radius: 4px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .box_1{
+      border: 1px solid #cccccc;
+      padding: 10px;
+      overflow-y: auto;
+      max-height: 85px;
+      height: 85px;
+      overflow-x: hidden;
       border-radius: 4px;
       background: white;
       display: flex;
@@ -216,16 +232,7 @@
       justify-content: space-between;
       align-items: center;
       margin-top: 10px;
-    }
-  
-    .search-btn {
-        font-size: 12px;
-      padding: 5px 10px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+      margin-bottom: 5px;
     }
   
     .scrollable {
@@ -255,5 +262,5 @@
     .arrow-button:hover {
       background-color: #0056b3;
     }
-  </style>
+</style>
   
