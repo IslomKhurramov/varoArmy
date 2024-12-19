@@ -1,6 +1,8 @@
 <script>
+  import SwiperPage4 from "../SwiperPage4.svelte";
+
   export let resultVulnsOfAsset;
-  export let targetName;
+  export let selectPage1;
 </script>
 
 <div class="first_nenu">
@@ -53,7 +55,7 @@
       </thead>
       <tbody>
         {#each resultVulnsOfAsset as asset, index}
-          <tr>
+          <tr on:click={() => selectPage1(SwiperPage4, asset)}>
             <!-- 번호 in descending order -->
             <td class="text-center">{resultVulnsOfAsset.length - index}</td>
 

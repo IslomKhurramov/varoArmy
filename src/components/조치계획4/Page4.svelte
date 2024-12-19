@@ -4,8 +4,9 @@
   import SecondMenu from "./모든구성요소/SecondMenu.svelte";
   import SwiperPage4 from "./SwiperPage4.svelte";
   import { allPlanList, vulnAssetList } from "../../services/store";
-  import { getVulnsOfAsset } from "../../services/callApi";
-
+  import { getVulnsOfAsset, setDeletePlan } from "../../services/callApi";
+  import { confirmDelete, successAlert } from "../../shared/sweetAlert";
+  export let getPlanList;
   // Dinamik o'zgaruvchilar
   let resultVulnsOfPlans = [];
   let setView = "plan";
@@ -14,6 +15,7 @@
   /**********************************/
   let isSectionOpen = {}; // To manage the open/close state of the sections
   let targetName = "";
+  let firstMenuData = [];
   // Function to toggle the section (asset category, like UNIX or NETWORK)
   function toggleSection(itemKey, sectionKey) {
     if (!isSectionOpen[itemKey]) {
@@ -114,8 +116,10 @@
   }
 
   // Funksiyalar orqali komponentlarni tanlash
-  const selectPage1 = (page) => {
+  const selectPage1 = (page, data) => {
     currentPage1 = page;
+    firstMenuData = data;
+    console.log("data1111", firstMenuData);
   };
 
   // Accordion logikasi
@@ -132,6 +136,24 @@
   }
   // Function to filter data based on selected target and hostname
   let selectedHostname = "";
+
+  async function deletePlan() {
+    const isConfirmed = await confirmDelete();
+    if (!isConfirmed) return;
+    try {
+      const response = await setDeletePlan(plan_index);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+        await getPlanList(); // Fetch updated data after deletion
+        plan_index = "";
+      } else {
+        console.log(response.CODE);
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
 </script>
 
 <main class="table-container">
@@ -220,7 +242,7 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button>삭제</button>
+          <button on:click={deletePlan}>삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -291,6 +313,8 @@
             bind:resultVulnsOfPlans
             {targetName}
             bind:resultVulnsOfAsset
+            {currentPage1}
+            {selectPage1}
           />
         {/if}
         <!-- Pagination -->

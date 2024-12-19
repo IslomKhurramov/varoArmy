@@ -1,6 +1,9 @@
 <script>
+  import SwiperPage4 from "../SwiperPage4.svelte";
+
   export let resultVulnsOfPlans;
   export let targetName;
+  export let selectPage1;
   $: console.log("firstmenu", resultVulnsOfPlans);
 </script>
 
@@ -40,7 +43,7 @@
             {#each Object.entries(targetGroup) as [category, assets]}
               {#if category === targetName}
                 {#each assets as asset, index}
-                  <tr>
+                  <tr on:click={() => selectPage1(SwiperPage4, asset)}>
                     <td class="text-center">{assets.length - index}</td>
                     <td class="text-center">{category}</td>
                     <td class="text-center"

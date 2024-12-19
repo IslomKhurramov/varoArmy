@@ -520,18 +520,20 @@
       <Header />
     </div>
     <div class="body_menu">
-      <Route path="/page1" component="{Page1}" />
-      <Route path="/page2" component="{Page2}" />
+      <Route path="/page1" component={Page1} />
+      <Route path="/page2" component={Page2} />
       <Route path="/page3">
         <Page3 {getPlanList} />
       </Route>
-      <Route path="/page4" component="{Page4}" />
-      <Route path="/page5" component="{Page5}" />
-      <Route path="/page6" component="{Page6}" />
-      <Route path="/page7" component="{Page7}" />
-      <Route path="/page8" component="{Page8}" />
-      <Route path="/page9" component="{Page9}" />
-      <Route path="/" component="{LeftMenu}" />
+      <Route path="/page4">
+        <Page4 {getPlanList} />
+      </Route>
+      <Route path="/page5" component={Page5} />
+      <Route path="/page6" component={Page6} />
+      <Route path="/page7" component={Page7} />
+      <Route path="/page8" component={Page8} />
+      <Route path="/page9" component={Page9} />
+      <Route path="/" component={LeftMenu} />
     </div>
   </section>
 </main>
