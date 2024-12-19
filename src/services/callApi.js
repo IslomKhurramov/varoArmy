@@ -19,7 +19,6 @@ export const getAllPlanLists = async (page_cnt, list_cnt) => {
         `Error Code on getDetailInformationOfAsset: ${response.data}`
       );
     }
-
   } catch (error) {
     console.error("API Call Error:", error.message);
     throw new Error(`Failed to fetch asset detail: ${error.message}`);
@@ -120,12 +119,18 @@ export const getAllCheckList = async () => {
   }
 };
 /***********DELETE CHECKLIST ITEM****************** */
-export const setDeleteChecklistItem = async (checklist_group_no, selected_items) => {
+export const setDeleteChecklistItem = async (
+  checklist_group_no,
+  selected_items
+) => {
   try {
     // Send page_cnt and list_cnt in the request body
     const response = await axios.post(
       `${serverApi}/api/setDeleteChecklistItem/`, // API endpoint
-      { checklist_group_no:checklist_group_no, selected_items:selected_items }, // Request body matches Postman structure
+      {
+        checklist_group_no: checklist_group_no,
+        selected_items: selected_items,
+      }, // Request body matches Postman structure
       { withCredentials: true } // Additional config
     );
 
@@ -148,7 +153,7 @@ export const setNewChecklistGroup = async (source_chk, destion_name) => {
     // Send page_cnt and list_cnt in the request body
     const response = await axios.post(
       `${serverApi}/api/setNewChecklistGroup/`, // API endpoint
-      { source_chk:source_chk, destion_name:destion_name }, // Request body matches Postman structure
+      { source_chk: source_chk, destion_name: destion_name }, // Request body matches Postman structure
       { withCredentials: true } // Additional config
     );
 
@@ -172,7 +177,7 @@ export const setDeleteChecklistGroup = async (checklist_group_no) => {
     // Send page_cnt and list_cnt in the request body
     const response = await axios.post(
       `${serverApi}/api/setDeleteChecklistGroup/`, // API endpoint
-      { checklist_group_no:checklist_group_no}, // Request body matches Postman structure
+      { checklist_group_no: checklist_group_no }, // Request body matches Postman structure
       { withCredentials: true } // Additional config
     );
 
@@ -197,7 +202,7 @@ export const setDeletePlan = async (plan_index) => {
     // Send page_cnt and list_cnt in the request body
     const response = await axios.post(
       `${serverApi}/api/setDeletePlan/`, // API endpoint
-      { plan_index:plan_index}, // Request body matches Postman structure
+      { plan_index: plan_index }, // Request body matches Postman structure
       { withCredentials: true } // Additional config
     );
 
@@ -206,9 +211,7 @@ export const setDeletePlan = async (plan_index) => {
     if (response) {
       return response.data; // Expected valid response
     } else {
-      throw new Error(
-        `Error Code on setDeletePlan: ${response.data}`
-      );
+      throw new Error(`Error Code on setDeletePlan: ${response.data}`);
     }
   } catch (error) {
     console.error("API Call Error:", error.message);
@@ -221,7 +224,7 @@ export const getPlanDetailInformation = async (plan_index) => {
     // Send page_cnt and list_cnt in the request body
     const response = await axios.post(
       `${serverApi}/api/getPlanDetailInformation/`, // API endpoint
-      { plan_index:plan_index}, // Request body matches Postman structure
+      { plan_index: plan_index }, // Request body matches Postman structure
       { withCredentials: true } // Additional config
     );
 
@@ -236,6 +239,48 @@ export const getPlanDetailInformation = async (plan_index) => {
     }
   } catch (error) {
     console.error("API Call Error:", error.message);
-    throw new Error(`Failed to fetch getPlanDetailInformation detail: ${error.message}`);
+    throw new Error(
+      `Failed to fetch getPlanDetailInformation detail: ${error.message}`
+    );
+  }
+};
+
+export const getVulnsOfAsset = async (
+  plan_index,
+  asset_target_uuid,
+  step_vuln,
+  page_cnt,
+  list_cnt,
+  search_opt
+) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/getVulnsOfAsset/`, // API endpoint
+      {
+        plan_index: plan_index,
+        asset_target_uuid: asset_target_uuid,
+        step_vuln: step_vuln,
+        page_cnt: page_cnt,
+        list_cnt: list_cnt,
+        search_opt: search_opt,
+      }, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on getPlanDetailInformation: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(
+      `Failed to fetch getPlanDetailInformation detail: ${error.message}`
+    );
   }
 };

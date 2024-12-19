@@ -1,32 +1,6 @@
 <script>
-  import moment from "moment";
-
-  // Hardcoded data for logData
-  let resultData = [];
-  let allSelected = false;
-
-  for (let i = 0; i < 10; i++) {
-    resultData.push({
-      ast_uuid__ass_uuid__ast_hostname: "NETWORK",
-      ccr_item_no__ccc_item_no: "AAAA",
-      ccr_item_no__ccc_item_item: "NW-06",
-      ccr_item_no__ccc_item_title: "SETUID..",
-      ccr_item_no__ccc_item_criteria: "취약",
-      ccr_item_no__ccc_item_result: "조치승인",
-    });
-  }
-  function selectAll(event) {
-    allSelected = event.target.checked;
-    selected = allSelected ? [...paginatedData] : [];
-  }
-
-  // Clear the checkboxes and reset selection states
-  function clearSelection() {
-    selected = [];
-    allSelected = false;
-    ccg_index_id = "";
-    ccc_index = [];
-  }
+  export let resultVulnsOfAsset;
+  export let targetName;
 </script>
 
 <div class="first_nenu">
@@ -78,24 +52,34 @@
         </tr>
       </thead>
       <tbody>
-        {#each resultData as data, index}
-          <tr> </tr><tr>
-            <td class="text-center">{resultData.length - index}</td>
+        {#each resultVulnsOfAsset as asset, index}
+          <tr>
+            <!-- 번호 in descending order -->
+            <td class="text-center">{resultVulnsOfAsset.length - index}</td>
 
-            <td class="text-center">
-              {data?.ast_uuid__ass_uuid__ast_hostname}
-            </td>
-            <td class="text-center">
-              <div>
-                {data?.ccr_item_no__ccc_item_no}
-              </div>
-            </td>
-            <td class="text-center">
-              {data.ccr_item_no__ccc_item_item}
-            </td>
-            <td> {data.ccr_item_no__ccc_item_title}</td>
-            <td class="text-center">{data.ccr_item_no__ccc_item_criteria} </td>
-            <td class="text-center">{data.ccr_item_no__ccc_item_result} </td>
+            <!-- 점검분야 -->
+            <td class="text-center">{asset.ast_uuid__ast_target__cct_target}</td
+            >
+
+            <!-- 자산명 -->
+            <td class="text-center">{asset.ast_uuid__ass_uuid__ast_hostname}</td
+            >
+
+            <!-- 점검항목 -->
+            <td class="text-center">NW-06</td>
+            <!-- Static value -->
+
+            <!-- 점검명 -->
+            <td class="text-center">Inspection Name Here</td>
+            <!-- Replace or map dynamically -->
+
+            <!-- 점검결과 -->
+            <td class="text-center">취약</td>
+            <!-- Static value -->
+
+            <!-- 처리유형 -->
+            <td class="text-center">조치승인</td>
+            <!-- Static value -->
           </tr>
         {/each}
       </tbody>

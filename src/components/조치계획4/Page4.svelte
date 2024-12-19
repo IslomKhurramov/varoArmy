@@ -3,32 +3,75 @@
   import FirstMenu from "./모든구성요소/FirstMenu.svelte";
   import SecondMenu from "./모든구성요소/SecondMenu.svelte";
   import SwiperPage4 from "./SwiperPage4.svelte";
+  import { allPlanList, vulnAssetList } from "../../services/store";
+  import { getVulnsOfAsset } from "../../services/callApi";
 
   // Dinamik o'zgaruvchilar
-  let resultData = [];
+  let resultVulnsOfPlans = [];
   let setView = "plan";
   let currentPage1 = FirstMenu; // Default sahifa
   let currentPage = null; // Hozirgi komponent
-
-  let selectedTargetData = [];
-  let selectedTarget = [];
-  function handleClickTarget(targetData, item) {
-    selectedTargetData = targetData;
-    selectedTarget = item;
-    console.log("targetData", selectedTargetData);
+  /**********************************/
+  let isSectionOpen = {}; // To manage the open/close state of the sections
+  let targetName = "";
+  // Function to toggle the section (asset category, like UNIX or NETWORK)
+  function toggleSection(itemKey, sectionKey) {
+    if (!isSectionOpen[itemKey]) {
+      isSectionOpen[itemKey] = {}; // Ensure a nested object exists for each itemKey
+    }
+    targetName = sectionKey;
+    console.log("targetName", targetName);
+    isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey]; // Toggle the section
   }
-  let currentPagePagination = 1; // Current page number
-  let itemsPerPage = 10; // Items per page
+  let plan_index = "";
+  const toggleAccordion = (index, item) => {
+    isOpen[index] = !isOpen[index];
+    plan_index = item.ccp_index;
+    fetchPaginatedData();
+  };
 
+  let asset_target_uuid = "";
+  let step_vuln = "1";
+  let currentPagePagination = "1";
+  let itemsPerPage = "15";
+  let search_opt = "취약";
+  let resultVulnsOfAsset = [];
+  let totalPages = 0; // Total pages from backend
+
+  async function fetchPaginatedData() {
+    try {
+      const response = await getVulnsOfAsset(
+        plan_index,
+        asset_target_uuid,
+        step_vuln,
+        currentPagePagination,
+        itemsPerPage,
+        search_opt
+      );
+
+      if (response) {
+        console.log("response from funct vulnsasset", response);
+
+        // Filter `plans` to only include data for the selected `plan_index`
+        resultVulnsOfPlans = response.CODE.plans.filter(
+          (plan) => plan.plan_index === plan_index
+        );
+
+        // Update other data
+        resultVulnsOfAsset = response.CODE.asset_asc;
+        totalPages = response.totalPages || 1;
+        currentPagePagination = response.currentPage || 1;
+
+        vulnAssetList.set(response); // Update the store if needed
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
+  $: console.log("resultVulnsOfAsset::", resultVulnsOfAsset);
   // Calculate the start and end index of items for the current page
   $: startIndex = (currentPagePagination - 1) * itemsPerPage;
   $: endIndex = startIndex + itemsPerPage;
-
-  // Slice the data for the current page
-  $: paginatedData = selectedTargetData.slice(startIndex, endIndex);
-
-  // Calculate total pages
-  $: totalPages = Math.ceil(selectedTargetData.length / itemsPerPage);
 
   // Dynamic range for pagination numbers
   const maxButtons = 10; // Maximum number of visible page buttons
@@ -46,22 +89,24 @@
     );
   }
 
-  // Function to handle page change
+  // Function to change page
   function goToPage(pageNumber) {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       currentPagePagination = pageNumber;
+      fetchPaginatedData(); // Fetch data for the new page
     }
   }
+
   // Function to handle items per page change
   function updateItemsPerPage(event) {
     itemsPerPage = parseInt(event.target.value, 10);
-    // currentPagePagination = 1; // Reset to first page
+    currentPagePagination = 1; // Reset to first page when items per page changes
+    fetchPaginatedData();
   }
+
   /*************************************************************/
   let selected = [];
   let allSelected = false; // Indicates if all items are selected
-  let ccg_index_id = "";
-  let ccc_index = [];
 
   function selectAll(event) {
     allSelected = event.target.checked;
@@ -73,65 +118,20 @@
     currentPage1 = page;
   };
 
-  const selectPage = () => {
-    currentPage = SwiperPage4;
-  };
-
-  // Fake ma'lumotlarni yaratish
-  for (let i = 0; i < 50; i++) {
-    resultData.push({
-      ast_uuid__ass_uuid__ast_hostname: "NETWORK",
-      ccr_item_no__ccc_item_no: "AAAA",
-      ccr_item_no__ccc_item_item: "NW-06",
-      ccr_item_no__ccc_item_title: "SETUID..",
-      ccr_item_no__ccc_item_criteria: "취약",
-      ccr_item_no__ccc_item_result: "조치승인",
-    });
-  }
-
   // Accordion logikasi
   let mainTitle = "점검 계획 현황";
   let isOpen = Array(8).fill(false);
   export let activeMenu = "신규계획등록";
-  let mainItems = [
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-  ];
 
-  // Accordion ochish/qayta yopish
-  const toggleAccordion = (index) => {
-    isOpen[index] = !isOpen[index];
-  };
+  let selectedHostnameData = null;
+  function handleClickHostname(data) {
+    console.log("handle data", data);
+    currentPage = Swiper;
+    selectedHostname = data.hostname;
+    selectedHostnameData = data;
+  }
+  // Function to filter data based on selected target and hostname
+  let selectedHostname = "";
 </script>
 
 <main class="table-container">
@@ -145,28 +145,71 @@
 
           <!-- Accordion -->
           <div class="accordion">
-            {#each mainItems as item, index}
+            {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
-                  on:click="{() => toggleAccordion(index)}"
+                  on:click={() => {
+                    toggleAccordion(index, item); // Direct function call in Svelte
+                  }}
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
-                  {item.title}
+                  {item.ccp_title}
+                  <!-- ccp_title will be displayed here -->
                 </button>
+
                 <div
                   class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '150px' : '0px'}"
+                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
                 >
                   <ul>
-                    {#each item.subItems as subItem}
-                      <li
-                        on:click="{() => {
-                          (activeMenu = subItem.title), selectPage();
-                        }}"
-                      >
-                        {subItem.title}
-                      </li>
-                    {/each}
+                    <div
+                      class="accordion-content {isOpen[index] ? 'open' : ''}"
+                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                    >
+                      {#if item.asset && typeof item.asset === "object"}
+                        {#each Object.entries(item.asset) as [targetName, targetData]}
+                          <p
+                            on:click={() => {
+                              toggleSection(index, targetName);
+                            }}
+                            class={isSectionOpen[index]?.[targetName]
+                              ? "active"
+                              : ""}
+                          >
+                            {targetName}
+                          </p>
+                          <!-- This will display UNIX, NETWORK, etc. -->
+
+                          {#if targetData && targetData.length > 0}
+                            <ul
+                              class="sublist {isSectionOpen[index]?.[targetName]
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[index]?.[
+                                targetName
+                              ]
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each targetData as subItem}
+                                <li
+                                  on:click={() => {
+                                    activeMenu = subItem;
+                                    handleClickHostname(subItem); // Set selected hostname
+                                  }}
+                                >
+                                  <strong>{subItem.hostname}</strong>
+                                  <!-- Display the hostname -->
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
+                        {/each}
+                      {:else}
+                        <li>No assets available</li>
+                        <!-- In case there are no assets -->
+                      {/if}
+                    </div>
                   </ul>
                 </div>
               </div>
@@ -188,7 +231,7 @@
   <section class="section2">
     <!-- Dinamik sahifa -->
     {#if currentPage}
-      <svelte:component this="{currentPage}" />
+      <svelte:component this={currentPage} />
     {:else}
       <article class="contentArea">
         <section class="filterWrap" style="margin-bottom: 0px;">
@@ -196,7 +239,7 @@
             <select>
               <option value="" selected>점검대상체계</option>
 
-              <option value="{'점검대상체계'}">점검대상체계</option>
+              <option value={"점검대상체계"}>점검대상체계</option>
             </select>
             <input
               style="    height: 28px;
@@ -223,59 +266,64 @@
         <section class="subTabWrap">
           <a
             style="font-size: 14px;"
-            class="{setView == 'plan' ? 'active' : ''}"
-            on:click="{() => {
-              setView = 'plan';
+            class={setView == "plan" ? "active" : ""}
+            on:click={() => {
+              setView = "plan";
               selectPage1(FirstMenu);
-            }}"
+            }}
           >
             조치계획등록
           </a>
           <a
             style="font-size: 14px;"
-            class="{setView == 'plan_accept' ? 'active' : ''}"
-            on:click="{() => {
-              setView = 'plan_accept';
+            class={setView == "plan_accept" ? "active" : ""}
+            on:click={() => {
+              setView = "plan_accept";
               selectPage1(SecondMenu);
-            }}"
+            }}
           >
             조치계획승인
           </a>
         </section>
         {#if currentPage1}
-          <svelte:component this="{currentPage1}" />
+          <svelte:component
+            this={currentPage1}
+            bind:resultVulnsOfPlans
+            {targetName}
+            bind:resultVulnsOfAsset
+          />
         {/if}
         <!-- Pagination -->
         <div class="pagination">
           <button
-            on:click="{() => goToPage(1)}"
-            disabled="{currentPagePagination === 1}"
+            on:click={() => goToPage(1)}
+            disabled={currentPagePagination === 1}
           >
             {"<<"}
           </button>
           <button
-            on:click="{() => goToPage(currentPagePagination - 1)}"
-            disabled="{currentPagePagination === 1}"
+            on:click={() => goToPage(currentPagePagination - 1)}
+            disabled={currentPagePagination === 1}
           >
             {"<"}
           </button>
           {#each Array(totalPages).fill(0) as _, pageIndex}
             <button
-              class:selected="{currentPagePagination === pageIndex + 1}"
-              on:click="{() => goToPage(pageIndex + 1)}"
+              class:selected={currentPagePagination === pageIndex + 1}
+              on:click={() => goToPage(pageIndex + 1)}
             >
               {pageIndex + 1}
             </button>
           {/each}
           <button
-            on:click="{() => goToPage(currentPagePagination + 1)}"
-            disabled="{currentPagePagination === totalPages}"
+            on:click={() => goToPage(currentPagePagination + 1)}
+            disabled={currentPagePagination === totalPages}
           >
             {">"}
           </button>
           <button
-            on:click="{() => goToPage(totalPages)}"
-            disabled="{currentPagePagination === totalPages}"
+            on:click={() => goToPage(totalPages)}
+            disabled={currentPagePagination === totalPages}
           >
             {">>"}
           </button>
@@ -293,7 +341,33 @@
     display: flex;
     flex-direction: row;
   }
+  .sublist {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  .sublist.open {
+    max-height: 100%;
+  }
+  .accordion-content ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid black;
+  }
+  .accordion-content.open {
+    padding: 0px 10px 0px 10px;
+  }
+  .accordion-content p {
+    cursor: pointer;
+  }
+  .accordion-content p:hover {
+    background-color: #3d5878;
+    cursor: pointer;
+    border-radius: 5px;
+    /* padding: 15px; */
 
+    color: white;
+  }
   .section2 {
     width: 85%;
     height: 90vh;

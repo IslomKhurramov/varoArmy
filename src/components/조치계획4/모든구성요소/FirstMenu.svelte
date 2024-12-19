@@ -1,32 +1,7 @@
 <script>
-  import moment from "moment";
-
-  // Hardcoded data for logData
-  let resultData = [];
-  let allSelected = false;
-
-  for (let i = 0; i < 20; i++) {
-    resultData.push({
-      ast_uuid__ass_uuid__ast_hostname: "NETWORK",
-      ccr_item_no__ccc_item_no: "AAAA",
-      ccr_item_no__ccc_item_item: "NW-06",
-      ccr_item_no__ccc_item_title: "SETUID..",
-      ccr_item_no__ccc_item_criteria: "취약",
-      ccr_item_no__ccc_item_result: "조치승인",
-    });
-  }
-  function selectAll(event) {
-    allSelected = event.target.checked;
-    selected = allSelected ? [...paginatedData] : [];
-  }
-
-  // Clear the checkboxes and reset selection states
-  function clearSelection() {
-    selected = [];
-    allSelected = false;
-    ccg_index_id = "";
-    ccc_index = [];
-  }
+  export let resultVulnsOfPlans;
+  export let targetName;
+  $: console.log("firstmenu", resultVulnsOfPlans);
 </script>
 
 <div class="first_nenu">
@@ -60,25 +35,26 @@
         </tr>
       </thead>
       <tbody>
-        {#each resultData as data, index}
-          <tr> </tr><tr>
-            <td class="text-center">{resultData.length - index}</td>
-
-            <td class="text-center">
-              {data?.ast_uuid__ass_uuid__ast_hostname}
-            </td>
-            <td class="text-center">
-              <div>
-                {data?.ccr_item_no__ccc_item_no}
-              </div>
-            </td>
-            <td class="text-center">
-              {data.ccr_item_no__ccc_item_item}
-            </td>
-            <td> {data.ccr_item_no__ccc_item_title}</td>
-            <td class="text-center">{data.ccr_item_no__ccc_item_criteria} </td>
-            <td class="text-center">{data.ccr_item_no__ccc_item_result} </td>
-          </tr>
+        {#each resultVulnsOfPlans as plan}
+          {#each plan.plan_target as targetGroup}
+            {#each Object.entries(targetGroup) as [category, assets]}
+              {#if category === targetName}
+                {#each assets as asset, index}
+                  <tr>
+                    <td class="text-center">{assets.length - index}</td>
+                    <td class="text-center">{category}</td>
+                    <td class="text-center"
+                      >{asset.ast_uuid__ass_uuid__ast_hostname}</td
+                    >
+                    <td class="text-center">NW-06</td>
+                    <td class="text-center">{plan.plan_title}</td>
+                    <td class="text-center">취약</td>
+                    <td class="text-center">조치승인</td>
+                  </tr>
+                {/each}
+              {/if}
+            {/each}
+          {/each}
         {/each}
       </tbody>
     </table>
