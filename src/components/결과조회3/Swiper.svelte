@@ -152,7 +152,7 @@
 
 <div class="contentArea">
   <section
-    bind:this="{swiperContainer}"
+    bind:this={swiperContainer}
     style="position: sticky;  z-index:99; background-color:white;"
     class="topCon swiper-container"
   >
@@ -163,7 +163,7 @@
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click="{() => handleScroll('prev')}"
+        on:click={() => handleScroll("prev")}
       >
         ◀
       </button>
@@ -176,20 +176,20 @@
           class="menu-wrapper"
           id="menuWrapper"
           style="background-color: white; z-index:99;"
-          bind:this="{menuWrapper}"
+          bind:this={menuWrapper}
         >
           {#if $viewPlanResult.length > 0}
             {#each $viewPlanResult as slide}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div
-                value="{slide.ccr_index}"
-                name="{slide}"
+                value={slide.ccr_index}
+                name={slide}
                 class="menu-item {activeAsset &&
                 activeAsset.ccr_item_no__ccc_item_no ===
                   slide.ccr_item_no__ccc_item_no
                   ? 'active'
                   : ''}"
-                on:click="{() => handleSlideclick(slide)}"
+                on:click={() => handleSlideclick(slide)}
               >
                 {slide.ccr_item_no__ccc_item_no}
               </div>
@@ -203,7 +203,7 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click="{() => handleScroll('next')}"
+        on:click={() => handleScroll("next")}
       >
         ▶
       </button>
@@ -282,8 +282,7 @@
           <option value="예외처리">예외처리</option>
           <option value="기타">기타</option>
         </select>
-        <button class="btnSave" on:click="{() => (showModal = true)}"
-          >edit</button
+        <button class="btnSave" on:click={() => (showModal = true)}>edit</button
         >
         <input type="text" />
       </div>
@@ -309,7 +308,7 @@
         rows="5"
         cols="50"
         style="width: 100%;"
-        bind:value="{insertData["change_status_text"]}"
+        bind:value={insertData["change_status_text"]}
       ></textarea>
     </div>
 
@@ -339,17 +338,13 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     class="modal-open-wrap"
-    on:click="{() => (showModal = false)}"
-    on:keydown="{handleKeyDown}"
+    on:click={() => (showModal = false)}
+    on:keydown={handleKeyDown}
     tabindex="0"
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <dialog
-      open
-      on:close="{() => (showModal = false)}"
-      on:click|stopPropagation
-    >
-      <ModalPopEdit {closeShowModal} />
+    <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
+      <ModalPopEdit {closeShowModal} {selectedData} />
     </dialog>
   </div>
 {/if}

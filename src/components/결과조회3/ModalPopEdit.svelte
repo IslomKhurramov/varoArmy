@@ -1,14 +1,7 @@
 <script>
   export let closeShowModal;
-  let selectedCategory = "Network Security Check";
-  let selectedItem = {
-    ccc_item_no: "NSC-001",
-    ccc_item_group: "Firewall",
-    ccc_check_purpose:
-      "Ensure the firewall is configured correctly to block unauthorized access.",
-    ccc_security_threat:
-      "Unsecured network traffic could lead to unauthorized access and data breaches.",
-  };
+  export let selectedData;
+  $: console.log("selectedData", selectedData);
 </script>
 
 <div class="modal">
@@ -35,26 +28,45 @@
         </th>
       </tr>
       <tbody>
-        {#if selectedItem}
+        {#if selectedData}
           <tr>
             <th class="center-align">점검항목</th>
-            <td class="line-height">{selectedCategory}</td>
+            <td class="line-height"
+              >[{selectedData.ccr_item_no__ccc_item_no}]{selectedData.ccr_item_no__ccc_item_title}</td
+            >
           </tr>
           <tr>
-            <th class="center-align">항목그룹</th>
-            <td class="line-height">{selectedItem.ccc_item_group}</td>
+            <th class="center-align">점검기준</th>
+            <td class="line-height"
+              >{@html selectedData.ccr_item_no__ccc_item_criteria.replace(
+                /\n/g,
+                "<br/>"
+              )}</td
+            >
           </tr>
           <tr>
-            <th class="center-align">정검목적</th>
-            <td class="line-height">{selectedItem.ccc_check_purpose}</td>
+            <th class="center-align">점검결과</th>
+            <td>
+              <select>
+                <option value="양호">양호</option>
+                <option value="취약">취약</option>
+                <option value="관리적조치">관리적조치</option>
+                <option value="예외처리">예외처리</option>
+                <option value="기타">기타</option>
+              </select>
+            </td>
           </tr>
           <tr>
-            <th class="center-align">보안위협</th>
-            <td class="line-height">{selectedItem.ccc_security_threat}</td>
+            <th class="center-align">변경사유</th>
+            <td class="line-height"
+              >{selectedData.ccr_item_no__ccc_security_threat}</td
+            >
           </tr>
           <tr>
-            <th class="center-align">보안위협</th>
-            <td class="line-height">{selectedItem.ccc_security_threat}</td>
+            <th class="center-align">현황정보</th>
+            <td class="line-height"
+              >{selectedData.ccr_item_no__ccc_security_threat}</td
+            >
           </tr>
         {:else}
           <tr>
@@ -69,7 +81,7 @@
           style="display:flex; flex-direction:row; width:100%; justify-content:center; gap:10px;align-items:center;"
         >
           <button class="btnUpload">변경하기</button>
-          <button class="btnDone" on:click="{closeShowModal}">닫기</button>
+          <button class="btnDone" on:click={closeShowModal}>닫기</button>
         </div>
       {/if}
     </div>
