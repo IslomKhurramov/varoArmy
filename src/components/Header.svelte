@@ -22,6 +22,7 @@
     { label: "점검항목관리", icon: faCog, link: "/page7" },
     { label: "점검준비", icon: faCog, link: "/page8" },
     { label: "취약점현황", icon: faClipboardList, link: "/page9" },
+    { label: "취약점추적", icon: faClipboardList, link: "/page10" },
   ];
   onMount(() => {
     const currentPath = window.location.pathname;
@@ -34,11 +35,11 @@
   <nav class="menu-container">
     {#each menuItems as item}
       <Link
-        to="{item.link}"
+        to={item.link}
         class="menu-item2 {activeMenu === item.label ? 'blue' : ''}"
-        on:click="{() => (activeMenu = item.label)}"
+        on:click={() => (activeMenu = item.label)}
       >
-        <FontAwesomeIcon icon="{item.icon}" />
+        <FontAwesomeIcon icon={item.icon} />
         <span>{item.label}</span>
       </Link>
     {/each}

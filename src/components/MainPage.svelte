@@ -14,6 +14,7 @@
   import { getAllPlanLists } from "../services/callApi";
   import { allPlanList } from "../services/store";
   import LeftMenu from "./LeftMenu.svelte";
+  import Page10 from "./comparison10/page10.svelte";
 
   export let activeMenu = "/";
   let currentPage = null;
@@ -48,6 +49,9 @@
         break;
       case "/page9":
         activeMenu = "취약점현황";
+        break;
+      case "/page10":
+        activeMenu = "취약점추적";
         break;
       default:
         activeMenu = "";
@@ -533,6 +537,8 @@
       <Route path="/page7" component={Page7} />
       <Route path="/page8" component={Page8} />
       <Route path="/page9" component={Page9} />
+      <Route path="/page10" component={Page10} />
+
       <Route path="/" component={LeftMenu} />
     </div>
   </section>
