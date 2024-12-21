@@ -50,7 +50,7 @@
 
 <main>
   <article class="contentArea" style="padding-top: 0px; margin-top:0px">
-    <p>잔존 취약점 현황</p>
+    <p style="margin-bottom: 0px;">잔존 취약점 현황</p>
     <div class="chart-container">
       <canvas id="chart1"></canvas>
     </div>

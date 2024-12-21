@@ -221,6 +221,9 @@
       throw err;
     }
   }
+  function closeSwiper() {
+    currentPage = null;
+  }
 </script>
 
 <main class="table-container">
@@ -230,7 +233,16 @@
       <div class="menuContainer">
         <!-- Header -->
         <div>
-          <div class="menuHeader">{mainTitle}</div>
+          <div class="menuHeader">
+            {mainTitle}
+            {#if currentPage === Swiper7}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click={closeSwiper}
+              />
+            {/if}
+          </div>
 
           <!-- Accordion -->
           <div class="accordion">
@@ -238,7 +250,7 @@
               {#each Object.entries($allCheckList) as [key, item], index}
                 <div class="accordion-item">
                   <button
-                    on:click="{() => toggleAccordion(index, item)}"
+                    on:click={() => toggleAccordion(index, item)}
                     class="accordion-header {isOpen[index] ? 'active' : ''}"
                   >
                     {item.ccg_group}
@@ -257,11 +269,11 @@
                         <!-- Render UNIX section if it exists -->
                         {#if item.UNIX && item.UNIX.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'UNIX');
-                              handleClickTarget(item.UNIX, item, 'UNIX');
-                            }}"
-                            class="{isSectionOpen[key]?.UNIX ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "UNIX");
+                              handleClickTarget(item.UNIX, item, "UNIX");
+                            }}
+                            class={isSectionOpen[key]?.UNIX ? "active" : ""}
                           >
                             UNIX
                           </p>
@@ -275,10 +287,10 @@
                           >
                             {#each item.UNIX as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -289,13 +301,11 @@
                         <!-- WINDOWS Section -->
                         {#if item.WINDOWS && item.WINDOWS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'WINDOWS');
-                              handleClickTarget(item.WINDOWS, item, 'WINDOWS');
-                            }}"
-                            class="{isSectionOpen[key]?.WINDOWS
-                              ? 'active'
-                              : ''}"
+                            on:click={() => {
+                              toggleSection(key, "WINDOWS");
+                              handleClickTarget(item.WINDOWS, item, "WINDOWS");
+                            }}
+                            class={isSectionOpen[key]?.WINDOWS ? "active" : ""}
                           >
                             WINDOWS
                           </p>
@@ -309,10 +319,10 @@
                           >
                             {#each item.WINDOWS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -323,13 +333,11 @@
                         <!-- NETWORK Section -->
                         {#if item.NETWORK && item.NETWORK.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'NETWORK');
-                              handleClickTarget(item.NETWORK, item, 'NETWORK');
-                            }}"
-                            class="{isSectionOpen[key]?.NETWORK
-                              ? 'active'
-                              : ''}"
+                            on:click={() => {
+                              toggleSection(key, "NETWORK");
+                              handleClickTarget(item.NETWORK, item, "NETWORK");
+                            }}
+                            class={isSectionOpen[key]?.NETWORK ? "active" : ""}
                           >
                             NETWORK
                           </p>
@@ -343,10 +351,10 @@
                           >
                             {#each item.NETWORK as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -357,11 +365,11 @@
                         <!-- DBMS Section -->
                         {#if item.DBMS && item.DBMS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'DBMS');
-                              handleClickTarget(item.DBMS, item, 'DBMS');
-                            }}"
-                            class="{isSectionOpen[key]?.DBMS ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "DBMS");
+                              handleClickTarget(item.DBMS, item, "DBMS");
+                            }}
+                            class={isSectionOpen[key]?.DBMS ? "active" : ""}
                           >
                             DBMS
                           </p>
@@ -375,10 +383,10 @@
                           >
                             {#each item.DBMS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -390,11 +398,11 @@
                         <!-- WAS Section -->
                         {#if item.WAS && item.WAS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'WAS');
-                              handleClickTarget(item.WAS, item, 'WAS');
-                            }}"
-                            class="{isSectionOpen[key]?.WAS ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "WAS");
+                              handleClickTarget(item.WAS, item, "WAS");
+                            }}
+                            class={isSectionOpen[key]?.WAS ? "active" : ""}
                           >
                             WAS
                           </p>
@@ -408,10 +416,10 @@
                           >
                             {#each item.WAS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -429,8 +437,8 @@
 
         <!-- Buttons -->
         <div class="buttons">
-          <button on:click="{() => (isAddingNewGroup = true)}">복사</button>
-          <button on:click="{deleteGroup}">삭제</button>
+          <button on:click={() => (isAddingNewGroup = true)}>복사</button>
+          <button on:click={deleteGroup}>삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -439,7 +447,7 @@
   <section class="section2">
     {#if currentPage}
       <svelte:component
-        this="{currentPage}"
+        this={currentPage}
         bind:selectedTargetData
         bind:selectedTarget
         {allCheckListGet}
@@ -447,7 +455,7 @@
     {:else}
       <article class="contentArea">
         <div class="last_button2">
-          <select on:change="{updateItemsPerPage}">
+          <select on:change={updateItemsPerPage}>
             <option value="10" selected>10줄</option>
             <option value="20">20줄</option>
           </select>
@@ -467,8 +475,8 @@
                 <th class="text-center">
                   <input
                     type="checkbox"
-                    on:click="{selectAll}"
-                    bind:checked="{allSelected}"
+                    on:click={selectAll}
+                    bind:checked={allSelected}
                   /></th
                 >
                 <th class="text-center">번호</th>
@@ -485,9 +493,9 @@
                     <td class="text-center">
                       <input
                         type="checkbox"
-                        bind:group="{selected}"
-                        value="{data}"
-                        name="{data}"
+                        bind:group={selected}
+                        value={data}
+                        name={data}
                       /></td
                     >
                     <td class="text-center"
@@ -513,41 +521,41 @@
         <!-- Pagination -->
         <div class="pagination">
           <button
-            on:click="{() => goToPage(1)}"
-            disabled="{currentPagePagination === 1}"
+            on:click={() => goToPage(1)}
+            disabled={currentPagePagination === 1}
           >
             {"<<"}
           </button>
           <button
-            on:click="{() => goToPage(currentPagePagination - 1)}"
-            disabled="{currentPagePagination === 1}"
+            on:click={() => goToPage(currentPagePagination - 1)}
+            disabled={currentPagePagination === 1}
           >
             {"<"}
           </button>
           {#each Array(totalPages).fill(0) as _, pageIndex}
             <button
-              class:selected="{currentPagePagination === pageIndex + 1}"
-              on:click="{() => goToPage(pageIndex + 1)}"
+              class:selected={currentPagePagination === pageIndex + 1}
+              on:click={() => goToPage(pageIndex + 1)}
             >
               {pageIndex + 1}
             </button>
           {/each}
           <button
-            on:click="{() => goToPage(currentPagePagination + 1)}"
-            disabled="{currentPagePagination === totalPages}"
+            on:click={() => goToPage(currentPagePagination + 1)}
+            disabled={currentPagePagination === totalPages}
           >
             {">"}
           </button>
           <button
-            on:click="{() => goToPage(totalPages)}"
-            disabled="{currentPagePagination === totalPages}"
+            on:click={() => goToPage(totalPages)}
+            disabled={currentPagePagination === totalPages}
           >
             {">>"}
           </button>
         </div>
 
         <div class="last_button">
-          <button class="btn btnSave" on:click="{deleteChecklist}"
+          <button class="btn btnSave" on:click={deleteChecklist}
             >선택항목삭제
           </button>
           <button class="btn btnSave">변경이력확인 </button>
@@ -558,25 +566,25 @@
 </main>
 {#if isAddingNewGroup}
   <div class="modal-open-wrap">
-    <dialog open on:close="{() => (isAddingNewGroup = false)}">
+    <dialog open on:close={() => (isAddingNewGroup = false)}>
       <div class="modal-content">
         <div class="modal">
-          <select class="editable_input" bind:value="{selected_checklist_id}">
+          <select class="editable_input" bind:value={selected_checklist_id}>
             {#each Object.entries($allCheckList) as [key, item], index}
-              <option value="{item.ccg_index}">{item.ccg_group}</option>
+              <option value={item.ccg_index}>{item.ccg_group}</option>
             {/each}
           </select>
           <input
-            bind:value="{new_checlist_name}"
+            bind:value={new_checlist_name}
             type="text"
             placeholder="그룹 이름을 입력하세요"
             class="editable_input"
           />
           <div class="modal-buttons">
-            <button class="primary-button" on:click="{createChecklist}">
+            <button class="primary-button" on:click={createChecklist}>
               저장하기
             </button>
-            <button class="secondary-button" on:click="{cancelNewGroup}"
+            <button class="secondary-button" on:click={cancelNewGroup}
               >취소</button
             >
           </div>
@@ -587,6 +595,15 @@
 {/if}
 
 <style>
+  .menuHeader {
+    position: relative;
+  }
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
+  }
   .sublist {
     overflow: hidden;
     transition: max-height 0.3s ease-in-out;

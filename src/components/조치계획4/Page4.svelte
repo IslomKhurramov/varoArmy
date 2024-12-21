@@ -154,6 +154,9 @@
       throw err;
     }
   }
+  function closeSwiper() {
+    currentPage1 = FirstMenu;
+  }
 </script>
 
 <main class="table-container">
@@ -163,7 +166,16 @@
       <div class="menuContainer">
         <!-- Header -->
         <div>
-          <div class="menuHeader">{mainTitle}</div>
+          <div class="menuHeader">
+            {mainTitle}
+            {#if currentPage1 === SwiperPage4}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click={closeSwiper}
+              />
+            {/if}
+          </div>
 
           <!-- Accordion -->
           <div class="accordion">
@@ -358,6 +370,15 @@
 </main>
 
 <style>
+  .menuHeader {
+    position: relative;
+  }
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
+  }
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;
