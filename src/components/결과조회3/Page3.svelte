@@ -19,6 +19,7 @@
   let resultData = [];
   let isSectionOpen = {}; // To manage the open/close state of the sections
   export let getPlanList;
+  export let loading = true;
 
   // Function to toggle the section (asset category, like UNIX or NETWORK)
   function toggleSection(itemKey, sectionKey) {
@@ -65,6 +66,7 @@
   let show_option = "";
   async function viewPlanResultFunction() {
     try {
+      loading = true;
       const response = await getViewPlanResults(
         planIndex,
         target,
@@ -76,6 +78,7 @@
 
       if (response) {
         viewPlanResult.set(response.CODE);
+        loading = false;
       } else {
       }
       // console.log("traceByPlan", $traceByPlan);
@@ -187,8 +190,10 @@
 
       if (response.RESULT === "OK") {
         successAlert(`${response.CODE}`);
+        loading = true;
         await getPlanList(); // Fetch updated data after deletion
         plan_index = "";
+        loading = false;
       } else {
         console.log(response.CODE);
       }
@@ -228,317 +233,330 @@
   }
 </script>
 
-<main class="table-container">
-  <section class="section1">
-    <!-- LEFT SIDE -->
-    <div class="body_menu">
-      <div class="menuContainer">
-        <!-- Header -->
-        <div>
-          <div class="menuHeader">
-            {mainTitle}
+{#if loading}
+  <div class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+{:else}
+  <main class="table-container">
+    <section class="section1">
+      <!-- LEFT SIDE -->
+      <div class="body_menu">
+        <div class="menuContainer">
+          <!-- Header -->
+          <div>
+            <div class="menuHeader">
+              {mainTitle}
 
-            {#if currentPage === Swiper}
-              <img
-                src="assets/images/back.png"
-                alt="back"
-                on:click={closeSwiper}
-              />
-            {/if}
-          </div>
+              {#if currentPage === Swiper}
+                <img
+                  src="assets/images/back.png"
+                  alt="back"
+                  on:click={closeSwiper}
+                />
+              {/if}
+            </div>
 
-          <!-- Accordion -->
-          <div class="accordion">
-            {#each $allPlanList as item, index}
-              <div class="accordion-item">
-                <button
-                  on:click={() => {
-                    toggleAccordion(index, item);
-                    getPlanDetail(item); // Direct function call in Svelte
-                  }}
-                  class="accordion-header {isOpen[index] ? 'active' : ''}"
-                >
-                  {item.ccp_title}
-                  <!-- ccp_title will be displayed here -->
-                </button>
+            <!-- Accordion -->
+            <div class="accordion">
+              {#each $allPlanList as item, index}
+                <div class="accordion-item">
+                  <button
+                    on:click={() => {
+                      toggleAccordion(index, item);
+                      getPlanDetail(item); // Direct function call in Svelte
+                    }}
+                    class="accordion-header {isOpen[index] ? 'active' : ''}"
+                  >
+                    {item.ccp_title}
+                    <!-- ccp_title will be displayed here -->
+                  </button>
 
-                <div
-                  class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                >
-                  <ul>
-                    <div
-                      class="accordion-content {isOpen[index] ? 'open' : ''}"
-                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                    >
-                      {#if item.asset && typeof item.asset === "object"}
-                        {#each Object.entries(item.asset) as [targetName, targetData]}
-                          <p
-                            on:click={() => {
-                              toggleSection(index, targetName);
-                            }}
-                            class={isSectionOpen[index]?.[targetName]
-                              ? "active"
-                              : ""}
-                          >
-                            {targetName}
-                          </p>
-                          <!-- This will display UNIX, NETWORK, etc. -->
-
-                          {#if targetData && targetData.length > 0}
-                            <ul
-                              class="sublist {isSectionOpen[index]?.[targetName]
-                                ? 'open'
-                                : ''}"
-                              style="max-height: {isSectionOpen[index]?.[
-                                targetName
-                              ]
-                                ? '100%'
-                                : '0px'}"
+                  <div
+                    class="accordion-content {isOpen[index] ? 'open' : ''}"
+                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                  >
+                    <ul>
+                      <div
+                        class="accordion-content {isOpen[index] ? 'open' : ''}"
+                        style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                      >
+                        {#if item.asset && typeof item.asset === "object"}
+                          {#each Object.entries(item.asset) as [targetName, targetData]}
+                            <p
+                              on:click={() => {
+                                toggleSection(index, targetName);
+                              }}
+                              class={isSectionOpen[index]?.[targetName]
+                                ? "active"
+                                : ""}
                             >
-                              {#each targetData as subItem}
-                                <li
-                                  on:click={() => {
-                                    activeMenu = subItem;
-                                    handleClickHostname(subItem); // Set selected hostname
-                                  }}
-                                >
-                                  <strong>{subItem.hostname}</strong>
-                                  <!-- Display the hostname -->
-                                </li>
-                              {/each}
-                            </ul>
-                          {/if}
-                        {/each}
-                      {:else}
-                        <li>No assets available</li>
-                        <!-- In case there are no assets -->
-                      {/if}
-                    </div>
-                  </ul>
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
+                              {targetName}
+                            </p>
+                            <!-- This will display UNIX, NETWORK, etc. -->
 
-        <!-- Buttons -->
-        <div class="buttons">
-          <button>복사</button>
-          <button on:click={deletePlan}>삭제</button>
-          <button>EXCEL</button>
+                            {#if targetData && targetData.length > 0}
+                              <ul
+                                class="sublist {isSectionOpen[index]?.[
+                                  targetName
+                                ]
+                                  ? 'open'
+                                  : ''}"
+                                style="max-height: {isSectionOpen[index]?.[
+                                  targetName
+                                ]
+                                  ? '100%'
+                                  : '0px'}"
+                              >
+                                {#each targetData as subItem}
+                                  <li
+                                    on:click={() => {
+                                      activeMenu = subItem;
+                                      handleClickHostname(subItem); // Set selected hostname
+                                    }}
+                                  >
+                                    <strong>{subItem.hostname}</strong>
+                                    <!-- Display the hostname -->
+                                  </li>
+                                {/each}
+                              </ul>
+                            {/if}
+                          {/each}
+                        {:else}
+                          <li>No assets available</li>
+                          <!-- In case there are no assets -->
+                        {/if}
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="buttons">
+            <button>복사</button>
+            <button on:click={deletePlan}>삭제</button>
+            <button>EXCEL</button>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-  <section class="section2">
-    {#if currentPage}
-      <svelte:component
-        this={currentPage}
-        {selectedData}
-        {selectedHostnameData}
-      />
-    {:else}
-      <article class="contentArea">
-        <section class="filterWrap">
-          <div>
-            <select bind:value={planIndex} on:change={viewPlanResultFunction}>
-              <option value="" selected disabled>프로젝트</option>
-              {#each $allPlanList as plan}
-                <option value={plan.ccp_index}>{plan.ccp_title}</option>
-              {/each}
-            </select>
-            <select bind:value={target} on:change={viewPlanResultFunction}>
-              <option value="" selected>점검대상</option>
-              <option value="UNIX">UNIX</option>
-              <option value="WINDOWS">WINDOWS</option>
-              <option value="PC">PC</option>
-              <option value="NETWORK">NETWORK</option>
-              <option value="DBMS">DBMS</option>
-              <option value="WEB">WEB</option>
-              <option value="WAS">WAS</option>
-              <option value="CLOUD">CLOUD</option>
-              <option value="SECURITY">SECURITY</option>
-            </select>
+    </section>
+    <section class="section2">
+      {#if currentPage}
+        <svelte:component
+          this={currentPage}
+          {selectedData}
+          {selectedHostnameData}
+        />
+      {:else}
+        <article class="contentArea">
+          <section class="filterWrap">
+            <div>
+              <select bind:value={planIndex} on:change={viewPlanResultFunction}>
+                <option value="" selected disabled>프로젝트</option>
+                {#each $allPlanList as plan}
+                  <option value={plan.ccp_index}>{plan.ccp_title}</option>
+                {/each}
+              </select>
+              <select bind:value={target} on:change={viewPlanResultFunction}>
+                <option value="" selected>점검대상</option>
+                <option value="UNIX">UNIX</option>
+                <option value="WINDOWS">WINDOWS</option>
+                <option value="PC">PC</option>
+                <option value="NETWORK">NETWORK</option>
+                <option value="DBMS">DBMS</option>
+                <option value="WEB">WEB</option>
+                <option value="WAS">WAS</option>
+                <option value="CLOUD">CLOUD</option>
+                <option value="SECURITY">SECURITY</option>
+              </select>
 
-            <select bind:value={hostName} on:change={viewPlanResultFunction}>
-              <option value="" selected>호스트</option>
-              {#each $allPlanList as item, index}
-                {#if item.asset && typeof item.asset === "object"}
-                  {#each Object.entries(item.asset) as [targetName, targetData]}
-                    {#each targetData as subItem}
-                      <option value={subItem.hostname}
-                        >{subItem.hostname}</option
-                      >
+              <select bind:value={hostName} on:change={viewPlanResultFunction}>
+                <option value="" selected>호스트</option>
+                {#each $allPlanList as item, index}
+                  {#if item.asset && typeof item.asset === "object"}
+                    {#each Object.entries(item.asset) as [targetName, targetData]}
+                      {#each targetData as subItem}
+                        <option value={subItem.hostname}
+                          >{subItem.hostname}</option
+                        >
+                      {/each}
                     {/each}
-                  {/each}
-                {/if}
-              {/each}
-            </select>
-            <select
-              bind:value={check_result}
-              on:change={viewPlanResultFunction}
-            >
-              <option value="" selected>점검항목</option>
-              <option value="양호">양호</option>
-              <option value="취약">취약</option>
-              <option value="인터뷰">인터뷰</option>
-              <option value="인터뷰">수동점검</option>
-            </select>
+                  {/if}
+                {/each}
+              </select>
+              <select
+                bind:value={check_result}
+                on:change={viewPlanResultFunction}
+              >
+                <option value="" selected>점검항목</option>
+                <option value="양호">양호</option>
+                <option value="취약">취약</option>
+                <option value="인터뷰">인터뷰</option>
+                <option value="인터뷰">수동점검</option>
+              </select>
 
-            <button
-              on:click={resetSearch}
-              class="btn btnSearch"
-              style="width: 98px; font-size: 14px;"
-              ><img src="assets/images/reset.png" alt="search" />초기화</button
-            >
-          </div>
-        </section>
-        <div class="tableListWrap">
-          <table class="tableList hdBorder">
-            <colgroup>
-              <col style="width:90px;" />
-              <col style="width:170px" />
-              <col style="width:140px" />
-              <col style="width: 200px;" />
-              <col />
-              <col style="width: 30%;" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th class="text-center">번호</th>
-                <th class="text-center">점검대상 </th>
-                <th class="text-center">점검항목 </th>
-                <th class="text-center">점검이름</th>
-                <th class="text-center">점검결과</th>
-                <th class="text-center">점검결과 </th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each paginatedData as data, index}
-                <tr on:click={() => selectPage(data)}>
-                  <!-- 번호: Reverse index to display latest first -->
-                  <td class="text-center"
-                    >{$viewPlanResult.length - (startIndex + index)}</td
-                  >
-                  <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
-                  <td class="text-center">
-                    {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
-                  </td>
-
-                  <!-- 점검항목: ccr_item_no__ccc_item_no -->
-                  <td class="text-center">
-                    <div>
-                      {data?.ccr_item_no__ccc_item_no || "N/A"}
-                    </div>
-                  </td>
-
-                  <!-- 점검이름: ccr_item_no__ccc_item_title -->
-                  <td>
-                    {data?.ccr_item_no__ccc_item_title || "N/A"}
-                  </td>
-
-                  <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
-                  <td>
-                    {@html data?.ccr_item_no__ccc_item_criteria.replace(
-                      /\n/g,
-                      "<br/>"
-                    ) || "N/A"}
-                  </td>
-
-                  <!-- 점검결과 (Actions): -->
-                  <td class="text-center">
-                    <div class="lastBox">
-                      <select
-                        style="width: 100px;"
-                        class="xs"
-                        on:click|stopPropagation={() => handleUpdateClick(data)}
-                      >
-                        {#each validOptions as option}
-                          <option
-                            value={option}
-                            selected={data.ccr_item_result === option}
-                          >
-                            {option}
-                          </option>
-                        {/each}
-                      </select>
-                      <!-- Bind change_method directly to the data object for each row -->
-                      <select
-                        style="width: 100px;"
-                        class="xs"
-                        on:click|stopPropagation
-                        on:change={(e) => {
-                          e.stopPropagation(); // Stop the event from bubbling up
-                          change_option = e.target.value; // Set the selected value to change_option
-                        }}
-                      >
-                        <option value="ALL">천제</option>
-                        <option value="ONE">해당</option>
-                      </select>
-                      <button
-                        class="btnSave"
-                        on:click|stopPropagation={resultUpdate}>저장</button
-                      >
-                      <button class="btnUpload">관련시스템보기</button>
-                    </div>
-                  </td>
+              <button
+                on:click={resetSearch}
+                class="btn btnSearch"
+                style="width: 98px; font-size: 14px;"
+                ><img
+                  src="assets/images/reset.png"
+                  alt="search"
+                />초기화</button
+              >
+            </div>
+          </section>
+          <div class="tableListWrap">
+            <table class="tableList hdBorder">
+              <colgroup>
+                <col style="width:90px;" />
+                <col style="width:170px" />
+                <col style="width:140px" />
+                <col style="width: 200px;" />
+                <col />
+                <col style="width: 30%;" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="text-center">번호</th>
+                  <th class="text-center">점검대상 </th>
+                  <th class="text-center">점검항목 </th>
+                  <th class="text-center">점검이름</th>
+                  <th class="text-center">점검결과</th>
+                  <th class="text-center">점검결과 </th>
                 </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-        <!-- Pagination -->
-        <div class="pagination">
-          <!-- First Page Button -->
-          <button
-            on:click={() => goToPage(1)}
-            disabled={currentPagePagination === 1}
-          >
-            {"<<"}
-          </button>
+              </thead>
+              <tbody>
+                {#each paginatedData as data, index}
+                  <tr on:click={() => selectPage(data)}>
+                    <!-- 번호: Reverse index to display latest first -->
+                    <td class="text-center"
+                      >{$viewPlanResult.length - (startIndex + index)}</td
+                    >
+                    <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
+                    <td class="text-center">
+                      {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
+                    </td>
 
-          <!-- Previous Page Button -->
-          <button
-            on:click={() => goToPage(currentPagePagination - 1)}
-            disabled={currentPagePagination === 1}
-          >
-            {"<"}
-          </button>
+                    <!-- 점검항목: ccr_item_no__ccc_item_no -->
+                    <td class="text-center">
+                      <div>
+                        {data?.ccr_item_no__ccc_item_no || "N/A"}
+                      </div>
+                    </td>
 
-          <!-- Visible Page Buttons -->
-          {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
+                    <!-- 점검이름: ccr_item_no__ccc_item_title -->
+                    <td>
+                      {data?.ccr_item_no__ccc_item_title || "N/A"}
+                    </td>
+
+                    <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
+                    <td>
+                      {@html data?.ccr_item_no__ccc_item_criteria.replace(
+                        /\n/g,
+                        "<br/>"
+                      ) || "N/A"}
+                    </td>
+
+                    <!-- 점검결과 (Actions): -->
+                    <td class="text-center">
+                      <div class="lastBox">
+                        <select
+                          style="width: 100px;"
+                          class="xs"
+                          on:click|stopPropagation={() =>
+                            handleUpdateClick(data)}
+                        >
+                          {#each validOptions as option}
+                            <option
+                              value={option}
+                              selected={data.ccr_item_result === option}
+                            >
+                              {option}
+                            </option>
+                          {/each}
+                        </select>
+                        <!-- Bind change_method directly to the data object for each row -->
+                        <select
+                          style="width: 100px;"
+                          class="xs"
+                          on:click|stopPropagation
+                          on:change={(e) => {
+                            e.stopPropagation(); // Stop the event from bubbling up
+                            change_option = e.target.value; // Set the selected value to change_option
+                          }}
+                        >
+                          <option value="ALL">천제</option>
+                          <option value="ONE">해당</option>
+                        </select>
+                        <button
+                          class="btnSave"
+                          on:click|stopPropagation={resultUpdate}>저장</button
+                        >
+                        <button class="btnUpload">관련시스템보기</button>
+                      </div>
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div class="pagination">
+            <!-- First Page Button -->
             <button
-              class:selected={currentPagePagination === paginationStart + index}
-              on:click={() => goToPage(paginationStart + index)}
+              on:click={() => goToPage(1)}
+              disabled={currentPagePagination === 1}
             >
-              {paginationStart + index}
+              {"<<"}
             </button>
-          {/each}
 
-          <!-- Next Page Button -->
-          <button
-            on:click={() => goToPage(currentPagePagination + 1)}
-            disabled={currentPagePagination === totalPages}
-          >
-            {">"}
-          </button>
+            <!-- Previous Page Button -->
+            <button
+              on:click={() => goToPage(currentPagePagination - 1)}
+              disabled={currentPagePagination === 1}
+            >
+              {"<"}
+            </button>
 
-          <!-- Last Page Button -->
-          <button
-            on:click={() => goToPage(totalPages)}
-            disabled={currentPagePagination === totalPages}
-          >
-            {">>"}
-          </button>
-        </div>
-        <div class="last_button">
-          <button class="btn btnSave">변경내역이력조회 </button>
-        </div>
-      </article>
-    {/if}
-  </section>
-</main>
+            <!-- Visible Page Buttons -->
+            {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
+              <button
+                class:selected={currentPagePagination ===
+                  paginationStart + index}
+                on:click={() => goToPage(paginationStart + index)}
+              >
+                {paginationStart + index}
+              </button>
+            {/each}
+
+            <!-- Next Page Button -->
+            <button
+              on:click={() => goToPage(currentPagePagination + 1)}
+              disabled={currentPagePagination === totalPages}
+            >
+              {">"}
+            </button>
+
+            <!-- Last Page Button -->
+            <button
+              on:click={() => goToPage(totalPages)}
+              disabled={currentPagePagination === totalPages}
+            >
+              {">>"}
+            </button>
+          </div>
+          <div class="last_button">
+            <button class="btn btnSave">변경내역이력조회 </button>
+          </div>
+        </article>
+      {/if}
+    </section>
+  </main>
+{/if}
 {#if closeShowModalDetail}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
@@ -559,6 +577,38 @@
 {/if}
 
 <style>
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(167, 167, 167, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it sits above other content */
+  }
+
+  .loading-spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+  }
+
+  /* Spinner animation */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
   .menuHeader {
     position: relative;
   }

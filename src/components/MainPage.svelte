@@ -73,8 +73,11 @@
       throw err;
     }
   }
-  onMount(() => {
-    getPlanList();
+  let loading = true;
+  onMount(async () => {
+    loading = true;
+    await getPlanList();
+    loading = false;
   });
   // $: console.log("allPlanList", $allPlanList);
 </script>
@@ -527,10 +530,10 @@
       <Route path="/page1" component={Page1} />
       <Route path="/page2" component={Page2} />
       <Route path="/page3">
-        <Page3 {getPlanList} />
+        <Page3 {getPlanList} {loading} />
       </Route>
       <Route path="/page4">
-        <Page4 {getPlanList} />
+        <Page4 {getPlanList} {loading} />
       </Route>
       <Route path="/page5" component={Page5} />
       <Route path="/page6" component={Page6} />

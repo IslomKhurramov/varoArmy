@@ -21,6 +21,7 @@
   let categoryToggles = {};
   let isOpen = Array(8).fill(false); // Initializing states for 8 accordion items
   let subIsOpen = {}; // For tracking open states of submenus (like UNIX)
+  let loading = true;
 
   // Toggle top-level accordion
   let groupIndex = "";
@@ -78,8 +79,10 @@
     }
   }
   $: console.log("allchecklist", $allCheckList);
-  onMount(() => {
-    allCheckListGet();
+  onMount(async () => {
+    loading = true;
+    await allCheckListGet();
+    loading = false;
   });
   let selectedTargetData = [];
   let selectedTarget = [];
@@ -187,6 +190,7 @@
 
   async function createChecklist() {
     try {
+      loading = true;
       const response = await setNewChecklistGroup(
         selected_checklist_id,
         new_checlist_name
@@ -198,6 +202,7 @@
         new_checlist_name = "";
         selected_checklist_id = "";
         isAddingNewGroup = false;
+        loading = false;
       }
     } catch (err) {
       console.error(err);
@@ -208,12 +213,14 @@
     const isConfirmed = await confirmDelete();
     if (!isConfirmed) return;
     try {
+      loading = true;
       const response = await setDeleteChecklistGroup(groupIndex);
 
       if (response.RESULT === "OK") {
         successAlert(`${response.CODE}`);
         await allCheckListGet(); // Fetch updated data after deletion
         groupIndex = "";
+        loading = false;
       } else {
         console.log(response.CODE);
       }
@@ -226,344 +233,365 @@
   }
 </script>
 
-<main class="table-container">
-  <section class="section1">
-    <!-- LEFT SIDE -->
-    <div class="body_menu">
-      <div class="menuContainer">
-        <!-- Header -->
-        <div>
-          <div class="menuHeader">
-            {mainTitle}
-            {#if currentPage === Swiper7}
-              <img
-                src="assets/images/back.png"
-                alt="back"
-                on:click={closeSwiper}
-              />
-            {/if}
-          </div>
+{#if loading}
+  <div class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+{:else}
+  <main class="table-container">
+    <section class="section1">
+      <!-- LEFT SIDE -->
+      <div class="body_menu">
+        <div class="menuContainer">
+          <!-- Header -->
+          <div>
+            <div class="menuHeader">
+              {mainTitle}
+              {#if currentPage === Swiper7}
+                <img
+                  src="assets/images/back.png"
+                  alt="back"
+                  on:click={closeSwiper}
+                />
+              {/if}
+            </div>
 
-          <!-- Accordion -->
-          <div class="accordion">
-            {#if $allCheckList && Object.keys($allCheckList).length > 0}
-              {#each Object.entries($allCheckList) as [key, item], index}
-                <div class="accordion-item">
-                  <button
-                    on:click={() => toggleAccordion(index, item)}
-                    class="accordion-header {isOpen[index] ? 'active' : ''}"
-                  >
-                    {item.ccg_group}
-                  </button>
+            <!-- Accordion -->
+            <div class="accordion">
+              {#if $allCheckList && Object.keys($allCheckList).length > 0}
+                {#each Object.entries($allCheckList) as [key, item], index}
+                  <div class="accordion-item">
+                    <button
+                      on:click={() => toggleAccordion(index, item)}
+                      class="accordion-header {isOpen[index] ? 'active' : ''}"
+                    >
+                      {item.ccg_group}
+                    </button>
 
-                  <!-- Accordion content -->
-                  <div
-                    class="accordion-content {isOpen[index] ? 'open' : ''}"
-                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                  >
-                    <ul>
-                      <div
-                        class="accordion-content {isOpen[index] ? 'open' : ''}"
-                        style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                      >
-                        <!-- Render UNIX section if it exists -->
-                        {#if item.UNIX && item.UNIX.length > 0}
-                          <p
-                            on:click={() => {
-                              toggleSection(key, "UNIX");
-                              handleClickTarget(item.UNIX, item, "UNIX");
-                            }}
-                            class={isSectionOpen[key]?.UNIX ? "active" : ""}
-                          >
-                            UNIX
-                          </p>
-                          <ul
-                            class="sublist {isSectionOpen[key]?.UNIX
-                              ? 'open'
-                              : ''}"
-                            style="max-height: {isSectionOpen[key]?.UNIX
-                              ? '100%'
-                              : '0px'}"
-                          >
-                            {#each item.UNIX as subItem}
-                              <li
-                                on:click={() => {
-                                  (activeMenu = subItem.ccc_item_no),
-                                    selectPage(subItem);
-                                }}
-                              >
-                                {subItem.ccc_item_no}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
+                    <!-- Accordion content -->
+                    <div
+                      class="accordion-content {isOpen[index] ? 'open' : ''}"
+                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                    >
+                      <ul>
+                        <div
+                          class="accordion-content {isOpen[index]
+                            ? 'open'
+                            : ''}"
+                          style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                        >
+                          <!-- Render UNIX section if it exists -->
+                          {#if item.UNIX && item.UNIX.length > 0}
+                            <p
+                              on:click={() => {
+                                toggleSection(key, "UNIX");
+                                handleClickTarget(item.UNIX, item, "UNIX");
+                              }}
+                              class={isSectionOpen[key]?.UNIX ? "active" : ""}
+                            >
+                              UNIX
+                            </p>
+                            <ul
+                              class="sublist {isSectionOpen[key]?.UNIX
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[key]?.UNIX
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each item.UNIX as subItem}
+                                <li
+                                  on:click={() => {
+                                    (activeMenu = subItem.ccc_item_no),
+                                      selectPage(subItem);
+                                  }}
+                                >
+                                  {subItem.ccc_item_no}
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
 
-                        <!-- WINDOWS Section -->
-                        {#if item.WINDOWS && item.WINDOWS.length > 0}
-                          <p
-                            on:click={() => {
-                              toggleSection(key, "WINDOWS");
-                              handleClickTarget(item.WINDOWS, item, "WINDOWS");
-                            }}
-                            class={isSectionOpen[key]?.WINDOWS ? "active" : ""}
-                          >
-                            WINDOWS
-                          </p>
-                          <ul
-                            class="sublist {isSectionOpen[key]?.WINDOWS
-                              ? 'open'
-                              : ''}"
-                            style="max-height: {isSectionOpen[key]?.WINDOWS
-                              ? '100%'
-                              : '0px'}"
-                          >
-                            {#each item.WINDOWS as subItem}
-                              <li
-                                on:click={() => {
-                                  (activeMenu = subItem.ccc_item_no),
-                                    selectPage(subItem);
-                                }}
-                              >
-                                {subItem.ccc_item_no}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
+                          <!-- WINDOWS Section -->
+                          {#if item.WINDOWS && item.WINDOWS.length > 0}
+                            <p
+                              on:click={() => {
+                                toggleSection(key, "WINDOWS");
+                                handleClickTarget(
+                                  item.WINDOWS,
+                                  item,
+                                  "WINDOWS"
+                                );
+                              }}
+                              class={isSectionOpen[key]?.WINDOWS
+                                ? "active"
+                                : ""}
+                            >
+                              WINDOWS
+                            </p>
+                            <ul
+                              class="sublist {isSectionOpen[key]?.WINDOWS
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[key]?.WINDOWS
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each item.WINDOWS as subItem}
+                                <li
+                                  on:click={() => {
+                                    (activeMenu = subItem.ccc_item_no),
+                                      selectPage(subItem);
+                                  }}
+                                >
+                                  {subItem.ccc_item_no}
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
 
-                        <!-- NETWORK Section -->
-                        {#if item.NETWORK && item.NETWORK.length > 0}
-                          <p
-                            on:click={() => {
-                              toggleSection(key, "NETWORK");
-                              handleClickTarget(item.NETWORK, item, "NETWORK");
-                            }}
-                            class={isSectionOpen[key]?.NETWORK ? "active" : ""}
-                          >
-                            NETWORK
-                          </p>
-                          <ul
-                            class="sublist {isSectionOpen[key]?.NETWORK
-                              ? 'open'
-                              : ''}"
-                            style="max-height: {isSectionOpen[key]?.NETWORK
-                              ? '100%'
-                              : '0px'}"
-                          >
-                            {#each item.NETWORK as subItem}
-                              <li
-                                on:click={() => {
-                                  (activeMenu = subItem.ccc_item_no),
-                                    selectPage(subItem);
-                                }}
-                              >
-                                {subItem.ccc_item_no}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
+                          <!-- NETWORK Section -->
+                          {#if item.NETWORK && item.NETWORK.length > 0}
+                            <p
+                              on:click={() => {
+                                toggleSection(key, "NETWORK");
+                                handleClickTarget(
+                                  item.NETWORK,
+                                  item,
+                                  "NETWORK"
+                                );
+                              }}
+                              class={isSectionOpen[key]?.NETWORK
+                                ? "active"
+                                : ""}
+                            >
+                              NETWORK
+                            </p>
+                            <ul
+                              class="sublist {isSectionOpen[key]?.NETWORK
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[key]?.NETWORK
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each item.NETWORK as subItem}
+                                <li
+                                  on:click={() => {
+                                    (activeMenu = subItem.ccc_item_no),
+                                      selectPage(subItem);
+                                  }}
+                                >
+                                  {subItem.ccc_item_no}
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
 
-                        <!-- DBMS Section -->
-                        {#if item.DBMS && item.DBMS.length > 0}
-                          <p
-                            on:click={() => {
-                              toggleSection(key, "DBMS");
-                              handleClickTarget(item.DBMS, item, "DBMS");
-                            }}
-                            class={isSectionOpen[key]?.DBMS ? "active" : ""}
-                          >
-                            DBMS
-                          </p>
-                          <ul
-                            class="sublist {isSectionOpen[key]?.DBMS
-                              ? 'open'
-                              : ''}"
-                            style="max-height: {isSectionOpen[key]?.DBMS
-                              ? '100%'
-                              : '0px'}"
-                          >
-                            {#each item.DBMS as subItem}
-                              <li
-                                on:click={() => {
-                                  (activeMenu = subItem.ccc_item_no),
-                                    selectPage(subItem);
-                                }}
-                              >
-                                {subItem.ccc_item_no}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
+                          <!-- DBMS Section -->
+                          {#if item.DBMS && item.DBMS.length > 0}
+                            <p
+                              on:click={() => {
+                                toggleSection(key, "DBMS");
+                                handleClickTarget(item.DBMS, item, "DBMS");
+                              }}
+                              class={isSectionOpen[key]?.DBMS ? "active" : ""}
+                            >
+                              DBMS
+                            </p>
+                            <ul
+                              class="sublist {isSectionOpen[key]?.DBMS
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[key]?.DBMS
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each item.DBMS as subItem}
+                                <li
+                                  on:click={() => {
+                                    (activeMenu = subItem.ccc_item_no),
+                                      selectPage(subItem);
+                                  }}
+                                >
+                                  {subItem.ccc_item_no}
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
 
-                        <!-- Repeat the same pattern for other sections -->
-                        <!-- WAS Section -->
-                        {#if item.WAS && item.WAS.length > 0}
-                          <p
-                            on:click={() => {
-                              toggleSection(key, "WAS");
-                              handleClickTarget(item.WAS, item, "WAS");
-                            }}
-                            class={isSectionOpen[key]?.WAS ? "active" : ""}
-                          >
-                            WAS
-                          </p>
-                          <ul
-                            class="sublist {isSectionOpen[key]?.WAS
-                              ? 'open'
-                              : ''}"
-                            style="max-height: {isSectionOpen[key]?.WAS
-                              ? '100%'
-                              : '0px'}"
-                          >
-                            {#each item.WAS as subItem}
-                              <li
-                                on:click={() => {
-                                  (activeMenu = subItem.ccc_item_no),
-                                    selectPage(subItem);
-                                }}
-                              >
-                                {subItem.ccc_item_no}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
-                      </div>
-                    </ul>
+                          <!-- Repeat the same pattern for other sections -->
+                          <!-- WAS Section -->
+                          {#if item.WAS && item.WAS.length > 0}
+                            <p
+                              on:click={() => {
+                                toggleSection(key, "WAS");
+                                handleClickTarget(item.WAS, item, "WAS");
+                              }}
+                              class={isSectionOpen[key]?.WAS ? "active" : ""}
+                            >
+                              WAS
+                            </p>
+                            <ul
+                              class="sublist {isSectionOpen[key]?.WAS
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[key]?.WAS
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each item.WAS as subItem}
+                                <li
+                                  on:click={() => {
+                                    (activeMenu = subItem.ccc_item_no),
+                                      selectPage(subItem);
+                                  }}
+                                >
+                                  {subItem.ccc_item_no}
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
+                        </div>
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              {/each}
-            {/if}
+                {/each}
+              {/if}
+            </div>
           </div>
-        </div>
 
-        <!-- Buttons -->
-        <div class="buttons">
-          <button on:click={() => (isAddingNewGroup = true)}>복사</button>
-          <button on:click={deleteGroup}>삭제</button>
-          <button>EXCEL</button>
+          <!-- Buttons -->
+          <div class="buttons">
+            <button on:click={() => (isAddingNewGroup = true)}>복사</button>
+            <button on:click={deleteGroup}>삭제</button>
+            <button>EXCEL</button>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-  <section class="section2">
-    {#if currentPage}
-      <svelte:component
-        this={currentPage}
-        bind:selectedTargetData
-        bind:selectedTarget
-        {allCheckListGet}
-      />
-    {:else}
-      <article class="contentArea">
-        <div class="last_button2">
-          <select on:change={updateItemsPerPage}>
-            <option value="10" selected>10줄</option>
-            <option value="20">20줄</option>
-          </select>
-        </div>
-        <div class="tableListWrap">
-          <table class="tableList hdBorder">
-            <colgroup>
-              <col style="width: 50px;" />
-              <col style="width:90px;" />
-              <col />
-              <col style="width:140px" />
-              <col />
-              <col style="width: 300px;" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th class="text-center">
-                  <input
-                    type="checkbox"
-                    on:click={selectAll}
-                    bind:checked={allSelected}
-                  /></th
-                >
-                <th class="text-center">번호</th>
-                <th class="text-center">점검대상 </th>
-                <th class="text-center">점검항목 </th>
-                <th class="text-center">점검이름</th>
-                <th class="text-center">등록일</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#if paginatedData && paginatedData.length > 0}
-                {#each paginatedData as data, index}
-                  <tr>
-                    <td class="text-center">
-                      <input
-                        type="checkbox"
-                        bind:group={selected}
-                        value={data}
-                        name={data}
-                      /></td
-                    >
-                    <td class="text-center"
-                      >{selectedTargetData.length - (startIndex + index)}</td
-                    >
-                    <td class="text-center"
-                      >{selectedTarget?.ccg_support_part}</td
-                    >
-                    <td class="text-center">{data.ccc_item_no}</td>
-                    <td>{data.ccc_item_title}</td>
-                    <td class="text-center">{selectedTarget?.ccg_createdate}</td
-                    >
-                  </tr>
-                {/each}
-              {:else}
+    </section>
+    <section class="section2">
+      {#if currentPage}
+        <svelte:component
+          this={currentPage}
+          bind:selectedTargetData
+          bind:selectedTarget
+          {allCheckListGet}
+        />
+      {:else}
+        <article class="contentArea">
+          <div class="last_button2">
+            <select on:change={updateItemsPerPage}>
+              <option value="10" selected>10줄</option>
+              <option value="20">20줄</option>
+            </select>
+          </div>
+          <div class="tableListWrap">
+            <table class="tableList hdBorder">
+              <colgroup>
+                <col style="width: 50px;" />
+                <col style="width:90px;" />
+                <col />
+                <col style="width:140px" />
+                <col />
+                <col style="width: 300px;" />
+              </colgroup>
+              <thead>
                 <tr>
-                  <td class="text-center" colspan="6">No Data Selected</td>
+                  <th class="text-center">
+                    <input
+                      type="checkbox"
+                      on:click={selectAll}
+                      bind:checked={allSelected}
+                    /></th
+                  >
+                  <th class="text-center">번호</th>
+                  <th class="text-center">점검대상 </th>
+                  <th class="text-center">점검항목 </th>
+                  <th class="text-center">점검이름</th>
+                  <th class="text-center">등록일</th>
                 </tr>
-              {/if}
-            </tbody>
-          </table>
-        </div>
-        <!-- Pagination -->
-        <div class="pagination">
-          <button
-            on:click={() => goToPage(1)}
-            disabled={currentPagePagination === 1}
-          >
-            {"<<"}
-          </button>
-          <button
-            on:click={() => goToPage(currentPagePagination - 1)}
-            disabled={currentPagePagination === 1}
-          >
-            {"<"}
-          </button>
-          {#each Array(totalPages).fill(0) as _, pageIndex}
+              </thead>
+              <tbody>
+                {#if paginatedData && paginatedData.length > 0}
+                  {#each paginatedData as data, index}
+                    <tr>
+                      <td class="text-center">
+                        <input
+                          type="checkbox"
+                          bind:group={selected}
+                          value={data}
+                          name={data}
+                        /></td
+                      >
+                      <td class="text-center"
+                        >{selectedTargetData.length - (startIndex + index)}</td
+                      >
+                      <td class="text-center"
+                        >{selectedTarget?.ccg_support_part}</td
+                      >
+                      <td class="text-center">{data.ccc_item_no}</td>
+                      <td>{data.ccc_item_title}</td>
+                      <td class="text-center"
+                        >{selectedTarget?.ccg_createdate}</td
+                      >
+                    </tr>
+                  {/each}
+                {:else}
+                  <tr>
+                    <td class="text-center" colspan="6">No Data Selected</td>
+                  </tr>
+                {/if}
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div class="pagination">
             <button
-              class:selected={currentPagePagination === pageIndex + 1}
-              on:click={() => goToPage(pageIndex + 1)}
+              on:click={() => goToPage(1)}
+              disabled={currentPagePagination === 1}
             >
-              {pageIndex + 1}
+              {"<<"}
             </button>
-          {/each}
-          <button
-            on:click={() => goToPage(currentPagePagination + 1)}
-            disabled={currentPagePagination === totalPages}
-          >
-            {">"}
-          </button>
-          <button
-            on:click={() => goToPage(totalPages)}
-            disabled={currentPagePagination === totalPages}
-          >
-            {">>"}
-          </button>
-        </div>
+            <button
+              on:click={() => goToPage(currentPagePagination - 1)}
+              disabled={currentPagePagination === 1}
+            >
+              {"<"}
+            </button>
+            {#each Array(totalPages).fill(0) as _, pageIndex}
+              <button
+                class:selected={currentPagePagination === pageIndex + 1}
+                on:click={() => goToPage(pageIndex + 1)}
+              >
+                {pageIndex + 1}
+              </button>
+            {/each}
+            <button
+              on:click={() => goToPage(currentPagePagination + 1)}
+              disabled={currentPagePagination === totalPages}
+            >
+              {">"}
+            </button>
+            <button
+              on:click={() => goToPage(totalPages)}
+              disabled={currentPagePagination === totalPages}
+            >
+              {">>"}
+            </button>
+          </div>
 
-        <div class="last_button">
-          <button class="btn btnSave" on:click={deleteChecklist}
-            >선택항목삭제
-          </button>
-          <button class="btn btnSave">변경이력확인 </button>
-        </div>
-      </article>
-    {/if}
-  </section>
-</main>
+          <div class="last_button">
+            <button class="btn btnSave" on:click={deleteChecklist}
+              >선택항목삭제
+            </button>
+            <button class="btn btnSave">변경이력확인 </button>
+          </div>
+        </article>
+      {/if}
+    </section>
+  </main>
+{/if}
 {#if isAddingNewGroup}
   <div class="modal-open-wrap">
     <dialog open on:close={() => (isAddingNewGroup = false)}>
@@ -595,6 +623,37 @@
 {/if}
 
 <style>
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(167, 167, 167, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it sits above other content */
+  }
+
+  .loading-spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+  }
+
+  /* Spinner animation */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
   .menuHeader {
     position: relative;
   }

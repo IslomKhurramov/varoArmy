@@ -138,7 +138,6 @@
       if (response.RESULT === "OK") {
         if (response.CODE === "기본 제공된 체크리스트는 삭제가 불가능합니다.") {
           warningAlert("기본 제공된 체크리스트는 삭제가 불가능합니다");
-          selected = [];
           allSelected = false;
         } else {
           successAlert(`${response.CODE}`);
@@ -154,28 +153,28 @@
 </script>
 
 <div class="contentArea">
-  <section bind:this="{swiperContainer}" class="topCon swiper-container">
+  <section bind:this={swiperContainer} class="topCon swiper-container">
     <div class="menu-container">
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click="{() => handleScroll('prev')}"
+        on:click={() => handleScroll("prev")}
       >
         ◀
       </button>
 
       <div class="menu-wrapper-container">
-        <div class="menu-wrapper" id="menuWrapper" bind:this="{menuWrapper}">
+        <div class="menu-wrapper" id="menuWrapper" bind:this={menuWrapper}>
           {#each selectedTargetData as subItem}
             <div
-              data-item-no="{subItem.ccc_item_no}"
-              value="{subItem.ccg_index_id}"
-              name="{subItem}"
+              data-item-no={subItem.ccc_item_no}
+              value={subItem.ccg_index_id}
+              name={subItem}
               class="menu-item {activeAsset &&
               activeAsset.ccc_item_no === subItem.ccc_item_no
                 ? 'active'
                 : ''}"
-              on:click="{() => handleSlideclick(subItem)}"
+              on:click={() => handleSlideclick(subItem)}
             >
               {subItem.ccc_item_no}
             </div>
@@ -186,7 +185,7 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click="{() => handleScroll('next')}"
+        on:click={() => handleScroll("next")}
       >
         ▶
       </button>
@@ -246,14 +245,14 @@
       >
     </div>
     <div class="lastButtons">
-      <button on:click="{deleteChecklist}">삭제하기</button>
+      <button on:click={deleteChecklist}>삭제하기</button>
       <button>업데이트</button>
     </div>
   </div>
 </div>
 {#if isAddingNewGroup}
   <div class="modal-open-wrap">
-    <dialog open on:close="{() => (isAddingNewGroup = false)}">
+    <dialog open on:close={() => (isAddingNewGroup = false)}>
       <div class="modal-content">
         <div class="modal">
           <input
