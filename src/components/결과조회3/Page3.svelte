@@ -20,15 +20,17 @@
   let isSectionOpen = {}; // To manage the open/close state of the sections
   export let getPlanList;
   export let loading = true;
-
+  let targetNamePlan = "";
   // Function to toggle the section (asset category, like UNIX or NETWORK)
   function toggleSection(itemKey, sectionKey) {
     if (!isSectionOpen[itemKey]) {
       isSectionOpen[itemKey] = {}; // Ensure a nested object exists for each itemKey
     }
     isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey]; // Toggle the section
+    targetNamePlan = sectionKey;
   }
 
+  // $: console.log("plan and target", plan_index, targetNamePlan);
   for (let i = 0; i < 50; i++) {
     resultData.push({
       ast_uuid__ass_uuid__ast_hostname: "NETWORK",
@@ -43,8 +45,17 @@
   export let activeMenu = "신규계획등록";
   let plan_index = "";
   const toggleAccordion = (index, item) => {
-    isOpen[index] = !isOpen[index];
-    plan_index = item.ccp_index;
+    // Reset all states when a new plan is selected
+    isOpen.fill(false); // Close all accordions
+    isOpen[index] = true; // Open only the selected accordion
+
+    // Clear other states to ensure a fresh start
+    plan_index = item.ccp_index; // Set the selected plan index
+    planIndex = plan_index;
+    targetNamePlan = ""; // Reset the target name
+    selectedHostname = ""; // Reset the selected hostname
+    isSectionOpen = {}; // Clear any previously opened sections
+    viewPlanResultFunction(); // Fetch data for the selected plan
   };
 
   let selectedData = null;
@@ -93,6 +104,8 @@
     checkList_item_no = "";
     check_result = "";
     show_option = "";
+    targetNamePlan = ""; // Reset the target name
+    selectedHostname = ""; // Reset the selected hostname
   }
 
   /*********************************************/
@@ -102,7 +115,7 @@
   function handleUpdateClick(data) {
     result_index = data.ccr_index;
   }
-  $: console.log("chaangeoption", change_option);
+  // $: console.log("chaangeoption", change_option);
   async function resultUpdate() {
     try {
       const response = await setResultChanged(
@@ -114,7 +127,7 @@
       );
 
       if (response.RESULT === "OK") {
-        console.log("response", response);
+        // console.log("response", response);
         successAlert(response.CODE);
         viewPlanResultFunction();
       } else {
@@ -124,7 +137,7 @@
       throw err;
     }
   }
-  $: console.log("viewPlanResult", $viewPlanResult);
+  // $: console.log("viewPlanResult", $viewPlanResult);
   // Close modal when Esc key is pressed
   function handleKeyDown(event) {
     if (event.key === "Escape") {
@@ -145,7 +158,7 @@
     };
   });
 
-  $: console.log("selectedData", selectedData);
+  // $: console.log("selectedData", selectedData);
   /**************PAGINATION*/
   let currentPagePagination = 1; // Current page number
   let itemsPerPage = 100; // Items per page
@@ -155,7 +168,16 @@
   $: endIndex = startIndex + itemsPerPage;
 
   // Slice the data for the current page
-  $: paginatedData = $viewPlanResult.slice(startIndex, endIndex);
+  $: paginatedData = $viewPlanResult
+    .slice(startIndex, endIndex)
+    .filter((item) => {
+      return (
+        (!selectedHostname ||
+          item.ast_uuid__ass_uuid__ast_hostname === selectedHostname) &&
+        (!targetNamePlan ||
+          item.ast_uuid__ast_target__cct_target === targetNamePlan)
+      );
+    });
 
   // Calculate total pages
   $: totalPages = Math.ceil($viewPlanResult.length / itemsPerPage);
@@ -206,7 +228,7 @@
       const response = await getPlanDetailInformation(item.ccp_index);
 
       if (response) {
-        console.log("response from funct", response);
+        // console.log("response from funct", response);
         detailInfoPlan.set(response);
       } else {
       }
@@ -218,12 +240,12 @@
 
   let selectedHostnameData = null;
   function handleClickHostname(data) {
-    console.log("handle data", data);
-    currentPage = Swiper;
+    // console.log("handle data", data);
     selectedHostname = data.hostname;
     selectedHostnameData = data;
+    currentPage = null;
   }
-  $: console.log("detailPlan", $detailInfoPlan);
+  // $: console.log("selectedHostname", selectedHostname);
   // Function to filter data based on selected target and hostname
   let selectedTarget = "";
   let selectedHostname = "";
@@ -349,6 +371,8 @@
           this={currentPage}
           {selectedData}
           {selectedHostnameData}
+          {plan_index}
+          {viewPlanResultFunction}
         />
       {:else}
         <article class="contentArea">
@@ -504,53 +528,55 @@
               </tbody>
             </table>
           </div>
-          <!-- Pagination -->
-          <div class="pagination">
-            <!-- First Page Button -->
-            <button
-              on:click={() => goToPage(1)}
-              disabled={currentPagePagination === 1}
-            >
-              {"<<"}
-            </button>
+          <div style="width: 100%; display:flex; justify-content:flex-end;">
+            <div class="last_button">
+              <!-- Pagination -->
+              <div class="pagination">
+                <!-- First Page Button -->
+                <button
+                  on:click={() => goToPage(1)}
+                  disabled={currentPagePagination === 1}
+                >
+                  {"<<"}
+                </button>
 
-            <!-- Previous Page Button -->
-            <button
-              on:click={() => goToPage(currentPagePagination - 1)}
-              disabled={currentPagePagination === 1}
-            >
-              {"<"}
-            </button>
+                <!-- Previous Page Button -->
+                <button
+                  on:click={() => goToPage(currentPagePagination - 1)}
+                  disabled={currentPagePagination === 1}
+                >
+                  {"<"}
+                </button>
 
-            <!-- Visible Page Buttons -->
-            {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
-              <button
-                class:selected={currentPagePagination ===
-                  paginationStart + index}
-                on:click={() => goToPage(paginationStart + index)}
-              >
-                {paginationStart + index}
-              </button>
-            {/each}
+                <!-- Visible Page Buttons -->
+                {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
+                  <button
+                    class:selected={currentPagePagination ===
+                      paginationStart + index}
+                    on:click={() => goToPage(paginationStart + index)}
+                  >
+                    {paginationStart + index}
+                  </button>
+                {/each}
 
-            <!-- Next Page Button -->
-            <button
-              on:click={() => goToPage(currentPagePagination + 1)}
-              disabled={currentPagePagination === totalPages}
-            >
-              {">"}
-            </button>
+                <!-- Next Page Button -->
+                <button
+                  on:click={() => goToPage(currentPagePagination + 1)}
+                  disabled={currentPagePagination === totalPages}
+                >
+                  {">"}
+                </button>
 
-            <!-- Last Page Button -->
-            <button
-              on:click={() => goToPage(totalPages)}
-              disabled={currentPagePagination === totalPages}
-            >
-              {">>"}
-            </button>
-          </div>
-          <div class="last_button">
-            <button class="btn btnSave">변경내역이력조회 </button>
+                <!-- Last Page Button -->
+                <button
+                  on:click={() => goToPage(totalPages)}
+                  disabled={currentPagePagination === totalPages}
+                >
+                  {">>"}
+                </button>
+              </div>
+              <button class="btn btnSave">변경내역이력조회 </button>
+            </div>
           </div>
         </article>
       {/if}
@@ -648,7 +674,7 @@
   .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    /* margin-top: 20px; */
     gap: 5px;
   }
   .pagination button {
@@ -781,9 +807,9 @@
     align-items: center;
   }
   .last_button {
-    width: 100%;
+    width: 60%;
     display: flex;
-    justify-content: end;
+    justify-content: space-between;
     align-items: center;
   }
   .last_button button {

@@ -24,7 +24,7 @@ export const setAssetUnActivate = async (uuid) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     const data = response.data;
@@ -50,7 +50,7 @@ export const setAssetActivate = async (uuid) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     const data = response.data;
@@ -89,7 +89,7 @@ export const setNewAssetGroup = async (asset_group_name) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     const data = response.data;
@@ -114,14 +114,14 @@ export const getDetailInformationOfAsset = async (uuid) => {
       {
         asset_uuid: uuid,
       },
-      { withCredentials: true },
+      { withCredentials: true }
     );
 
     if (response.data.RESULT === "OK") {
       return response.data.CODE; // Return the data from the API
     } else {
       throw new Error(
-        `Error Code on getDetailInformationOfAsset: ${response.data.CODE}`,
+        `Error Code on getDetailInformationOfAsset: ${response.data.CODE}`
       );
     }
   } catch (error) {
@@ -133,12 +133,12 @@ export const setAssetGroupChange = async (
   uuid, // Ensure this is an array of UUID strings
   current_group_index,
   next_group_index,
-  move_option,
+  move_option
 ) => {
-  console.log("uuid_asset", uuid); // Log the UUID array to check if it's being passed correctly
-  console.log("asset_group_index", current_group_index);
-  console.log("selectedGroupIndex", next_group_index);
-  console.log("moving_option", move_option);
+  // console.log("uuid_asset", uuid); // Log the UUID array to check if it's being passed correctly
+  // console.log("asset_group_index", current_group_index);
+  // console.log("selectedGroupIndex", next_group_index);
+  // console.log("moving_option", move_option);
 
   try {
     const response = await axios.post(
@@ -151,16 +151,16 @@ export const setAssetGroupChange = async (
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     if (response.data.RESULT === "OK") {
-      console.log("response", response);
+      // console.log("response", response);
       return response; // Return the data from the API
     } else {
       console.log("error", response);
       throw new Error(
-        `Error Code on setAssetGroupChange: ${response.data.CODE}`,
+        `Error Code on setAssetGroupChange: ${response.data.CODE}`
       );
     }
   } catch (error) {
@@ -246,14 +246,14 @@ export const setAssetInformationUpdate = async (assetInfo) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     if (response.data.RESULT === "OK") {
       return { success: true }; // Return the data from the API
     } else {
       throw new Error(
-        `Error Code on setAssetInformationUpdate: ${response.data.CODE}`,
+        `Error Code on setAssetInformationUpdate: ${response.data.CODE}`
       );
     }
   } catch (error) {
@@ -273,14 +273,14 @@ export const setAssetRegisterChange = async (uuid, approve_status) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     if (response.data.RESULT === "OK") {
       return response.data; // Return the data from the API
     } else {
       throw new Error(
-        `Error Code on setAssetRegisterChange: ${response.data.CODE}`,
+        `Error Code on setAssetRegisterChange: ${response.data.CODE}`
       );
     }
   } catch (error) {
@@ -307,14 +307,14 @@ export const setAssetTargetRegister = async (payload) => {
       payload,
       {
         withCredentials: true,
-      },
+      }
     );
 
     if (response.data && response.data.RESULT === "OK") {
       return response.data;
     } else {
       throw new Error(
-        `Error Code on setAssetTargetRegister: ${response.data.CODE}`,
+        `Error Code on setAssetTargetRegister: ${response.data.CODE}`
       );
     }
   } catch (error) {
@@ -333,14 +333,14 @@ export const getAssetRegisterStatus = async (current_day) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     if (response.data.RESULT === "OK") {
       return response.data; // Return the data from the API
     } else {
       throw new Error(
-        `Error Code on getAssetRegisterStatus: ${response.data.CODE}`,
+        `Error Code on getAssetRegisterStatus: ${response.data.CODE}`
       );
     }
   } catch (error) {
@@ -379,7 +379,7 @@ export const setAssetForNewGroup = async (addingAssetForm) => {
       formData,
       {
         withCredentials: true,
-      },
+      }
     );
 
     // console.log("response.......", response);
@@ -397,7 +397,7 @@ export const setAssetForNewGroup = async (addingAssetForm) => {
 export const getSearch = async (
   asset_ostype,
   asset_target_registered,
-  asset_activate,
+  asset_activate
 ) => {
   try {
     const response = await axios.post(
@@ -409,7 +409,7 @@ export const getSearch = async (
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     if (response.data.RESULT === "OK") {
@@ -432,7 +432,7 @@ export const setAssetGroupDelete = async (asset_index) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     const data = response.data;
@@ -457,7 +457,7 @@ export const setAssetDelete = async (ast_uuid, asset_index) => {
       },
       {
         withCredentials: true,
-      },
+      }
     );
 
     const data = response.data;

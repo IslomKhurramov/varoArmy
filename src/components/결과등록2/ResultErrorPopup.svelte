@@ -1,80 +1,74 @@
 <script>
-    export let modalErrorData;
-  
-  
-    $: {
-      console.log("modalData:", modalErrorData);
-    }
-  
-  </script>
-  
-  <div class="tableListWrap" style="padding: 0;">
+  export let modalErrorData;
+
+  // $: {
+  //   console.log("modalData:", modalErrorData);
+  // }
+</script>
+
+<div class="tableListWrap" style="padding: 0;">
   <h4 style="text-align: center;">결과정보 등록실패 내역</h4>
-  
+
   <div class="modal_page2">
-
-      <table class="tableList hdBorder">
-        <colgroup>
-          <col style="width:14%;" />
-          <col style="width:14%;" />
-          <col style="width:14%;" />
-          <col style="width:14%;" />
-          <col style="width:14%;" />
-          <col style="width:14%;" />
-          <col style="width:14%;" />
-        </colgroup>
-        <thead>
+    <table class="tableList hdBorder">
+      <colgroup>
+        <col style="width:14%;" />
+        <col style="width:14%;" />
+        <col style="width:14%;" />
+        <col style="width:14%;" />
+        <col style="width:14%;" />
+        <col style="width:14%;" />
+        <col style="width:14%;" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="text-center">체계명</th>
+          <th class="text-center">점검분야 </th>
+          <th class="text-center">운영체제 </th>
+          <th class="text-center">호스트명</th>
+          <th class="text-center">아이피정보</th>
+          <th class="text-center">등록실패사유 </th>
+          <th class="text-center">재실행요청</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each modalErrorData as data, index}
           <tr>
-            <th class="text-center">체계명</th>
-            <th class="text-center">점검분야 </th>
-            <th class="text-center">운영체제 </th>
-            <th class="text-center">호스트명</th>
-            <th class="text-center">아이피정보</th>
-            <th class="text-center">등록실패사유 </th>
-            <th class="text-center">재실행요청</th>
+            <td class="text-center">
+              {data?.systemName || "xxxxxxxx"}
+            </td>
+            <td class="text-center">
+              <div>
+                {data?.clf_hostname}
+              </div>
+            </td>
+            <td class="text-center">
+              {data.clf_ipaddr}
+            </td>
+            <td class="text-center"> {data.clf_orig_file}</td>
+            <td class="text-center">
+              {data.clf_etc}
+            </td>
+            <td class="text-center">
+              {data?.agent || "--"}
+            </td>
+            <td class="text-center">
+              <div class="table_modal_btn">
+                <button class=" btn-box_12">재실행 </button>
+              </div>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {#each modalErrorData as data, index}
-            <tr>
-              <td class="text-center">
-                {data?.systemName || "xxxxxxxx"}
-              </td>
-              <td class="text-center">
-                <div>
-                  {data?.clf_hostname}
-                </div>
-              </td>
-              <td class="text-center">
-                {data.clf_ipaddr}
-              </td>
-              <td class="text-center">
-                {data.clf_orig_file}</td>
-              <td class="text-center">
-                {data.clf_etc}
-              </td>
-              <td class="text-center">
-                {data?.agent || "--"}
-              </td>
-              <td class="text-center">
-                <div class="table_modal_btn">
-                  <button class=" btn-box_12">재실행 </button>
-                </div>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    
+        {/each}
+      </tbody>
+    </table>
   </div>
+</div>
 
-  </div>
-  
-  <style>
+<style>
   .tableListWrap {
     position: relative;
   }
-  
+
   .modal_page2 {
     overflow-y: auto;
     max-height: 380px;
@@ -106,17 +100,17 @@
     transition-duration: 0.3s;
   }
 
-    .table_modal_btn {
-      display: flex;
-      align-items: center;
+  .table_modal_btn {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    }
+  }
 
-    .table_modal_btn .btn-box_12 {
+  .table_modal_btn .btn-box_12 {
     width: 74px;
     height: 28px;
     color: #999999;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border: 1px solid #999999;
     display: flex;
     justify-content: center;
@@ -130,12 +124,11 @@
   }
   .btn-box_12:hover {
     opacity: 0.9;
-    color: #FFFFFF;
+    color: #ffffff;
     background-color: #333333;
     border: none;
     font-weight: bold;
     font-size: 12px;
     border-radius: 4px;
   }
-  </style>
-  
+</style>

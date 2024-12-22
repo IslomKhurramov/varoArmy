@@ -1,7 +1,11 @@
 <script>
   export let closeShowModal;
   export let selectedData;
-  $: console.log("selectedData", selectedData);
+  export let updateSelectedData;
+  export let insertData;
+  export let plan_index;
+  export let change_option;
+  // $: console.log("selectedData", selectedData);
 </script>
 
 <div class="modal">
@@ -47,13 +51,63 @@
           <tr>
             <th class="center-align">점검결과</th>
             <td>
-              <select>
-                <option value="양호">양호</option>
-                <option value="취약">취약</option>
-                <option value="관리적조치">관리적조치</option>
-                <option value="예외처리">예외처리</option>
-                <option value="기타">기타</option>
+              <select
+                style="font-size: 16px;"
+                value={selectedData?.ccr_item_result}
+                on:change={(e) => (insertData.change_result = e.target.value)}
+              >
+                <option value="" disabled style="font-size: 16px;"> </option>
+                <option
+                  style="font-size: 16px;"
+                  value="양호"
+                  selected={selectedData?.ccr_item_result === "양호"}
+                >
+                  양호
+                </option>
+                <option
+                  style="font-size: 16px;"
+                  value="취약"
+                  selected={selectedData?.ccr_item_result === "취약"}
+                >
+                  취약
+                </option>
+                <option
+                  style="font-size: 16px;"
+                  value="수동점검"
+                  selected={selectedData?.ccr_item_result === "수동점검"}
+                >
+                  수동점검
+                </option>
+                <option
+                  style="font-size: 16px;"
+                  value="예외처리"
+                  selected={selectedData?.ccr_item_result === "예외처리"}
+                >
+                  예외처리
+                </option>
+
+                <option
+                  style="font-size: 16px;"
+                  value="해당없음"
+                  selected={selectedData?.ccr_item_result === "해당없음"}
+                >
+                  해당없음
+                </option>
               </select>
+            </td>
+          </tr>
+          <tr>
+            <th></th>
+            <td>
+              <textarea
+                class="line-height"
+                name=""
+                id=""
+                rows="5"
+                cols="50"
+                style="width: 100%; font-size:14px;"
+                bind:value={insertData["change_status_text"]}
+              ></textarea>
             </td>
           </tr>
           <tr>
@@ -80,7 +134,22 @@
         <div
           style="display:flex; flex-direction:row; width:100%; justify-content:center; gap:10px;align-items:center;"
         >
-          <button class="btnUpload">변경하기</button>
+          <button
+            class="btnUpload"
+            on:click={() => {
+              updateSelectedData({
+                plan_index: plan_index,
+                result_index: selectedData?.ccr_index,
+                checklist_index: selectedData?.ccr_item_no__ccc_index,
+                change_result:
+                  insertData?.change_result ?? selectedData?.ccr_item_result,
+                change_option: change_option,
+                change_status_text: insertData?.change_status_text,
+                change_evidence_file: insertData?.change_evidence_file,
+              });
+              change_option = "ONE";
+            }}>변경하기</button
+          >
           <button class="btnDone" on:click={closeShowModal}>닫기</button>
         </div>
       {/if}

@@ -59,7 +59,7 @@
     currentPage = Swiper7;
     $swiperTargetData = data;
   }
-  $: console.log("swiper", $swiperTargetData);
+  // $: console.log("swiper", $swiperTargetData);
   let isAddingNewGroup = false;
   const cancelNewGroup = () => {
     isAddingNewGroup = false;
@@ -78,7 +78,7 @@
       throw err;
     }
   }
-  $: console.log("allchecklist", $allCheckList);
+  // $: console.log("allchecklist", $allCheckList);
   onMount(async () => {
     loading = true;
     await allCheckListGet();
@@ -89,7 +89,7 @@
   function handleClickTarget(targetData, item) {
     selectedTargetData = targetData;
     selectedTarget = item;
-    console.log("targetData", selectedTargetData);
+    // console.log("targetData", selectedTargetData);
   }
   let currentPagePagination = 1; // Current page number
   let itemsPerPage = 10; // Items per page
@@ -150,7 +150,7 @@
   }
 
   // Debugging: Log whenever ccg_index_id or ccc_index changes
-  $: console.log("ccg_index_id:", ccg_index_id, "ccc_index:", ccc_index);
+  // $: console.log("ccg_index_id:", ccg_index_id, "ccc_index:", ccc_index);
 
   /**************DELETE CHECKLIST ITEM************/
   async function deleteChecklist() {

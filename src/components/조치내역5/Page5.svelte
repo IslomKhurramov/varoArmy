@@ -3,9 +3,19 @@
   import SwiperPage5 from "./SwiperPage5.svelte";
   import FirstMenu from "./모든구성요소/FirstMenu.svelte";
   import SeconMenu from "./모든구성요소/SeconMenu.svelte";
-  import {getVulnsOfAsset} from "../../services/vulns/vulnsService"
-  import { confirmDelete, errorAlert, successAlert, warningAlert } from "../../shared/sweetAlert";
-  import { getAllCheckList, setDeleteChecklistGroup, setDeleteChecklistItem, setNewChecklistGroup } from "../../services/callApi";
+  import { getVulnsOfAsset } from "../../services/vulns/vulnsService";
+  import {
+    confirmDelete,
+    errorAlert,
+    successAlert,
+    warningAlert,
+  } from "../../shared/sweetAlert";
+  import {
+    getAllCheckList,
+    setDeleteChecklistGroup,
+    setDeleteChecklistItem,
+    setNewChecklistGroup,
+  } from "../../services/callApi";
   import { allCheckList } from "../../services/store";
 
   // Dinamik o'zgaruvchilar
@@ -16,7 +26,7 @@
   let tableData;
   let totalRecords = 0;
 
-    // DATA
+  // DATA
   let plans = [];
   let targetData = null;
   let assets = [];
@@ -31,10 +41,8 @@
 
   onMount(async () => {
     try {
-
       plans = await getVulnsOfAsset(search);
-      console.log('plans', plans);
-      
+      // console.log('plans', plans);
 
       tableData = plans?.vulns;
       totalRecords = plans?.total_rec_cnt;
@@ -105,7 +113,7 @@
     allSelected = event.target.checked;
     selected = allSelected ? [...paginatedData] : [];
   }
-// //////////////////////////////////////////////////////////////////////////////////////
+  // //////////////////////////////////////////////////////////////////////////////////////
 
   const selectPage1 = (page) => {
     currentPage1 = page;
@@ -143,8 +151,6 @@
     isAddingNewGroup = false;
   };
 
-
-
   // Accordion ochish/qayta yopish
   let groupIndex = "";
   const toggleAccordion = (index, item) => {
@@ -166,13 +172,13 @@
       throw err;
     }
   }
-  $: console.log("allchecklist", $allCheckList);
+  // $: console.log("allchecklist", $allCheckList);
   onMount(() => {
     allCheckListGet();
   });
 
-    /**************DELETE CHECKLIST ITEM************/
-    async function deleteChecklist() {
+  /**************DELETE CHECKLIST ITEM************/
+  async function deleteChecklist() {
     try {
       const response = await setDeleteChecklistItem(ccg_index_id, ccc_index);
 
@@ -251,7 +257,6 @@
       throw err;
     }
   }
-
 </script>
 
 <main class="table-container">
@@ -269,7 +274,7 @@
               {#each Object.entries($allCheckList) as [key, item], index}
                 <div class="accordion-item">
                   <button
-                    on:click="{() => toggleAccordion(index, item)}"
+                    on:click={() => toggleAccordion(index, item)}
                     class="accordion-header {isOpen[index] ? 'active' : ''}"
                   >
                     {item.ccg_group}
@@ -288,11 +293,11 @@
                         <!-- Render UNIX section if it exists -->
                         {#if item.UNIX && item.UNIX.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'UNIX');
-                              handleClickTarget(item.UNIX, item, 'UNIX');
-                            }}"
-                            class="{isSectionOpen[key]?.UNIX ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "UNIX");
+                              handleClickTarget(item.UNIX, item, "UNIX");
+                            }}
+                            class={isSectionOpen[key]?.UNIX ? "active" : ""}
                           >
                             UNIX
                           </p>
@@ -306,10 +311,10 @@
                           >
                             {#each item.UNIX as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -320,13 +325,11 @@
                         <!-- WINDOWS Section -->
                         {#if item.WINDOWS && item.WINDOWS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'WINDOWS');
-                              handleClickTarget(item.WINDOWS, item, 'WINDOWS');
-                            }}"
-                            class="{isSectionOpen[key]?.WINDOWS
-                              ? 'active'
-                              : ''}"
+                            on:click={() => {
+                              toggleSection(key, "WINDOWS");
+                              handleClickTarget(item.WINDOWS, item, "WINDOWS");
+                            }}
+                            class={isSectionOpen[key]?.WINDOWS ? "active" : ""}
                           >
                             WINDOWS
                           </p>
@@ -340,10 +343,10 @@
                           >
                             {#each item.WINDOWS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -354,13 +357,11 @@
                         <!-- NETWORK Section -->
                         {#if item.NETWORK && item.NETWORK.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'NETWORK');
-                              handleClickTarget(item.NETWORK, item, 'NETWORK');
-                            }}"
-                            class="{isSectionOpen[key]?.NETWORK
-                              ? 'active'
-                              : ''}"
+                            on:click={() => {
+                              toggleSection(key, "NETWORK");
+                              handleClickTarget(item.NETWORK, item, "NETWORK");
+                            }}
+                            class={isSectionOpen[key]?.NETWORK ? "active" : ""}
                           >
                             NETWORK
                           </p>
@@ -374,10 +375,10 @@
                           >
                             {#each item.NETWORK as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -388,11 +389,11 @@
                         <!-- DBMS Section -->
                         {#if item.DBMS && item.DBMS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'DBMS');
-                              handleClickTarget(item.DBMS, item, 'DBMS');
-                            }}"
-                            class="{isSectionOpen[key]?.DBMS ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "DBMS");
+                              handleClickTarget(item.DBMS, item, "DBMS");
+                            }}
+                            class={isSectionOpen[key]?.DBMS ? "active" : ""}
                           >
                             DBMS
                           </p>
@@ -406,10 +407,10 @@
                           >
                             {#each item.DBMS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -421,11 +422,11 @@
                         <!-- WAS Section -->
                         {#if item.WAS && item.WAS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'WAS');
-                              handleClickTarget(item.WAS, item, 'WAS');
-                            }}"
-                            class="{isSectionOpen[key]?.WAS ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "WAS");
+                              handleClickTarget(item.WAS, item, "WAS");
+                            }}
+                            class={isSectionOpen[key]?.WAS ? "active" : ""}
                           >
                             WAS
                           </p>
@@ -439,10 +440,10 @@
                           >
                             {#each item.WAS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -460,8 +461,8 @@
 
         <!-- Buttons -->
         <div class="buttons">
-          <button on:click="{() => (isAddingNewGroup = true)}">복사</button>
-          <button on:click="{deleteGroup}">삭제</button>
+          <button on:click={() => (isAddingNewGroup = true)}>복사</button>
+          <button on:click={deleteGroup}>삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -472,33 +473,32 @@
   <section class="section2">
     <!-- Dinamik sahifa -->
     {#if currentPage}
-      <svelte:component this="{currentPage}" />
+      <svelte:component this={currentPage} />
     {:else}
-
-    <article class="contentArea">
+      <article class="contentArea">
         <section class="filterWrap" style="margin-bottom: 0px;">
           <div>
             <select>
               <option value="" selected>점검대상체계</option>
-  
-              <option value="{'점검대상체계'}">점검대상체계</option>
+
+              <option value={"점검대상체계"}>점검대상체계</option>
             </select>
             <input
               style="    height: 28px;
               font-size: 12px;"
               type="datetime-local"
             />
-  
+
             <select>
               <option value="" selected>미등록</option>
-  
+
               <option value="점검관">점검관</option>
             </select>
             <select id="result">
               <option value="" selected>점검구분 </option>
               <option value="점검구분">점검구분 </option>
             </select>
-  
+
             <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
               ><img src="assets/images/reset.png" alt="search" />초기화</button
             >
@@ -507,14 +507,14 @@
 
         <section class="subTabWrap">
           <a
-          style="font-size: 14px;"
-          class={setView == "plan" ? "active" : ""}
-          on:click={() => {
-            setView = "plan";
-            selectPage1(FirstMenu);
-          }}
+            style="font-size: 14px;"
+            class={setView == "plan" ? "active" : ""}
+            on:click={() => {
+              setView = "plan";
+              selectPage1(FirstMenu);
+            }}
           >
-          조치계획등록
+            조치계획등록
           </a>
           <a
             style="font-size: 14px;"
@@ -524,20 +524,19 @@
               selectPage1(SeconMenu);
             }}
           >
-          조치계획승인
+            조치계획승인
           </a>
         </section>
         {#if currentPage1}
           <svelte:component this={currentPage1} />
         {/if}
-    </article>
+      </article>
     {/if}
   </section>
 </main>
 
 <style>
-
-.sublist {
+  .sublist {
     overflow: hidden;
     transition: max-height 0.3s ease-in-out;
   }
@@ -601,7 +600,7 @@
     position: relative;
   }
 
-  .subTabWrap{
+  .subTabWrap {
     position: absolute;
     top: 60px;
     left: 20px;
@@ -610,5 +609,4 @@
   .subTabWrap a {
     cursor: pointer;
   }
-  
 </style>

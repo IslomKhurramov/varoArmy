@@ -48,7 +48,7 @@ export const getViewPlanResults = async (
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response.data.RESULT === "OK") {
       return response.data; // Expected valid response
@@ -84,7 +84,7 @@ export const setResultChanged = async (
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response.data.RESULT === "OK") {
       return response.data; // Expected valid response
@@ -106,7 +106,7 @@ export const getAllCheckList = async () => {
       withCredentials: true,
     });
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response && response.data) {
       return response.data; // Return the API response data
@@ -134,7 +134,7 @@ export const setDeleteChecklistItem = async (
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response) {
       return response.data; // Expected valid response
@@ -157,7 +157,7 @@ export const setNewChecklistGroup = async (source_chk, destion_name) => {
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response) {
       return response.data; // Expected valid response
@@ -181,7 +181,7 @@ export const setDeleteChecklistGroup = async (checklist_group_no) => {
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response) {
       return response.data; // Expected valid response
@@ -206,7 +206,7 @@ export const setDeletePlan = async (plan_index) => {
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response) {
       return response.data; // Expected valid response
@@ -228,7 +228,7 @@ export const getPlanDetailInformation = async (plan_index) => {
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response) {
       return response.data; // Expected valid response
@@ -268,7 +268,7 @@ export const getVulnsOfAsset = async (
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
 
     if (response) {
       return response.data; // Expected valid response
@@ -282,5 +282,32 @@ export const getVulnsOfAsset = async (
     throw new Error(
       `Failed to fetch getPlanDetailInformation detail: ${error.message}`
     );
+  }
+};
+
+export const setSpecificItemResultsChange = async (data) => {
+  try {
+    console.log("Sending data:", data);
+
+    // Make the API call with axios, sending FormData as the payload
+    const response = await axios.post(
+      `${serverApi}/api/setSpecificItemResultsChange/`,
+      data,
+      {
+        withCredentials: true, // Make sure to send credentials if necessary
+      }
+    );
+
+    console.log("API response:", response);
+
+    // Check if the response contains an error
+    if (response?.data?.RESULT === "ERROR") {
+      throw new Error(response.data?.CODE);
+    }
+
+    return response.data; // Return the data if the request is successful
+  } catch (error) {
+    console.error("Error during API request:", error);
+    throw error; // Rethrow error for further handling
   }
 };

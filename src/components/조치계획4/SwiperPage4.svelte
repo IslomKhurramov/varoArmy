@@ -77,7 +77,7 @@
 
   function handleSlideclick(slide) {
     activeAsset = slide;
-    console.log("Selected Slide:", slide);
+    // console.log("Selected Slide:", slide);
   }
 
   let formData = {
@@ -360,7 +360,7 @@
     max-width: 100%;
     margin-top: 15px;
     overflow-y: auto;
-    max-height: 70vh;
+    max-height: 65vh;
     overflow-x: hidden;
   }
 

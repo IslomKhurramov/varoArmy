@@ -77,7 +77,7 @@
 
   function handleSlideclick(slide) {
     activeAsset = slide;
-    console.log("Selected Slide:", slide);
+    // console.log("Selected Slide:", slide);
   }
 
   let formData = {
@@ -125,7 +125,7 @@
 
 <div class="contentArea">
   <section
-    bind:this="{swiperContainer}"
+    bind:this={swiperContainer}
     style="position: sticky;  z-index:99; background-color:white;"
     class="topCon swiper-container"
   >
@@ -136,7 +136,7 @@
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click="{() => handleScroll('prev')}"
+        on:click={() => handleScroll("prev")}
       >
         ◀
       </button>
@@ -149,19 +149,19 @@
           class="menu-wrapper"
           id="menuWrapper"
           style="background-color: white; z-index:99;"
-          bind:this="{menuWrapper}"
+          bind:this={menuWrapper}
         >
           {#if slides.length > 0}
             {#each slides as slide}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div
-                value="{slide.ccc_item_no}"
-                name="{slide}"
+                value={slide.ccc_item_no}
+                name={slide}
                 class="menu-item {activeAsset &&
                 activeAsset.ccc_item_no === slide.ccc_item_no
                   ? 'active'
                   : ''}"
-                on:click="{() => handleSlideclick(slide)}"
+                on:click={() => handleSlideclick(slide)}
               >
                 {slide.ccc_item_no}
               </div>
@@ -175,7 +175,7 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click="{() => handleScroll('next')}"
+        on:click={() => handleScroll("next")}
       >
         ▶
       </button>
@@ -304,7 +304,7 @@
                 <input
                   type="datetime-local"
                   style="margin-left: 5px;"
-                  bind:value="{formData.endDate}"
+                  bind:value={formData.endDate}
                 />
               </div>
             </div>
@@ -327,7 +327,7 @@
                 <input
                   type="file"
                   class="file-input"
-                  on:change="{(event) => handleFileSelect(event)}"
+                  on:change={(event) => handleFileSelect(event)}
                 />
                 <img src="./assets/images/download.svg" class="excel-img" />
                 <span>파일업로드</span>
@@ -335,7 +335,7 @@
               <input
                 type="text"
                 placeholder="선택된 파일 없음"
-                value="{fileNames || '선택된 파일 없음'}"
+                value={fileNames || "선택된 파일 없음"}
                 readonly
                 class="file-name-input"
               />

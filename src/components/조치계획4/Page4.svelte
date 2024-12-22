@@ -23,12 +23,13 @@
       isSectionOpen[itemKey] = {}; // Ensure a nested object exists for each itemKey
     }
     targetName = sectionKey;
-    console.log("targetName", targetName);
+    // console.log("targetName", targetName);
     isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey]; // Toggle the section
   }
   let plan_index = "";
   const toggleAccordion = (index, item) => {
-    isOpen[index] = !isOpen[index];
+    isOpen.fill(false); // Close all accordions
+    isOpen[index] = true; // Open only the selected accordion
     plan_index = item.ccp_index;
     fetchPaginatedData();
   };
@@ -55,12 +56,10 @@
       );
 
       if (response) {
-        console.log("response from funct vulnsasset", response);
+        // console.log("response from funct vulnsasset", response);
 
         // Filter `plans` to only include data for the selected `plan_index`
-        resultVulnsOfPlans = response.CODE.plans.filter(
-          (plan) => plan.plan_index === plan_index
-        );
+        resultVulnsOfPlans = response.CODE.vulns;
         loading = false;
         // Update other data
         resultVulnsOfAsset = response.CODE.asset_asc;
@@ -73,7 +72,7 @@
       console.error("Error fetching paginated data:", err);
     }
   }
-  $: console.log("resultVulnsOfAsset::", resultVulnsOfAsset);
+  // $: console.log("resultVulnsOfPlans::", resultVulnsOfPlans);
   // Calculate the start and end index of items for the current page
   $: startIndex = (currentPagePagination - 1) * itemsPerPage;
   $: endIndex = startIndex + itemsPerPage;
@@ -122,7 +121,7 @@
   const selectPage1 = (page, data) => {
     currentPage1 = page;
     firstMenuData = data;
-    console.log("data1111", firstMenuData);
+    // console.log("data1111", firstMenuData);
   };
 
   // Accordion logikasi
@@ -132,7 +131,7 @@
 
   let selectedHostnameData = null;
   function handleClickHostname(data) {
-    console.log("handle data", data);
+    // console.log("handle data", data);
     currentPage = Swiper;
     selectedHostname = data.hostname;
     selectedHostnameData = data;

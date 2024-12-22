@@ -5,6 +5,8 @@
   import ModalPopEdit from "./ModalPopEdit.svelte";
   import { viewPlanResult } from "../../services/store";
   import { active } from "d3";
+  import { setSpecificItemResultsChange } from "../../services/callApi";
+  import { successAlert } from "../../shared/sweetAlert";
 
   let swiperContainer;
   let scrollAmount = 0;
@@ -15,16 +17,66 @@
   let showModal = false;
   export let selectedData;
   export let selectedHostnameData;
-  $: console.log("swiper selected data", selectedHostnameData);
+  export let plan_index;
+  export let viewPlanResultFunction;
+  let change_option = "ONE";
+  let insertData = {};
+
+  if (selectedData) {
+    insertData.change_status_text = selectedData.ccr_item_status || "";
+  }
+
+  async function updateSelectedData(data) {
+    try {
+      console.log("plan_index", data.plan_index);
+      console.log("result_index", data?.result_index);
+      console.log("checklist_index", data?.checklist_index);
+      console.log("change_result", data?.change_result);
+      console.log("change_option", data?.change_option);
+      console.log("change_status_text", data?.change_status_text);
+      console.log("change_evidence_file", data?.change_evidence_file);
+      const formData = new FormData();
+
+      formData.append("plan_index", data?.plan_index);
+      formData.append("result_index", data?.result_index);
+      formData.append("checklist_index", data?.checklist_index);
+      if (data?.change_result)
+        formData.append("change_result", data?.change_result);
+      formData.append("change_option", data?.change_option);
+      if (data?.change_status_text)
+        formData.append("change_status_text", data?.change_status_text);
+      if (data?.change_evidence_file)
+        formData.append("change_evidence_file", data?.change_evidence_file);
+
+      // Check the content of FormData before sending it
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+
+      console.log("formData", formData);
+      // Call the API with the FormData
+      const response = await setSpecificItemResultsChange(formData);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+
+        // Refresh the view after successful update
+        await viewPlanResultFunction();
+      } else {
+        console.log(response.CODE);
+      }
+    } catch (err) {
+      console.error("Error during data update:", err);
+      throw err; // You can customize error handling as needed
+    }
+  }
+
+  $: console.log("swiper selected data", selectedData);
 
   $: {
     if (selectedHostnameData) {
       selectedData = { ...selectedHostnameData }; // Shallow copy to trigger reactivity
     }
-  }
-  let insertData = {};
-  if (selectedData) {
-    insertData.change_status_text = selectedData.ccr_item_status || "";
   }
 
   onMount(() => {
@@ -84,7 +136,7 @@
   function handleSlideclick(slide) {
     activeAsset = slide; // Set the clicked slide as active
     selectedData = slide;
-    console.log("Selected Slide:", slide);
+    // console.log("Selected Slide:", slide);
   }
   $: if (selectedData) {
     activeAsset = selectedData;
@@ -108,22 +160,6 @@
     }
   }
 
-  let formData = {
-    planTitle: "",
-    inspectionPeriod: "",
-    category: "",
-    system: "",
-    domain: "전체",
-    item: "",
-    description: "",
-    attachment: null,
-    inspectorInfo: "",
-    executionCondition: "즉시/예약",
-    repeatPeriod: "",
-    repeatCount: 1,
-    startDate: "2024-09-01 12:00:00",
-    endDate: "2024-09-01 12:00:00",
-  };
   // Close modal when Esc key is pressed
   function handleKeyDown(event) {
     if (event.key === "Escape") {
@@ -148,6 +184,16 @@
   function selectData(item) {
     selectedData = item;
   }
+
+  export const changeDataHandler = async (data) => {
+    try {
+      const formData = new FormData();
+      const result = await setSpecificItemResultsChange(formData);
+      successAlert(result);
+    } catch (err) {
+      alert(err?.message);
+    }
+  };
 </script>
 
 <div class="contentArea">
@@ -182,6 +228,7 @@
             {#each $viewPlanResult as slide}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div
+                data-item-no={slide.ccr_item_no__ccc_item_no}
                 value={slide.ccr_index}
                 name={slide}
                 class="menu-item {activeAsset &&
@@ -276,18 +323,56 @@
     <div class="inputRow">
       <label>점검결과</label>
       <div style="display: flex; gap:10px; flex-direction:row; width:91%">
-        <select name="operating_system" id="operating_system">
-          <option value="양호" selected>양호</option>
-          <option value="취약">취약</option>
-          <option value="예외처리">예외처리</option>
-          <option value="기타">기타</option>
+        <select
+          style="font-size: 16px;"
+          value={selectedData?.ccr_item_result}
+          on:change={(e) => (insertData.change_result = e.target.value)}
+        >
+          <option value="" disabled style="font-size: 16px;"> </option>
+          <option
+            style="font-size: 16px;"
+            value="양호"
+            selected={selectedData?.ccr_item_result === "양호"}
+          >
+            양호
+          </option>
+          <option
+            style="font-size: 16px;"
+            value="취약"
+            selected={selectedData?.ccr_item_result === "취약"}
+          >
+            취약
+          </option>
+          <option
+            style="font-size: 16px;"
+            value="수동점검"
+            selected={selectedData?.ccr_item_result === "수동점검"}
+          >
+            수동점검
+          </option>
+          <option
+            style="font-size: 16px;"
+            value="예외처리"
+            selected={selectedData?.ccr_item_result === "예외처리"}
+          >
+            예외처리
+          </option>
+
+          <option
+            style="font-size: 16px;"
+            value="해당없음"
+            selected={selectedData?.ccr_item_result === "해당없음"}
+          >
+            해당없음
+          </option>
         </select>
+
+        <!-- Button to open modal (if necessary for editing additional details) -->
         <button class="btnSave" on:click={() => (showModal = true)}>edit</button
         >
-        <input type="text" />
+        <input type="text" placeholder="Optional input" />
       </div>
     </div>
-
     <div class="inputRow">
       <label>보안위협</label>
       <span> {selectedData?.ccr_item_no__ccc_security_threat}</span>
@@ -299,7 +384,7 @@
     </div>
 
     <div class="inputRow" style="height: 170px;">
-      <label>점검현황</label>
+      <label style="width: 133px;">점검현황</label>
 
       <textarea
         class="line-height"
@@ -307,11 +392,18 @@
         id=""
         rows="5"
         cols="50"
-        style="width: 100%;"
+        style="width: 100%; font-size:14px;"
         bind:value={insertData["change_status_text"]}
       ></textarea>
     </div>
 
+    <div class="inputRow">
+      <label>증적파일 </label>
+      <input
+        type="file"
+        on:change={(e) => (insertData.change_evidence_file = e.target.files[0])}
+      />
+    </div>
     <div class="inputRow">
       <label>개선방법</label>
       <span>{selectedData.ccr_item_no__ccc_mitigation_method}</span>
@@ -328,7 +420,23 @@
     </div>
 
     <div class="lastButtons">
-      <button class="btnSave">저장</button>
+      <button
+        class="btnSave"
+        disabled={Object.keys(insertData).length === 0}
+        on:click={() => {
+          updateSelectedData({
+            plan_index: plan_index,
+            result_index: selectedData?.ccr_index,
+            checklist_index: selectedData?.ccr_item_no__ccc_index,
+            change_result:
+              insertData?.change_result ?? selectedData?.ccr_item_result,
+            change_option: change_option,
+            change_status_text: insertData?.change_status_text,
+            change_evidence_file: insertData?.change_evidence_file,
+          });
+          change_option = "ONE";
+        }}>저장</button
+      >
       <button class="btnUpload">취약점이력추적</button>
       <button class="btnUpload">변경내역이력조회</button>
     </div>
@@ -344,7 +452,14 @@
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
-      <ModalPopEdit {closeShowModal} {selectedData} />
+      <ModalPopEdit
+        {plan_index}
+        {insertData}
+        {change_option}
+        {closeShowModal}
+        {selectedData}
+        {updateSelectedData}
+      />
     </dialog>
   </div>
 {/if}
@@ -368,11 +483,13 @@
     height: 60px;
   }
   .formContainer {
-    max-width: 85%;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 20px;
+    overflow-y: auto;
+    height: 65vh;
   }
 
   .inputRow {

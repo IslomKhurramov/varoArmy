@@ -123,7 +123,6 @@
     }
   }
 
-  $: console.log("viewPlanResult", $viewPlanResult);
   // Close modal when Esc key is pressed
   function handleKeyDown(event) {
     if (event.key === "Escape") {
@@ -148,7 +147,6 @@
     selectedData = data;
     closeShowModalDetail = true; // Open the modal
   }
-  $: console.log("selectedData", selectedData);
   /**************PAGINATION*/
 </script>
 
@@ -166,7 +164,7 @@
             {#each mainItems as item, index}
               <div class="accordion-item">
                 <button
-                  on:click="{() => toggleAccordion(index)}"
+                  on:click={() => toggleAccordion(index)}
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
                   {item.title}
@@ -178,9 +176,9 @@
                   <ul>
                     {#each item.subItems as subItem}
                       <li
-                        on:click="{() => {
+                        on:click={() => {
                           activeMenu = subItem.title;
-                        }}"
+                        }}
                       >
                         {subItem.title}
                       </li>
@@ -203,21 +201,18 @@
   </section>
   <section class="section2">
     {#if currentPage}
-      <svelte:component this="{currentPage}" />
+      <svelte:component this={currentPage} />
     {:else}
       <article class="contentArea">
         <section class="filterWrap">
           <div>
-            <select
-              bind:value="{planIndex}"
-              on:change="{viewPlanResultFunction}"
-            >
+            <select bind:value={planIndex} on:change={viewPlanResultFunction}>
               <option value="" selected disabled>프로젝트</option>
               {#each $allPlanList as plan}
-                <option value="{plan.ccp_index}">{plan.ccp_title}</option>
+                <option value={plan.ccp_index}>{plan.ccp_title}</option>
               {/each}
             </select>
-            <select bind:value="{target}" on:change="{viewPlanResultFunction}">
+            <select bind:value={target} on:change={viewPlanResultFunction}>
               <option value="" selected>점검대상</option>
               <option value="UNIX">UNIX</option>
               <option value="WINDOWS">WINDOWS</option>
@@ -230,16 +225,13 @@
               <option value="SECURITY">SECURITY</option>
             </select>
 
-            <select
-              bind:value="{hostName}"
-              on:change="{viewPlanResultFunction}"
-            >
+            <select bind:value={hostName} on:change={viewPlanResultFunction}>
               <option value="" selected>호스트</option>
               <option value="호스트">호스트</option>
             </select>
             <select
-              bind:value="{check_result}"
-              on:change="{viewPlanResultFunction}"
+              bind:value={check_result}
+              on:change={viewPlanResultFunction}
             >
               <option value="" selected>점검항목</option>
               <option value="양호">양호</option>
@@ -275,7 +267,7 @@
             </thead>
             <tbody>
               {#each $viewPlanResult as data, index}
-                <tr on:click="{() => handleRowClick(data)}">
+                <tr on:click={() => handleRowClick(data)}>
                   <!-- 번호: Reverse index to display latest first -->
                   <td class="text-center">{$viewPlanResult.length - index}</td>
 
@@ -314,8 +306,8 @@
                       >
                         {#each validOptions as option}
                           <option
-                            value="{option}"
-                            selected="{data.ccr_item_result === option}"
+                            value={option}
+                            selected={data.ccr_item_result === option}
                           >
                             {option}
                           </option>

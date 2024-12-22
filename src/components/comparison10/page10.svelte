@@ -73,7 +73,6 @@
       const response = await getPlanDetailInformation(item.ccp_index);
 
       if (response) {
-        console.log("response from funct", response);
         detailInfoPlan.set(response);
       } else {
       }
@@ -85,11 +84,11 @@
 
   let selectedHostnameData = null;
   function handleClickHostname(data) {
-    console.log("handle data", data);
+    // console.log("handle data", data);
     selectedHostname = data.hostname;
     selectedHostnameData = data;
   }
-  $: console.log("detailPlan", $detailInfoPlan);
+  $: "detailPlan", $detailInfoPlan;
   // Function to filter data based on selected target and hostname
   let selectedTarget = "";
   let selectedHostname = "";
@@ -98,7 +97,7 @@
   const selectPage1 = (page, data) => {
     currentPage1 = page;
     firstMenuData = data;
-    console.log("data1111", firstMenuData);
+    // console.log("data1111", firstMenuData);
   };
 </script>
 

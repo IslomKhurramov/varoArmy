@@ -11,9 +11,14 @@
   import { getPlanLists } from "../../services/page1/newInspection";
   import ResultErrorPopup from "./ResultErrorPopup.svelte";
   import { getAllPlanLists } from "../../services/page1/planInfoService";
-  import {errorAlert, successAlert} from "../../shared/sweetAlert"
+  import { errorAlert, successAlert } from "../../shared/sweetAlert";
   import ResultUploadStatusPopup from "./ResultUploadStatusPopup.svelte";
-  import { getAllCheckList, setDeleteChecklistGroup, setDeleteChecklistItem, setNewChecklistGroup } from "../../services/callApi";
+  import {
+    getAllCheckList,
+    setDeleteChecklistGroup,
+    setDeleteChecklistItem,
+    setNewChecklistGroup,
+  } from "../../services/callApi";
   import { allCheckList } from "../../services/store";
 
   let jsonInput, txtInput, excelInput;
@@ -53,44 +58,43 @@
   $: if (selectedPlan) {
     (async () => {
       try {
-        console.log('selectedPlan',selectedPlan);
-        
+        // console.log('selectedPlan',selectedPlan);
+
         resultStatus = await getCCEResultUploadStatus(selectedPlan);
         resultErrors = await getUploadedResultErrors(selectedPlan);
         uploadStatus = await getResultUploadStatus(selectedPlan);
-        
       } catch (error) {}
     })();
   }
 
-const submitNewSystemCommand = async () => {
+  const submitNewSystemCommand = async () => {
     try {
       if (!selectedPlan) {
-      errorAlert("프로젝트명을 먼저 선택해주세요.");
-      return;
-    }
+        errorAlert("프로젝트명을 먼저 선택해주세요.");
+        return;
+      }
 
-    if (!jsonFiles.length && !txtFiles.length && !excelFiles.length) {
-      errorAlert("파일을 업로드하고 계획을 선택하세요.");
-      return;
-    }
+      if (!jsonFiles.length && !txtFiles.length && !excelFiles.length) {
+        errorAlert("파일을 업로드하고 계획을 선택하세요.");
+        return;
+      }
 
-    const filesToUpload = [
-      ...jsonFiles.map((file) => ({ type: "JSON", file })),
-      ...txtFiles.map((file) => ({ type: "TXT", file })),
-      ...excelFiles.map((file) => ({ type: "EXCEL", file })),
-    ];
+      const filesToUpload = [
+        ...jsonFiles.map((file) => ({ type: "JSON", file })),
+        ...txtFiles.map((file) => ({ type: "TXT", file })),
+        ...excelFiles.map((file) => ({ type: "EXCEL", file })),
+      ];
 
-    for (const { type, file } of filesToUpload) {
-      const formData = new FormData();
-      formData.append("plan_index", selectedPlan);
-      formData.append("target_system", type);
-      formData.append("result_files", file);
-  
-    const response = await setUploadPlanResult(formData);
-      await successAlert(response);
-    }
-    
+      for (const { type, file } of filesToUpload) {
+        const formData = new FormData();
+        formData.append("plan_index", selectedPlan);
+        formData.append("target_system", type);
+        formData.append("result_files", file);
+
+        const response = await setUploadPlanResult(formData);
+        await successAlert(response);
+      }
+
       resultStatus = await getCCEResultUploadStatus(selectedPlan);
       resultErrors = await getUploadedResultErrors(selectedPlan);
       uploadStatus = await getResultUploadStatus(selectedPlan);
@@ -104,11 +108,10 @@ const submitNewSystemCommand = async () => {
     }
   };
 
-
-onMount(async () => {
+  onMount(async () => {
     try {
       planList = await getPlanLists();
-      allCheckListGet();  
+      allCheckListGet();
     } catch (err) {}
   });
 
@@ -121,7 +124,6 @@ onMount(async () => {
   $: {
     if (projectIndex) selectedPlan = projectIndex;
   }
-
 
   /*************LEFT SIDE */
 
@@ -156,9 +158,8 @@ onMount(async () => {
     isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey];
   }
 
-
-    /********************************/
-    async function allCheckListGet() {
+  /********************************/
+  async function allCheckListGet() {
     try {
       const response = await getAllCheckList();
 
@@ -177,7 +178,7 @@ onMount(async () => {
   function handleClickTarget(targetData, item) {
     selectedTargetData = targetData;
     selectedTarget = item;
-    console.log("targetData", selectedTargetData);
+    // console.log("targetData", selectedTargetData);
   }
 
   async function deleteChecklist() {
@@ -319,22 +320,28 @@ onMount(async () => {
     const files = Array.from(event.target.files);
     if (fileType === "json") {
       jsonFiles = files;
-      fileNames = jsonFiles.length > 0 ? jsonFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
+      fileNames =
+        jsonFiles.length > 0
+          ? jsonFiles.map((file) => file.name).join(", ")
+          : "(멀티파일등록가능)";
     } else if (fileType === "txt") {
       txtFiles = files;
-      fileNames2 = txtFiles.length > 0 ? txtFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
+      fileNames2 =
+        txtFiles.length > 0
+          ? txtFiles.map((file) => file.name).join(", ")
+          : "(멀티파일등록가능)";
     } else if (fileType === "excel") {
       excelFiles = files;
-      fileNames3 = excelFiles.length > 0 ? excelFiles.map((file) => file.name).join(", ") : "(멀티파일등록가능)";
+      fileNames3 =
+        excelFiles.length > 0
+          ? excelFiles.map((file) => file.name).join(", ")
+          : "(멀티파일등록가능)";
     }
     updateAllFiles();
   }
-
-
 </script>
 
 <main class="table-container">
-
   <section class="section1">
     <div class="body_menu">
       <div class="menuContainer">
@@ -348,7 +355,7 @@ onMount(async () => {
               {#each Object.entries($allCheckList) as [key, item], index}
                 <div class="accordion-item">
                   <button
-                    on:click="{() => toggleAccordion(index, item)}"
+                    on:click={() => toggleAccordion(index, item)}
                     class="accordion-header {isOpen[index] ? 'active' : ''}"
                   >
                     {item.ccg_group}
@@ -367,11 +374,11 @@ onMount(async () => {
                         <!-- Render UNIX section if it exists -->
                         {#if item.UNIX && item.UNIX.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'UNIX');
-                              handleClickTarget(item.UNIX, item, 'UNIX');
-                            }}"
-                            class="{isSectionOpen[key]?.UNIX ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "UNIX");
+                              handleClickTarget(item.UNIX, item, "UNIX");
+                            }}
+                            class={isSectionOpen[key]?.UNIX ? "active" : ""}
                           >
                             UNIX
                           </p>
@@ -385,10 +392,10 @@ onMount(async () => {
                           >
                             {#each item.UNIX as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -399,13 +406,11 @@ onMount(async () => {
                         <!-- WINDOWS Section -->
                         {#if item.WINDOWS && item.WINDOWS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'WINDOWS');
-                              handleClickTarget(item.WINDOWS, item, 'WINDOWS');
-                            }}"
-                            class="{isSectionOpen[key]?.WINDOWS
-                              ? 'active'
-                              : ''}"
+                            on:click={() => {
+                              toggleSection(key, "WINDOWS");
+                              handleClickTarget(item.WINDOWS, item, "WINDOWS");
+                            }}
+                            class={isSectionOpen[key]?.WINDOWS ? "active" : ""}
                           >
                             WINDOWS
                           </p>
@@ -419,10 +424,10 @@ onMount(async () => {
                           >
                             {#each item.WINDOWS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -433,13 +438,11 @@ onMount(async () => {
                         <!-- NETWORK Section -->
                         {#if item.NETWORK && item.NETWORK.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'NETWORK');
-                              handleClickTarget(item.NETWORK, item, 'NETWORK');
-                            }}"
-                            class="{isSectionOpen[key]?.NETWORK
-                              ? 'active'
-                              : ''}"
+                            on:click={() => {
+                              toggleSection(key, "NETWORK");
+                              handleClickTarget(item.NETWORK, item, "NETWORK");
+                            }}
+                            class={isSectionOpen[key]?.NETWORK ? "active" : ""}
                           >
                             NETWORK
                           </p>
@@ -453,10 +456,10 @@ onMount(async () => {
                           >
                             {#each item.NETWORK as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -467,11 +470,11 @@ onMount(async () => {
                         <!-- DBMS Section -->
                         {#if item.DBMS && item.DBMS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'DBMS');
-                              handleClickTarget(item.DBMS, item, 'DBMS');
-                            }}"
-                            class="{isSectionOpen[key]?.DBMS ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "DBMS");
+                              handleClickTarget(item.DBMS, item, "DBMS");
+                            }}
+                            class={isSectionOpen[key]?.DBMS ? "active" : ""}
                           >
                             DBMS
                           </p>
@@ -485,10 +488,10 @@ onMount(async () => {
                           >
                             {#each item.DBMS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -500,11 +503,11 @@ onMount(async () => {
                         <!-- WAS Section -->
                         {#if item.WAS && item.WAS.length > 0}
                           <p
-                            on:click="{() => {
-                              toggleSection(key, 'WAS');
-                              handleClickTarget(item.WAS, item, 'WAS');
-                            }}"
-                            class="{isSectionOpen[key]?.WAS ? 'active' : ''}"
+                            on:click={() => {
+                              toggleSection(key, "WAS");
+                              handleClickTarget(item.WAS, item, "WAS");
+                            }}
+                            class={isSectionOpen[key]?.WAS ? "active" : ""}
                           >
                             WAS
                           </p>
@@ -518,10 +521,10 @@ onMount(async () => {
                           >
                             {#each item.WAS as subItem}
                               <li
-                                on:click="{() => {
+                                on:click={() => {
                                   (activeMenu = subItem.ccc_item_no),
                                     selectPage(subItem);
-                                }}"
+                                }}
                               >
                                 {subItem.ccc_item_no}
                               </li>
@@ -539,8 +542,8 @@ onMount(async () => {
 
         <!-- Buttons -->
         <div class="buttons">
-          <button on:click="{() => (isAddingNewGroup = true)}">복사</button>
-          <button on:click="{deleteGroup}">삭제</button>
+          <button on:click={() => (isAddingNewGroup = true)}>복사</button>
+          <button on:click={deleteGroup}>삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -550,7 +553,6 @@ onMount(async () => {
   <section class="section2">
     <div class="formContainer_main">
       <div class="inspection-container">
-  
         <div class="formControlWrap">
           <div class="formControl">
             <label style="font-size: 14px;">점검항목</label>
@@ -564,29 +566,29 @@ onMount(async () => {
             </select>
           </div>
         </div>
-  
+
         <div class="formControlWrap">
           <div class="formControl">
             <label style="font-size: 14px;">점검분류</label>
-            <input type="text">
+            <input type="text" />
           </div>
         </div>
-  
+
         <div class="formControlWrap">
-        <div class="inputRow box_1">
-          <label>점검기간</label>
-          <div class="dateWrap">
-            <div class="date_1">
-              <input type="date" class="" placeholder="시작일시" />
-            </div>
-            <img src="./assets/images/dash.svg" />
-            <div class="date_1">
-              <input type="date" class="" placeholder="종료일시" />
+          <div class="inputRow box_1">
+            <label>점검기간</label>
+            <div class="dateWrap">
+              <div class="date_1">
+                <input type="date" class="" placeholder="시작일시" />
+              </div>
+              <img src="./assets/images/dash.svg" />
+              <div class="date_1">
+                <input type="date" class="" placeholder="종료일시" />
+              </div>
             </div>
           </div>
         </div>
-        </div>
-  
+
         <!-- Registration Status -->
         <div class="tableListWrap">
           <p>등록현황</p>
@@ -630,11 +632,12 @@ onMount(async () => {
                   {/each}
                 {:else}
                   <tr>
-                    <td class="data_no_color" colspan="8">데이터가 없음! 프로젝트명을 먼저 선택함</td>
+                    <td class="data_no_color" colspan="8"
+                      >데이터가 없음! 프로젝트명을 먼저 선택함</td
+                    >
                   </tr>
                 {/if}
               </tbody>
-              
             </table>
           </div>
           <div class="buttons1">
@@ -642,36 +645,33 @@ onMount(async () => {
               type="button"
               class={`btn ${resultStatus?.assets_info?.length > 0 ? "btn-primary" : ""}`}
               disabled={!resultStatus?.assets_info?.length > 0}
-              on:click="{() => {
+              on:click={() => {
                 showModal = true;
                 modalData = resultStatus?.assets_info;
                 getResultStatus();
-              }}">결과미등록자산 ({resultStatus?.assets_info?.length || ""})
-              </button
-            >
-            <button 
+              }}
+              >결과미등록자산 ({resultStatus?.assets_info?.length || ""})
+            </button>
+            <button
               type="button"
               class={`btn ${resultErrors?.length > 0 ? "btn-secondary" : ""}`}
               disabled={!resultErrors?.length > 0}
               on:click={() => {
                 showErrorModal = true;
                 modalErrorData = resultErrors;
-              }}
-              >등록실패내역 ({resultErrors?.length || ""})</button
+              }}>등록실패내역 ({resultErrors?.length || ""})</button
             >
           </div>
         </div>
-  
+
         <!-- File Upload Section -->
       </div>
-      
+
       <div class="page2_headir_bottom">
         <p>이동식점검 결과 파일등록</p>
-  
+
         <div class="upload-section">
-    
           <div class="upload-box">
-  
             <div class="upload-button">
               <span>JSON 파일등록</span><br />
               <input
@@ -682,7 +682,7 @@ onMount(async () => {
                 readonly
               />
             </div>
-          
+
             <label class="plus-icon">
               <span>+</span>
               <input
@@ -696,9 +696,8 @@ onMount(async () => {
               />
             </label>
           </div>
-  
+
           <div class="upload-box">
-  
             <div class="upload-button">
               <span>네트워크 설정파일등록</span><br />
               <input
@@ -709,7 +708,7 @@ onMount(async () => {
                 readonly
               />
             </div>
-          
+
             <label class="plus-icon">
               <span>+</span>
               <input
@@ -723,9 +722,8 @@ onMount(async () => {
               />
             </label>
           </div>
-          
+
           <div class="upload-box">
-  
             <div class="upload-button">
               <span>수기등록</span><br />
               <input
@@ -736,7 +734,7 @@ onMount(async () => {
                 readonly
               />
             </div>
-          
+
             <label class="plus-icon">
               <span>+</span>
               <input
@@ -750,21 +748,18 @@ onMount(async () => {
               />
             </label>
           </div>
-             
         </div>
 
-        <div class="upload-submit"
+        <div
+          class="upload-submit"
           on:click={submitNewSystemCommand}
           disabled={!selectedPlan || !allFiles.length}
         >
           <button class="btn btn-upload">업로드</button>
         </div>
-  
       </div>
     </div>
-
   </section>
-
 </main>
 
 {#if uploadStatusModalData && uploadStatusModalData?.length !== 0}
@@ -848,7 +843,7 @@ onMount(async () => {
     overflow-x: hidden;
   }
 
-  .table_scroll_bar{
+  .table_scroll_bar {
     overflow-y: auto;
     max-height: 20vh;
     margin-bottom: 10px;
@@ -881,7 +876,7 @@ onMount(async () => {
     border-radius: 4px;
   }
 
-   .date_1 input {
+  .date_1 input {
     min-width: 78px;
     height: 28px;
     padding: 0 8px;
@@ -913,10 +908,10 @@ onMount(async () => {
     width: 50%;
   }
 
- .data_no_color {
-  font-size: 14px;
-  color: #ccc;
- }
+  .data_no_color {
+    font-size: 14px;
+    color: #ccc;
+  }
 
   .inputRow input {
     flex: 1;
@@ -1053,20 +1048,19 @@ onMount(async () => {
   .file-name-input {
     margin-left: 50px;
     border: none;
-    background: none;  
-    color: inherit; 
+    background: none;
+    color: inherit;
     padding: 0;
     outline: none;
     font: inherit;
     cursor: default;
-}
+  }
 
   .file-input {
     opacity: 0;
     position: absolute;
     cursor: pointer;
-}
-
+  }
 
   .upload-button {
     width: 100%;

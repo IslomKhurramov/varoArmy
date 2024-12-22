@@ -3,51 +3,51 @@
 
   const tableHead = ["넘버", "호스트명", "아이피주소", "점검대상", "보안점수"];
 
-  $: {
-    console.log("modalData:", modalData);
-  }
+  // $: {
+  //   console.log("modalData:", modalData);
+  // }
 
   let resultData = [];
 
   let tableData = [
-  {
-    systemName: 'xxxxxxxx',
-    inspectionField: 'WINDOWS',
-    operatingSystem: 'Windows2012',
-    hostName: 'aaaaaa',
-    ipInfo: '192.168.0.x',
-    agent: 'O',
-    connectionStatus: '연결안됨',
-    errorDetails: '-',
-    registrationStatus: '미등록' 
-  },
-  {
-    systemName: 'xxxxxxxx',
-    inspectionField: 'LINUX',
-    operatingSystem: 'Ubuntu 22.02',
-    hostName: 'aaaaaa',
-    ipInfo: '192.168.0.x',
-    agent: 'X',
-    connectionStatus: '미연결', 
-    errorDetails: '-',
-    registrationStatus: '미등록'
-  },
-  {
-    systemName: 'xxxxxxxx',
-    inspectionField: 'LINUX',
-    operatingSystem: 'Ubuntu 22.02',
-    hostName: 'aaaaaa',
-    ipInfo: '192.168.0.x',
-    agent: 'X',
-    connectionStatus: '미연결', 
-    errorDetails: '-',
-    registrationStatus: '미등록'
-  }
-];
+    {
+      systemName: "xxxxxxxx",
+      inspectionField: "WINDOWS",
+      operatingSystem: "Windows2012",
+      hostName: "aaaaaa",
+      ipInfo: "192.168.0.x",
+      agent: "O",
+      connectionStatus: "연결안됨",
+      errorDetails: "-",
+      registrationStatus: "미등록",
+    },
+    {
+      systemName: "xxxxxxxx",
+      inspectionField: "LINUX",
+      operatingSystem: "Ubuntu 22.02",
+      hostName: "aaaaaa",
+      ipInfo: "192.168.0.x",
+      agent: "X",
+      connectionStatus: "미연결",
+      errorDetails: "-",
+      registrationStatus: "미등록",
+    },
+    {
+      systemName: "xxxxxxxx",
+      inspectionField: "LINUX",
+      operatingSystem: "Ubuntu 22.02",
+      hostName: "aaaaaa",
+      ipInfo: "192.168.0.x",
+      agent: "X",
+      connectionStatus: "미연결",
+      errorDetails: "-",
+      registrationStatus: "미등록",
+    },
+  ];
 </script>
 
 <div class="tableListWrap" style="padding: 0;">
-<h4 style="text-align: center;">결과 미등록 자산 내역</h4>
+  <h4 style="text-align: center;">결과 미등록 자산 내역</h4>
 
   <table class="tableList hdBorder">
     <colgroup>
@@ -88,8 +88,7 @@
           <td class="text-center">
             {data.operatingSystem}
           </td>
-          <td class="text-center">
-             {data.hostName}</td>
+          <td class="text-center"> {data.hostName}</td>
           <td class="text-center">
             {data.ipInfo}
           </td>
@@ -113,9 +112,9 @@
 
 <style>
   thead {
-    position: sticky; 
-    top: 0; 
-    z-index: 10; 
+    position: sticky;
+    top: 0;
+    z-index: 10;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
   }
 

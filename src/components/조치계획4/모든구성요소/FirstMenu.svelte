@@ -4,7 +4,10 @@
   export let resultVulnsOfPlans;
   export let targetName;
   export let selectPage1;
-  $: console.log("firstmenu", resultVulnsOfPlans);
+  // $: console.log("firstmenu", resultVulnsOfPlans);
+  let results = Object.values(resultVulnsOfPlans)
+    .filter((item) => Array.isArray(item) && item[0]?.result) // Ensure valid array with a result key
+    .map((item) => item[0].result); // Extract the result key
 </script>
 
 <div class="first_nenu">
@@ -38,26 +41,23 @@
         </tr>
       </thead>
       <tbody>
-        {#each resultVulnsOfPlans as plan}
-          {#each plan.plan_target as targetGroup}
-            {#each Object.entries(targetGroup) as [category, assets]}
-              {#if category === targetName}
-                {#each assets as asset, index}
-                  <tr on:click={() => selectPage1(SwiperPage4, asset)}>
-                    <td class="text-center">{assets.length - index}</td>
-                    <td class="text-center">{category}</td>
-                    <td class="text-center"
-                      >{asset.ast_uuid__ass_uuid__ast_hostname}</td
-                    >
-                    <td class="text-center">NW-06</td>
-                    <td class="text-center">{plan.plan_title}</td>
-                    <td class="text-center">취약</td>
-                    <td class="text-center">조치승인</td>
-                  </tr>
-                {/each}
-              {/if}
-            {/each}
-          {/each}
+        {#each results as entry, index}
+          <tr>
+            <td class="text-center">{results.length - index}</td>
+            <td class="text-center"
+              >{entry.ccr_item_no__ccc_item_group || "N/A"}</td
+            >
+            <td class="text-center"
+              >{entry.ast_uuid__ass_uuid__ast_hostname || "N/A"}</td
+            >
+            <td class="text-center"
+              >{entry.ccr_item_no__ccc_item_no || "N/A"}</td
+            >
+            <td class="text-center"
+              >{entry.ccr_item_no__ccc_item_title || "N/A"}</td
+            >
+            <td class="text-center">{entry.ccr_item_result || "N/A"}</td>
+          </tr>
         {/each}
       </tbody>
     </table>

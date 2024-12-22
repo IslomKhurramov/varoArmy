@@ -93,11 +93,11 @@
 
   // Handlers
   function handleTableClick(index, vuln) {
-    console.log("First Plan - Clicked Row:", index, vuln);
+    // console.log("First Plan - Clicked Row:", index, vuln);
   }
 
   function handleTableClick2(index, vuln) {
-    console.log("Second Plan - Clicked Row:", index, vuln);
+    // console.log("Second Plan - Clicked Row:", index, vuln);
   }
 </script>
 
