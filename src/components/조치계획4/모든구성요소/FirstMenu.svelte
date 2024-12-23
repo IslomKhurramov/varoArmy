@@ -3,11 +3,67 @@
 
   export let resultVulnsOfPlans;
   export let targetName;
+  export let selectedHostname;
   export let selectPage1;
-  // $: console.log("firstmenu", resultVulnsOfPlans);
+  export let currentPage1;
+
+  // Filter and map the results based on targetName and selectedHostname
   let results = Object.values(resultVulnsOfPlans)
-    .filter((item) => Array.isArray(item) && item[0]?.result) // Ensure valid array with a result key
-    .map((item) => item[0].result); // Extract the result key
+    .filter((item) => Array.isArray(item) && item[0]?.result)
+    .map((item) => item[0].result);
+
+  // Filter results based on targetName and selectedHostname
+  $: filteredResults = results.filter((entry) => {
+    const matchesTargetName = targetName
+      ? entry.cct_index__cct_target === targetName
+      : true;
+    const matchesHostname = selectedHostname
+      ? entry.ast_uuid__ass_uuid__ast_hostname === selectedHostname
+      : true;
+    return matchesTargetName && matchesHostname;
+  });
+
+  let currentPagePagination = 1; // Current page number
+  let itemsPerPage = 20; // Items per page
+
+  // Calculate the start and end index of items for the current page
+  $: startIndex = (currentPagePagination - 1) * itemsPerPage;
+  $: endIndex = startIndex + itemsPerPage;
+
+  // Calculate total pages
+  $: totalPages = Math.ceil(filteredResults.length / itemsPerPage);
+
+  // Dynamic range for pagination numbers
+  const maxButtons = 10; // Maximum number of visible page buttons
+  let paginationStart, paginationEnd;
+
+  // Calculate visible page range
+  $: {
+    // Calculate the start and end of pagination buttons to show
+    paginationStart = Math.max(
+      1,
+      currentPagePagination - Math.floor(maxButtons / 2)
+    );
+    paginationEnd = Math.min(totalPages, paginationStart + maxButtons - 1);
+
+    // Adjust paginationStart to ensure we don't go beyond the total number of pages
+    if (
+      paginationEnd - paginationStart + 1 < maxButtons &&
+      totalPages > maxButtons
+    ) {
+      paginationStart = paginationEnd - maxButtons + 1;
+    }
+  }
+
+  // Function to handle page change
+  function goToPage(pageNumber) {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      currentPagePagination = pageNumber;
+    }
+  }
+
+  // Slice the data for the current page
+  $: paginatedData = filteredResults.slice(startIndex, endIndex);
 </script>
 
 <div class="first_nenu">
@@ -32,21 +88,20 @@
       <thead>
         <tr>
           <th class="text-center">번호</th>
-          <th class="text-center">점검분야 </th>
-          <th class="text-center">자산명 </th>
+          <th class="text-center">점검분야</th>
+          <th class="text-center">자산명</th>
           <th class="text-center">점검항목</th>
           <th class="text-center">점검명</th>
-          <th class="text-center">점검결과 </th>
-          <th class="text-center">처리유형 </th>
+          <th class="text-center">점검결과</th>
+          <th class="text-center">처리유형</th>
         </tr>
       </thead>
       <tbody>
-        {#each results as entry, index}
-          <tr>
-            <td class="text-center">{results.length - index}</td>
-            <td class="text-center"
-              >{entry.ccr_item_no__ccc_item_group || "N/A"}</td
-            >
+        {#each paginatedData as entry, index}
+          <tr on:click={() => selectPage1(SwiperPage4, entry)}>
+            <td class="text-center">{startIndex + index + 1}</td>
+            <!-- Adjust numbering -->
+            <td class="text-center">{entry.cct_index__cct_target || "N/A"}</td>
             <td class="text-center"
               >{entry.ast_uuid__ass_uuid__ast_hostname || "N/A"}</td
             >
@@ -57,10 +112,62 @@
               >{entry.ccr_item_no__ccc_item_title || "N/A"}</td
             >
             <td class="text-center">{entry.ccr_item_result || "N/A"}</td>
+            <td class="text-center">
+              {#if entry.ccr_item_result === "취약"}
+                조치예정
+              {:else if entry.ccr_item_result === "양호"}
+                조치완료
+              {:else if entry.ccr_item_result === "예외"}
+                예외처리
+              {:else}
+                관리적조치
+              {/if}
+            </td>
           </tr>
         {/each}
       </tbody>
     </table>
+  </div>
+  <!-- Pagination -->
+  <div class="pagination">
+    <!-- First Page Button -->
+    <button on:click={() => goToPage(1)} disabled={currentPagePagination === 1}>
+      {"<<"}
+    </button>
+
+    <!-- Previous Page Button -->
+    <button
+      on:click={() => goToPage(currentPagePagination - 1)}
+      disabled={currentPagePagination === 1}
+    >
+      {"<"}
+    </button>
+
+    <!-- Visible Page Buttons -->
+    {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, pageIndex}
+      <button
+        class:selected={currentPagePagination === paginationStart + pageIndex}
+        on:click={() => goToPage(paginationStart + pageIndex)}
+      >
+        {paginationStart + pageIndex}
+      </button>
+    {/each}
+
+    <!-- Next Page Button -->
+    <button
+      on:click={() => goToPage(currentPagePagination + 1)}
+      disabled={currentPagePagination === totalPages}
+    >
+      {">"}
+    </button>
+
+    <!-- Last Page Button -->
+    <button
+      on:click={() => goToPage(totalPages)}
+      disabled={currentPagePagination === totalPages}
+    >
+      {">>"}
+    </button>
   </div>
 </div>
 
@@ -122,5 +229,44 @@
     border-radius: 4px;
     width: auto;
     margin: 10px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+  }
+  .pagination button {
+    border: none !important;
+    padding: 8px 12px;
+    margin: 0 4px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .pagination button.selected {
+    background-color: #007bff; /* Change to your desired color */
+    color: white;
+    font-weight: bold;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    /* margin-top: 20px; */
+    gap: 5px;
+  }
+  .pagination button {
+    border: none !important;
+    padding: 8px 12px;
+    margin: 0 4px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .pagination button.selected {
+    background-color: #007bff; /* Change to your desired color */
+    color: white;
+    font-weight: bold;
   }
 </style>

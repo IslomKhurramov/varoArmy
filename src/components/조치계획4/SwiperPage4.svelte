@@ -2,6 +2,9 @@
   import { onMount } from "svelte";
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
+  import { fixways, userNames, vulnAssetList } from "../../services/store";
+  import { setFixPlanRegister } from "../../services/callApi";
+  import { successAlert } from "../../shared/sweetAlert";
 
   let swiperContainer;
   let scrollAmount = 0;
@@ -10,7 +13,20 @@
   let menuWrapper;
   let swiperInstance;
   let showModal = false;
+  export let firstMenuData;
+  export let resultVulnsOfPlans;
 
+  let asset_uuid = firstMenuData.ast_uuid;
+  let ccr_index = firstMenuData.ccr_index;
+  let fix_method = "";
+  let fix_level = "";
+  let fix_start_date = "";
+  let fix_end_date = "";
+  let fix_comment = "";
+  let fix_user_index = "";
+  let fix_step_status = "";
+
+  $: console.log("firstMenuData", firstMenuData);
   onMount(() => {
     if (swiperContainer) {
       swiperInstance = new Swiper(swiperContainer, {
@@ -38,19 +54,6 @@
     };
   });
 
-  let selectedFiles = {};
-  let fileNames = {};
-
-  function handleFileSelect(event, hostname) {
-    const file = event.target.files[0];
-    if (file) {
-      selectedFiles[hostname] = file;
-      fileNames[hostname] = file.name;
-    } else {
-      fileNames[hostname] = "선택된 파일 없음";
-    }
-  }
-
   const handleScroll = (direction) => {
     if (direction === "prev") {
       scrollAmount -= itemWidth;
@@ -77,25 +80,39 @@
 
   function handleSlideclick(slide) {
     activeAsset = slide;
+    firstMenuData = slide;
     // console.log("Selected Slide:", slide);
   }
+  $: if (firstMenuData) {
+    activeAsset = firstMenuData;
+  }
 
-  let formData = {
-    planTitle: "",
-    inspectionPeriod: "",
-    category: "",
-    system: "",
-    domain: "전체",
-    item: "",
-    description: "",
-    attachment: null,
-    inspectorInfo: "",
-    executionCondition: "즉시/예약",
-    repeatPeriod: "",
-    repeatCount: 1,
-    startDate: "2024-09-01 12:00:00",
-    endDate: "2024-09-01 12:00:00",
-  };
+  $: {
+    if (activeAsset) {
+      scrollToActiveSlide(activeAsset); // Trigger scroll when activeAsset changes
+    }
+  }
+  function scrollToActiveSlide(activeSlide) {
+    console.log("Scrolling to active slide:", activeSlide);
+
+    const activeItem = document.querySelector(
+      `.menu-item[data-item-no="${activeSlide.ccr_item_no__ccc_item_no}"]`
+    );
+
+    console.log("Active item found:", activeItem);
+
+    if (activeItem) {
+      activeItem.scrollIntoView({
+        behavior: "smooth", // Smooth scrolling
+        block: "nearest", // Align to the nearest position
+      });
+    } else {
+      console.warn(
+        "No active item found for:",
+        activeSlide.ccr_item_no__ccc_item_no
+      );
+    }
+  }
 
   function handleKeyDown(event) {
     if (event.key === "Escape") {
@@ -114,13 +131,38 @@
     };
   });
 
-  const handleFileUpload = (event) => {
-    formData.attachment = event.target.files[0];
-  };
+  async function fixPlanRegister() {
+    try {
+      const response = await setFixPlanRegister(
+        asset_uuid,
+        ccr_index,
+        fix_method,
+        fix_level,
+        fix_start_date,
+        fix_end_date,
+        fix_comment,
+        fix_user_index,
+        fix_step_status
+      );
 
-  const handleSubmit = () => {
-    alert("Form submitted: " + JSON.stringify(formData, null, 2));
-  };
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
+  $: console.log("dasset_uuid ", asset_uuid);
+  $: console.log("ccr_index ", ccr_index);
+  $: console.log("fix_method ", fix_method);
+  $: console.log("fix_level ", fix_level);
+  $: console.log("fix_start_date ", fix_start_date);
+  $: console.log("fix_comment ", fix_comment);
+  $: console.log("fix_user_index ", fix_user_index);
+  $: console.log("fix_step_status", fix_step_status);
+  let results = Object.values($vulnAssetList)
+    .filter((item) => Array.isArray(item) && item[0]?.result)
+    .map((item) => item[0].result);
 </script>
 
 <div class="contentArea">
@@ -151,24 +193,21 @@
           style="background-color: white; z-index:99;"
           bind:this={menuWrapper}
         >
-          {#if slides.length > 0}
-            {#each slides as slide}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <div
-                value={slide.ccc_item_no}
-                name={slide}
-                class="menu-item {activeAsset &&
-                activeAsset.ccc_item_no === slide.ccc_item_no
-                  ? 'active'
-                  : ''}"
-                on:click={() => handleSlideclick(slide)}
-              >
-                {slide.ccc_item_no}
-              </div>
-            {/each}
-          {:else}
-            <div>데이터가 없습니다</div>
-          {/if}
+          {#each results as slide}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div
+              data-item-no={slide.ccr_item_no__ccc_item_no}
+              value={slide.ccr_index}
+              name={slide}
+              class="menu-item {activeAsset &&
+              activeAsset.ccr_index === slide.ccr_index
+                ? 'active'
+                : ''}"
+              on:click={() => handleSlideclick(slide)}
+            >
+              {slide.ccr_item_no__ccc_item_no}
+            </div>
+          {/each}
         </div>
       </div>
 
@@ -184,6 +223,7 @@
 
   <div class="formContainer">
     <div class="main_box_page5">
+      <!-- 평가수행부대 -->
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">평가수행부대</span>
         <div
@@ -193,157 +233,154 @@
             <label>점검기간</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <input type="text" />
+                <span class="span-input"
+                  >{firstMenuData.evl_evlperiod_stt_dt__evl_evlperiod_end_dt}</span
+                >
               </div>
               <div class="riskLevelItem">
-                <span>점검분류</span>
-                <input type="text" />
+                <label>점검분류</label>
+                <span class="span-input">{firstMenuData.evl_evl_type_name}</span
+                >
               </div>
             </div>
           </div>
-
           <div class="inputRow">
             <label>소속기관</label>
-            <input type="text" />
+            <span class="span-input">{firstMenuData.evl_evlorg_nm}</span>
           </div>
         </div>
       </div>
 
+      <!-- 취약점정보 -->
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">취약점정보</span>
         <div
-          style="display: flex; flex-direction: column; row-gap: 10px;border:1px solid #cccccc; padding:20px"
+          style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
         >
           <div class="inputRow">
             <label>취약점구분</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <input type="text" />
+                <span class="span-input">{firstMenuData.ccc_item_nm}</span>
               </div>
               <div class="riskLevelItem">
-                <span>점검번호</span>
-                <input type="text" />
+                <label>점검번호</label>
+                <span class="span-input"
+                  >{firstMenuData.ccr_item_no__ccc_item_no}</span
+                >
               </div>
             </div>
           </div>
-
           <div class="inputRow">
             <label>점검결과</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <input type="text" />
+                <span class="span-input">{firstMenuData.ccr_status_name}</span>
               </div>
               <div class="riskLevelItem">
-                <span>수집방법</span>
-                <input type="text" />
+                <label>수집방법</label>
+                <span class="span-input"
+                  >{firstMenuData.ccr_collect_method}</span
+                >
               </div>
             </div>
           </div>
-
           <div class="inputRow">
             <label>점검현황</label>
-            <input type="text" />
+            <span class="span-input">{firstMenuData.ccr_result_txt}</span>
           </div>
-
           <div class="inputRow">
             <label>점검기준(Key)</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <input type="text" />
+                <span class="span-input">{firstMenuData.ccc_key_txt}</span>
               </div>
               <div class="riskLevelItem">
-                <span>점검기준</span>
-                <input type="text" />
+                <label>점검기준</label>
+                <span class="span-input">{firstMenuData.ccc_criteria_txt}</span>
               </div>
             </div>
           </div>
-
           <div class="inputRow">
             <label>조치방법</label>
-            <input type="text" />
+            <span class="span-input">{firstMenuData.ccc_action_txt}</span>
           </div>
         </div>
       </div>
 
+      <!-- 체계정보 -->
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">체계정보</span>
         <div
-          style="display: flex; flex-direction: column; row-gap: 10px;border:1px solid #cccccc; padding:20px"
+          style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
         >
           <div class="inputRow">
-            <label>조치이력</label>
-            <input type="text" />
+            <label>체계명</label>
+            <span class="span-input"
+              >{firstMenuData.ast_uuid__ass_uuid__ast_nm}</span
+            >
           </div>
-
           <div class="inputRow">
-            <label>조치계획</label>
-            <input type="text" />
+            <label>운영관리담당자</label>
+            <span class="span-input"
+              >{firstMenuData.ast_uuid__ass_uuid__ast_optr_nm}</span
+            >
           </div>
-
           <div class="inputRow">
-            <label>조치결과</label>
-            <input type="text" />
+            <label>IP/호스팅</label>
+            <span class="span-input"
+              >{firstMenuData.ast_uuid__ass_uuid__ast_ipaddr}</span
+            >
+          </div>
+          <div class="inputRow">
+            <label>자산분류</label>
+            <span class="span-input"
+              >{firstMenuData.ast_uuid__ass_uuid__ast_class}</span
+            >
+          </div>
+          <div class="inputRow">
+            <label>제조사/제품명/버전</label>
+            <span class="span-input"
+              >{firstMenuData.ast_uuid__ass_uuid__ast_maker_ver}</span
+            >
           </div>
         </div>
       </div>
 
+      <!-- 조치결과 -->
       <div style="display: flex; flex-direction: column;">
         <span class="main_header">조치결과</span>
         <div
-          style="display: flex; flex-direction: column; row-gap: 10px;border:1px solid #cccccc; padding:20px"
+          style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
         >
           <div class="inputRow">
-            <label>최종조치완료처리자</label>
-
+            <label>조치계획수립</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <input type="text" />
+                <select bind:value={fix_method}>
+                  {#each $fixways as fixway}
+                    <option value={fixway.cvf_index}>{fixway.cvf_desc}</option>
+                  {/each}
+                </select>
               </div>
               <div class="riskLevelItem">
-                <span style="margin: 0 0 0 0;">최종조치완료일</span>
-                <input
-                  type="datetime-local"
-                  style="margin-left: 5px;"
-                  bind:value={formData.endDate}
-                />
+                <label style="margin: 0 0 0 0;">조치담당관</label>
+                <select bind:value={fix_user_index}>
+                  {#each $userNames as names}
+                    <option value={names.user_index}>{names.user_name}</option>
+                  {/each}
+                </select>
               </div>
             </div>
           </div>
-
           <div class="inputRow">
-            <label>조치내역</label>
-            <input type="text" />
-          </div>
-
-          <div class="inputRow">
-            <label>조치증적</label>
-            <div
-              style="width: 100%; display:flex; gap:10px; justify-content:center"
-            >
-              <label
-                class="btn btnPrimary"
-                style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px"
-              >
-                <input
-                  type="file"
-                  class="file-input"
-                  on:change={(event) => handleFileSelect(event)}
-                />
-                <img src="./assets/images/download.svg" class="excel-img" />
-                <span>파일업로드</span>
-              </label>
-              <input
-                type="text"
-                placeholder="선택된 파일 없음"
-                value={fileNames || "선택된 파일 없음"}
-                readonly
-                class="file-name-input"
-              />
-            </div>
+            <label>조치예정일 </label>
+            <input type="date" bind:value={fix_end_date} />
           </div>
         </div>
       </div>
 
+      <!-- 저장 버튼 -->
       <div style="display: flex; flex-direction: column;">
         <div style="display: flex; flex-direction: column; row-gap: 10px">
           <div class="inputRow">
@@ -391,6 +428,15 @@
     margin-left: 20px;
   }
 
+  .inputRow span {
+    flex: 1;
+    width: 100%;
+    /* height: 34px; */
+    padding: 8px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
   .inputRow input {
     flex: 1;
     width: 100%;
@@ -428,7 +474,7 @@
     font-size: 14px;
     font-weight: 600;
     white-space: nowrap; /* Prevent text wrapping */
-    margin: 0 20px;
+    /* margin: 0 20px; */
   }
 
   @media (max-width: 768px) {

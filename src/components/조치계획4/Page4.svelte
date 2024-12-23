@@ -3,8 +3,18 @@
   import FirstMenu from "./모든구성요소/FirstMenu.svelte";
   import SecondMenu from "./모든구성요소/SecondMenu.svelte";
   import SwiperPage4 from "./SwiperPage4.svelte";
-  import { allPlanList, vulnAssetList } from "../../services/store";
-  import { getVulnsOfAsset, setDeletePlan } from "../../services/callApi";
+  import {
+    allPlanList,
+    fixways,
+    userNames,
+    vulnAssetList,
+  } from "../../services/store";
+  import {
+    getUserName,
+    getVulnsFixWay,
+    getVulnsOfAsset,
+    setDeletePlan,
+  } from "../../services/callApi";
   import { confirmDelete, successAlert } from "../../shared/sweetAlert";
   import { faL } from "@fortawesome/free-solid-svg-icons";
   export let getPlanList;
@@ -37,7 +47,7 @@
   let asset_target_uuid = "";
   let step_vuln = "1";
   let currentPagePagination = "1";
-  let itemsPerPage = "15";
+  let itemsPerPage = "99999";
   let search_opt = "취약";
   let resultVulnsOfAsset = [];
   let totalPages = 0; // Total pages from backend
@@ -66,47 +76,13 @@
         totalPages = response.totalPages || 1;
         currentPagePagination = response.currentPage || 1;
 
-        vulnAssetList.set(response); // Update the store if needed
+        vulnAssetList.set(response.CODE.vulns); // Update the store if needed
       }
     } catch (err) {
       console.error("Error fetching paginated data:", err);
     }
   }
   // $: console.log("resultVulnsOfPlans::", resultVulnsOfPlans);
-  // Calculate the start and end index of items for the current page
-  $: startIndex = (currentPagePagination - 1) * itemsPerPage;
-  $: endIndex = startIndex + itemsPerPage;
-
-  // Dynamic range for pagination numbers
-  const maxButtons = 10; // Maximum number of visible page buttons
-  let paginationStart, paginationEnd; // Declare these variables once
-
-  $: {
-    paginationStart = Math.max(
-      1,
-      currentPagePagination - Math.floor(maxButtons / 2)
-    );
-    paginationEnd = Math.min(totalPages, paginationStart + maxButtons - 1);
-    paginationStart = Math.max(
-      1,
-      Math.min(paginationStart, totalPages - maxButtons + 1)
-    );
-  }
-
-  // Function to change page
-  function goToPage(pageNumber) {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      currentPagePagination = pageNumber;
-      fetchPaginatedData(); // Fetch data for the new page
-    }
-  }
-
-  // Function to handle items per page change
-  function updateItemsPerPage(event) {
-    itemsPerPage = parseInt(event.target.value, 10);
-    currentPagePagination = 1; // Reset to first page when items per page changes
-    fetchPaginatedData();
-  }
 
   /*************************************************************/
   let selected = [];
@@ -161,6 +137,38 @@
   function closeSwiper() {
     currentPage1 = FirstMenu;
   }
+
+  async function getuserName() {
+    try {
+      const response = await getUserName();
+
+      if (response) {
+        userNames.set(response.CODE);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async function getfixWays() {
+    try {
+      const response = await getVulnsFixWay();
+
+      if (response) {
+        fixways.set(response.CODE);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+  onMount(() => {
+    getuserName();
+    getfixWays();
+  });
 </script>
 
 {#if loading}
@@ -342,44 +350,11 @@
               {targetName}
               bind:resultVulnsOfAsset
               {currentPage1}
+              {selectedHostname}
               {selectPage1}
+              {firstMenuData}
             />
           {/if}
-          <!-- Pagination -->
-          <div class="pagination">
-            <button
-              on:click={() => goToPage(1)}
-              disabled={currentPagePagination === 1}
-            >
-              {"<<"}
-            </button>
-            <button
-              on:click={() => goToPage(currentPagePagination - 1)}
-              disabled={currentPagePagination === 1}
-            >
-              {"<"}
-            </button>
-            {#each Array(totalPages).fill(0) as _, pageIndex}
-              <button
-                class:selected={currentPagePagination === pageIndex + 1}
-                on:click={() => goToPage(pageIndex + 1)}
-              >
-                {pageIndex + 1}
-              </button>
-            {/each}
-            <button
-              on:click={() => goToPage(currentPagePagination + 1)}
-              disabled={currentPagePagination === totalPages}
-            >
-              {">"}
-            </button>
-            <button
-              on:click={() => goToPage(totalPages)}
-              disabled={currentPagePagination === totalPages}
-            >
-              {">>"}
-            </button>
-          </div>
         </article>
       {/if}
     </section>

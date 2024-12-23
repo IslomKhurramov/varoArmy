@@ -311,3 +311,88 @@ export const setSpecificItemResultsChange = async (data) => {
     throw error; // Rethrow error for further handling
   }
 };
+
+export const getUserName = async () => {
+  try {
+    // Send the request with proper payload and configurations
+    const response = await axios.get(`${serverApi}/api/getUserName/`, {
+      withCredentials: true,
+    });
+
+    // console.log("API Response:", response.data);
+
+    if (response && response.data) {
+      return response.data; // Return the API response data
+    } else {
+      throw new Error("Invalid response received from the server.");
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch checklist: ${error.message}`);
+  }
+};
+export const getVulnsFixWay = async () => {
+  try {
+    // Send the request with proper payload and configurations
+    const response = await axios.get(`${serverApi}/api/getVulnsFixWay/`, {
+      withCredentials: true,
+    });
+
+    // console.log("API Response:", response.data);
+
+    if (response && response.data) {
+      return response.data; // Return the API response data
+    } else {
+      throw new Error("Invalid response received from the server.");
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(`Failed to fetch checklist: ${error.message}`);
+  }
+};
+
+export const setFixPlanRegister = async (
+  asset_uuid,
+  ccr_index,
+  fix_method,
+  fix_level,
+  fix_start_date,
+  fix_end_date,
+  fix_comment,
+  fix_user_index,
+  fix_step_status
+) => {
+  try {
+    // Send page_cnt and list_cnt in the request body
+    const response = await axios.post(
+      `${serverApi}/api/setFixPlanRegister/`, // API endpoint
+      {
+        asset_uuid: asset_uuid,
+        ccr_index: ccr_index,
+        fix_method: fix_method,
+        fix_level: fix_level,
+        fix_start_date: fix_start_date,
+        fix_end_date: fix_end_date,
+        fix_comment: fix_comment,
+        fix_user_index: fix_user_index,
+        fix_step_status: fix_step_status,
+      }, // Request body matches Postman structure
+      { withCredentials: true } // Additional config
+    );
+
+    // console.log("API Response:", response.data);
+
+    if (response) {
+      return response.data; // Expected valid response
+    } else {
+      throw new Error(
+        `Error Code on getPlanDetailInformation: ${response.data}`
+      );
+    }
+  } catch (error) {
+    console.error("API Call Error:", error.message);
+    throw new Error(
+      `Failed to fetch getPlanDetailInformation detail: ${error.message}`
+    );
+  }
+};
