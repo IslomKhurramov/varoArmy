@@ -74,19 +74,26 @@
     repeat_term: "",
   };
 
-  let units = [ 
-    {name: 'Unit 1'}, 
-    {name: 'Unit 2'}, 
-    {name: 'Unit 3'}, 
-    {name: 'Unit 4'} ]; 
+  let units = [
+    { name: "Unit 1" },
+    { name: "Unit 2" },
+    { name: "Unit 3" },
+    { name: "Unit 4" },
+  ];
 
-  let systems = [ 
-    {name: 'System 1'}, 
-    {name: 'System 2'}, 
-    {name: 'System 3'}, 
-    {name: 'System 4'} ]; 
+  let systems = [
+    { name: "System 1" },
+    { name: "System 2" },
+    { name: "System 3" },
+    { name: "System 4" },
+  ];
 
-  let ipRanges = [ '192.168.0.1/24', '192.168.1.1/24', '10.0.0.1/24', '172.16.0.1/24' ];
+  let ipRanges = [
+    "192.168.0.1/24",
+    "192.168.1.1/24",
+    "10.0.0.1/24",
+    "172.16.0.1/24",
+  ];
 
   let showModal = false;
   let modalData = null;
@@ -145,27 +152,26 @@
 
       const response = await setNewPlanSave(formData);
 
-      
-      
       if (response.RESULT === "OK") {
         await successAlert(response.CODE);
-        getPlanLists()
-
+        getPlanLists();
       } else if (response.RESULT === "ERROR") {
         await errorAlert(response.CODE);
-        getPlanLists()
+        getPlanLists();
+        console.log("ERROR PAGE1", response);
       }
 
       navigate(window.location?.pathname == "/" ? "/page1" : "/");
     } catch (error) {
       errorAlert(error?.message);
+      throw error;
     }
   };
 
   onMount(async () => {
     try {
       planOptions = await getOptionsForNewPlan();
-      
+
       planList = await getPlanLists();
 
       assetGroup = await getAssetGroup();
@@ -235,7 +241,6 @@
         { title: "--'21 교육사 정기점검3차" },
       ],
     },
-
   ];
 
   const toggleAccordion = (index) => {
@@ -245,11 +250,9 @@
   function selectPage() {
     currentPage = SwiperPage1;
   }
-
 </script>
 
 <main class="table-container">
-
   <section class="section1">
     <!-- LEFT SIDE -->
     <div class="body_menu">
@@ -263,7 +266,7 @@
             {#each mainItems as item, index}
               <div class="accordion-item">
                 <button
-                  on:click="{() => toggleAccordion(index)}"
+                  on:click={() => toggleAccordion(index)}
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
                   {item.title}
@@ -275,9 +278,9 @@
                   <ul>
                     {#each item.subItems as subItem}
                       <li
-                        on:click="{() => {
+                        on:click={() => {
                           (activeMenu = subItem.title), selectPage();
-                        }}"
+                        }}
                       >
                         {subItem.title}
                       </li>
@@ -301,257 +304,262 @@
 
   <section class="section2">
     {#if currentPage}
-    <svelte:component this="{currentPage}" />
+      <svelte:component this={currentPage} />
     {:else}
-  
-    <div class="formContainer_main">
-      <div class="formContainer">
-
-        <div class="inputRow">
-          <label>점검계획제목</label>
-          <input
-          style="font-size: 14px;"
-          type="text"
-          placeholder="점검플랜명"
-          bind:value={projectName}
-        />
-        </div>
-  
-        <div class="inputRow">
-          <label>점검기간</label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <input 
-               type="datetime-local"
-               placeholder="시작일시"
-               bind:value={startDate} />
-            </div>
-            <img src="./assets/images/dash.svg" />
-            <div class="riskLevelItem">
-              <input type="datetime-local"
-                placeholder="종료일시"
-                on:change={(e) => {
-                  if (new Date(e.target.value) < new Date(startDate)) {
-                    errorAlert("종료 일자가 시작 일자보다 빠릅니다");
-                    endDate = "";
-                  }
-                }}
-              bind:value={endDate}
-              />
-            </div>
-            <div class="riskLevelItem">
-              <span>점검분류</span>
-              <select class="inputRow" id="asset_group">
-                <option value="전체" selected>정기점검 </option>
-  
-                <option value="UNIX">수시점검</option>
-                <option value="WINDOWS">긴시점검</option>
-                <option value="PC">기타</option>
-              </select>
-            </div>
-          </div>
-        </div>
-  
-        <div class="inputRow">
-          <label>점검체계</label>
-          <input type="text" />
-          <button class="buttons1"
-            on:click="{() => {
-              showModal = true;
-              modalData = resultStatus;
-            }}"
-          >검색</button>
-        </div>
-  
-        <div class="inputRow1">
-          <p>점검분야</p>
-          <div class="box_2">
-            <div class="box2_radio">
-              <label
-                ><input
-                  type="radio"
-                  bind:group="{formData.domain}"
-                  value="전체"
-                /> 전체</label
-              >
-            </div>
-            <div class="box2_radio">
-              <label
-                ><input
-                  type="radio"
-                  bind:group="{formData.domain}"
-                  value="선택"
-                /> 선택</label
-              >
-              (<label><input type="checkbox" /> Unix</label>
-              <label><input type="checkbox" /> Linux</label>
-              <label><input type="checkbox" /> Windows Server</label>
-              <label><input type="checkbox" /> Network</label>)
-            </div>
-          </div>
-        </div>
-  
-        <div class="inputRow box_1">
-          <label>점검항목</label>
-          <select bind:value={selectedAssetList} style="font-size: 14px;">
-            <option value="" selected disabled>점검항목 목록</option>
-            {#if planOptions.checklist_group}
-              {#each planOptions.checklist_group as item}
-                <option value={item.ccg_index}>{item.ccg_group}</option>
-              {/each}
-            {/if}
-          </select>
-        </div>
-  
-        <div class="inputRow">
-          <label>점검계획내용</label>
-          <textarea type="text" />
-        </div>
-  
-        <div class="inputRow">
-          <label>첨부파일</label>
-          <input type="text" />
-        </div>
-  
-        <div class="inputRow">
-          <label>점검관정보</label>
-          <input type="text" />
-          <button class="buttons1"
-          on:click="{() => {
-            showErrorModal = true;
-            resultErrors = resultStatus;
-          }}"
-          >검색</button>
-        </div>
-  
-        <div class="inputRow">
-          <label>점검스케줄</label>
-          <div class="riskLevels">
-            <div class="riskLevelItem page1_slect3">
-              <p>수행조건</p>
-              <select 
-                bind:value="{assetInsertData.reserved}" >
-                <option value="0">즉시</option>
-                <option value="1">예약</option>
-              </select>
-            </div>
-  
-            <div class="riskLevelItem">
-            </div>
-  
-          </div>
-        </div>
-  
-        {#if assetInsertData.reserved == "1"}
-        <div class="inputRow">
-          <label></label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <p>반복주기</p>
-              <input 
-                style="font-size: 14px;"
-                type="number"
-                placeholder="반복주기지정(반복설정"
-                class="w90"
-                bind:value={plan_execute_interval_value}
-              />
-              <select 
-                bind:value={repeatCycle}
-              >
-                <option value="hours">시</option>
-                <option value="days">일</option>
-                <option value="weeks">주</option>
-                <option value="months">월</option>
-                <option value="years">년</option>
-              </select>
-            </div>
-  
-            <div class="riskLevelItem">
-              <span>반복횟수</span>
-              <select bind:value="{formData.repeatPeriod}">
-                <option>분</option>
-                <option>시간</option>
-                <option>일</option>
-                <option>주</option>
-                <option>월</option>
-              </select>
-            </div>
-          </div>
-        </div>
-    
-        <div class="inputRow">
-          <label></label>
-          <div class="riskLevels">
-            <div class="riskLevelItem">
-              <p>시작일</p>
-              <input type="datetime-local" style="margin-left: 12px;" bind:value="{formData.startDate}" />
-            </div>
-  
-            <div class="riskLevelItem">
-              <span>종료일</span>
-              <input type="datetime-local" style="margin-left: 12px;" bind:value="{formData.endDate}" />
-            </div>
-          </div>
-        </div>
-        {/if}
-  
-        <div class="inputRow">
-          <label>점검명령</label>
-  
-          <div style="width: 100%; display:flex; gap:10px; justify-content:center">
-          <label class="btn btnDownlod"
-                style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px">
+      <div class="formContainer_main">
+        <div class="formContainer">
+          <div class="inputRow">
+            <label>점검계획제목</label>
             <input
-              type="file"
-              class="file-input"
-              id="file-upload"
-              accept=".xls,.xlsx"
-              bind:this={inputFile}
-              on:change={(event) => handleFileUpload(event, "excel")}
-            />
-          <img src="./assets/images/download.svg" class="excel-img" />
-          <span>파일업로드</span>
-          </label>
-            <input
+              style="font-size: 14px;"
               type="text"
-              placeholder="선택된 파일 없음"
-              value={fileName}
-              readonly
-              class="file-name-input"
+              placeholder="점검플랜명"
+              bind:value={projectName}
             />
           </div>
-        </div>
-      
-        <div class="inputRow_btn">
-          <label></label>
-          <div class="buttons2">
-            <button class="btn-primary" 
-              on:click={submitNewPlan}
-            >임시저장</button>
-            <button class="btn-secondary">등록</button>
+
+          <div class="inputRow">
+            <label>점검기간</label>
+            <div class="riskLevels">
+              <div class="riskLevelItem">
+                <input
+                  type="datetime-local"
+                  placeholder="시작일시"
+                  bind:value={startDate}
+                />
+              </div>
+              <img src="./assets/images/dash.svg" />
+              <div class="riskLevelItem">
+                <input
+                  type="datetime-local"
+                  placeholder="종료일시"
+                  on:change={(e) => {
+                    if (new Date(e.target.value) < new Date(startDate)) {
+                      errorAlert("종료 일자가 시작 일자보다 빠릅니다");
+                      endDate = "";
+                    }
+                  }}
+                  bind:value={endDate}
+                />
+              </div>
+              <div class="riskLevelItem">
+                <span>점검분류</span>
+                <select class="inputRow" id="asset_group">
+                  <option value="전체" selected>정기점검 </option>
+
+                  <option value="UNIX">수시점검</option>
+                  <option value="WINDOWS">긴시점검</option>
+                  <option value="PC">기타</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="inputRow">
+            <label>점검체계</label>
+            <input type="text" />
+            <button
+              class="buttons1"
+              on:click={() => {
+                showModal = true;
+                modalData = resultStatus;
+              }}>검색</button
+            >
+          </div>
+
+          <div class="inputRow1">
+            <p>점검분야</p>
+            <div class="box_2">
+              <div class="box2_radio">
+                <label
+                  ><input
+                    type="radio"
+                    bind:group={formData.domain}
+                    value="전체"
+                  /> 전체</label
+                >
+              </div>
+              <div class="box2_radio">
+                <label
+                  ><input
+                    type="radio"
+                    bind:group={formData.domain}
+                    value="선택"
+                  /> 선택</label
+                >
+                (<label><input type="checkbox" /> Unix</label>
+                <label><input type="checkbox" /> Linux</label>
+                <label><input type="checkbox" /> Windows Server</label>
+                <label><input type="checkbox" /> Network</label>)
+              </div>
+            </div>
+          </div>
+
+          <div class="inputRow box_1">
+            <label>점검항목</label>
+            <select bind:value={selectedAssetList} style="font-size: 14px;">
+              <option value="" selected disabled>점검항목 목록</option>
+              {#if planOptions.checklist_group}
+                {#each planOptions.checklist_group as item}
+                  <option value={item.ccg_index}>{item.ccg_group}</option>
+                {/each}
+              {/if}
+            </select>
+          </div>
+
+          <div class="inputRow">
+            <label>점검계획내용</label>
+            <textarea type="text" />
+          </div>
+
+          <div class="inputRow">
+            <label>첨부파일</label>
+            <input type="text" />
+          </div>
+
+          <div class="inputRow">
+            <label>점검관정보</label>
+            <input type="text" />
+            <button
+              class="buttons1"
+              on:click={() => {
+                showErrorModal = true;
+                resultErrors = resultStatus;
+              }}>검색</button
+            >
+          </div>
+
+          <div class="inputRow">
+            <label>점검스케줄</label>
+            <div class="riskLevels">
+              <div class="riskLevelItem page1_slect3">
+                <p>수행조건</p>
+                <select bind:value={assetInsertData.reserved}>
+                  <option value="0">즉시</option>
+                  <option value="1">예약</option>
+                </select>
+              </div>
+
+              <div class="riskLevelItem"></div>
+            </div>
+          </div>
+
+          {#if assetInsertData.reserved == "1"}
+            <div class="inputRow">
+              <label></label>
+              <div class="riskLevels">
+                <div class="riskLevelItem">
+                  <p>반복주기</p>
+                  <input
+                    style="font-size: 14px;"
+                    type="number"
+                    placeholder="반복주기지정(반복설정"
+                    class="w90"
+                    bind:value={plan_execute_interval_value}
+                  />
+                  <select bind:value={repeatCycle}>
+                    <option value="hours">시</option>
+                    <option value="days">일</option>
+                    <option value="weeks">주</option>
+                    <option value="months">월</option>
+                    <option value="years">년</option>
+                  </select>
+                </div>
+
+                <div class="riskLevelItem">
+                  <span>반복횟수</span>
+                  <select bind:value={formData.repeatPeriod}>
+                    <option>분</option>
+                    <option>시간</option>
+                    <option>일</option>
+                    <option>주</option>
+                    <option>월</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="inputRow">
+              <label></label>
+              <div class="riskLevels">
+                <div class="riskLevelItem">
+                  <p>시작일</p>
+                  <input
+                    type="datetime-local"
+                    style="margin-left: 12px;"
+                    bind:value={formData.startDate}
+                  />
+                </div>
+
+                <div class="riskLevelItem">
+                  <span>종료일</span>
+                  <input
+                    type="datetime-local"
+                    style="margin-left: 12px;"
+                    bind:value={formData.endDate}
+                  />
+                </div>
+              </div>
+            </div>
+          {/if}
+
+          <div class="inputRow">
+            <label>점검명령</label>
+
+            <div
+              style="width: 100%; display:flex; gap:10px; justify-content:center"
+            >
+              <label
+                class="btn btnDownlod"
+                style="display: flex; gap:5px; width:130px; font-size:12px; margin-left: 10px"
+              >
+                <input
+                  type="file"
+                  class="file-input"
+                  id="file-upload"
+                  accept=".xls,.xlsx"
+                  bind:this={inputFile}
+                  on:change={(event) => handleFileUpload(event, "excel")}
+                />
+                <img src="./assets/images/download.svg" class="excel-img" />
+                <span>파일업로드</span>
+              </label>
+              <input
+                type="text"
+                placeholder="선택된 파일 없음"
+                value={fileName}
+                readonly
+                class="file-name-input"
+              />
+            </div>
+          </div>
+
+          <div class="inputRow_btn">
+            <label></label>
+            <div class="buttons2">
+              <button class="btn-primary" on:click={submitNewPlan}
+                >임시저장</button
+              >
+              <button class="btn-secondary">등록</button>
+            </div>
           </div>
         </div>
-        
       </div>
-    </div>
-
     {/if}
   </section>
-
 </main>
 
-
 {#if showModal}
-  <ModalDynamic bind:showModal modalWidth="{60}" modalHeight="{700}">
+  <ModalDynamic bind:showModal modalWidth={60} modalHeight={700}>
     <InspectionTargetAssignment {units} {systems} {ipRanges} bind:modalData />
   </ModalDynamic>
 {/if}
 
 {#if showErrorModal}
   <ModalDynamic
-    bind:showModal="{showErrorModal}"
-    modalWidth="{40}"
-    modalHeight="{600}"
+    bind:showModal={showErrorModal}
+    modalWidth={40}
+    modalHeight={600}
   >
     <TargetAssignment {units} {systems} {ipRanges} bind:resultErrors />
   </ModalDynamic>
@@ -804,7 +812,7 @@
   }
 
   .inputRow .btnDownlod:hover {
-    background-color: #39825A;
+    background-color: #39825a;
     color: #ffffff;
     border: none;
     height: 28px;
@@ -819,34 +827,34 @@
     height: 34px;
     font-size: 14px;
     border-radius: 4px;
-    color: #FFFFFF;
-    background-color: #117CE9;
+    color: #ffffff;
+    background-color: #117ce9;
     font-weight: bold;
-    }
-  
+  }
+
   .btn-primary:hover {
-    color: #FFFFFF;
-    background-color: #354D7D;
+    color: #ffffff;
+    background-color: #354d7d;
     border: none;
     font-weight: bold;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
   }
-  
+
   .btn-secondary {
     width: 100px;
     height: 34px;
     border-radius: 4px;
-    color: #FFFFFF;
+    color: #ffffff;
     font-size: 14px;
-    background-color: #117CE9;
+    background-color: #117ce9;
     font-weight: bold;
   }
-  
+
   .btn-secondary:hover {
-    background-color: #354D7D;
-    color: #FFFFFF;
+    background-color: #354d7d;
+    color: #ffffff;
     border: none;
     font-weight: bold;
     font-size: 14px;

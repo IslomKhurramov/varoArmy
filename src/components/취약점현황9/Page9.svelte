@@ -69,6 +69,46 @@
       throw err;
     }
   }
+  let currentPagePagination = 1; // Current page number
+  let itemsPerPage = 10; // Items per page
+
+  // Calculate the start and end index of items for the current page
+  $: startIndex = (currentPagePagination - 1) * itemsPerPage;
+  $: endIndex = startIndex + itemsPerPage;
+
+  // Slice the data for the current page
+  $: paginatedData = resultData.slice(startIndex, endIndex);
+
+  // Calculate total pages
+  $: totalPages = Math.ceil(resultData.length / itemsPerPage);
+
+  // Dynamic range for pagination numbers
+  const maxButtons = 10; // Maximum number of visible page buttons
+  let paginationStart, paginationEnd; // Declare these variables once
+
+  $: {
+    paginationStart = Math.max(
+      1,
+      currentPagePagination - Math.floor(maxButtons / 2)
+    );
+    paginationEnd = Math.min(totalPages, paginationStart + maxButtons - 1);
+    paginationStart = Math.max(
+      1,
+      Math.min(paginationStart, totalPages - maxButtons + 1)
+    );
+  }
+
+  // Function to handle page change
+  function goToPage(pageNumber) {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      currentPagePagination = pageNumber;
+    }
+  }
+  // Function to handle items per page change
+  function updateItemsPerPage(event) {
+    itemsPerPage = parseInt(event.target.value, 10);
+    // currentPagePagination = 1; // Reset to first page
+  }
 </script>
 
 <main class="table-container">
@@ -231,7 +271,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each resultData as data, index}
+            {#each paginatedData as data, index}
               <tr>
                 <td class="text-center">{resultData.length - index}</td>
 
@@ -278,6 +318,41 @@
             {/each}
           </tbody>
         </table>
+      </div>
+      <!-- Paginatsiya -->
+      <div class="pagination">
+        <button
+          on:click={() => goToPage(1)}
+          disabled={currentPagePagination === 1}
+        >
+          {"<<"}
+        </button>
+        <button
+          on:click={() => goToPage(currentPagePagination - 1)}
+          disabled={currentPagePagination === 1}
+        >
+          {"<"}
+        </button>
+        {#each Array(totalPages).fill(0) as _, pageIndex}
+          <button
+            class:selected={currentPagePagination === pageIndex + 1}
+            on:click={() => goToPage(pageIndex + 1)}
+          >
+            {pageIndex + 1}
+          </button>
+        {/each}
+        <button
+          on:click={() => goToPage(currentPagePagination + 1)}
+          disabled={currentPagePagination === totalPages}
+        >
+          {">"}
+        </button>
+        <button
+          on:click={() => goToPage(totalPages)}
+          disabled={currentPagePagination === totalPages}
+        >
+          {">>"}
+        </button>
       </div>
     </article>
   </section>
@@ -376,5 +451,30 @@
     /* padding: 15px; */
 
     color: white;
+  }
+  .pagination-wrapper {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+  }
+  .pagination button {
+    border: none !important;
+    padding: 8px 12px;
+    margin: 0 4px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .pagination button.selected {
+    background-color: #007bff; /* Change to your desired color */
+    color: white;
+    font-weight: bold;
   }
 </style>
