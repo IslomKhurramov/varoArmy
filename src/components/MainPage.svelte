@@ -10,7 +10,7 @@
   import Page7 from "./점검항목관리7/Page7.svelte";
   import Page8 from "./점검준비8/Page8.svelte";
   import Page9 from "./취약점현황9/Page9.svelte";
-  import { Route } from "svelte-routing";
+  import { Link, Route } from "svelte-routing";
   import { getAllPlanLists } from "../services/callApi";
   import { allPlanList } from "../services/store";
   import LeftMenu from "./LeftMenu.svelte";
@@ -62,6 +62,7 @@
   let list_cnt = "100";
   async function getPlanList() {
     try {
+      console.log("updating planlist");
       const response = await getAllPlanLists(page_cnt, list_cnt);
 
       if (response) {
@@ -524,7 +525,12 @@
 <main>
   <section class="section2">
     <div class="header_menu">
-      <Header />
+      <div style="width: 10%; display:flex; justify-content:center">
+        <Link to={"/"}>MainPage</Link>
+      </div>
+      <div style="width: 80%; display:flex; justify-content:flex-start">
+        <Header />
+      </div>
     </div>
     <div class="body_menu">
       <Route path="/page1" component={Page1} />
@@ -535,14 +541,20 @@
       <Route path="/page4">
         <Page4 {getPlanList} {loading} />
       </Route>
-      <Route path="/page5" component={Page5} />
-      <Route path="/page6" component={Page6} />
+      <Route path="/page5">
+        <Page5 {getPlanList} />
+      </Route>
+      <Route path="/page6">
+        <Page6 {getPlanList} />
+      </Route>
       <Route path="/page7" component={Page7} />
       <Route path="/page8" component={Page8} />
       <Route path="/page9" component={Page9} />
       <Route path="/page10" component={Page10} />
 
-      <Route path="/" component={LeftMenu} />
+      <Route path="/">
+        <LeftMenu {getPlanList} />
+      </Route>
     </div>
   </section>
 </main>
@@ -590,7 +602,7 @@
     /* margin-bottom: 10px; */
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
     border-radius: 10px;
     border: 1px solid rgba(242, 242, 242, 1);
   }
