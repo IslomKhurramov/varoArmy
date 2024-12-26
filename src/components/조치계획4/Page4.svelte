@@ -42,6 +42,7 @@
     isOpen[index] = true; // Open only the selected accordion
     plan_index = item.ccp_index;
     fetchPaginatedData();
+    currentPage1 = FirstMenu;
   };
 
   let asset_target_uuid = "";

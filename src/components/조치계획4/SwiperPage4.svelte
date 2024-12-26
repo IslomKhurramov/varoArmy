@@ -15,6 +15,19 @@
   let showModal = false;
   export let firstMenuData;
   export let resultVulnsOfPlans;
+  $: console.log("firstmenu data", firstMenuData);
+  function formatKoreanDate(date) {
+    const d = new Date(date);
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Use 24-hour format
+    };
+    return new Intl.DateTimeFormat("ko-KR", options).format(d);
+  }
 
   let asset_uuid = firstMenuData.ast_uuid;
   let ccr_index = firstMenuData.ccr_index;
@@ -234,19 +247,24 @@
             <div class="riskLevels">
               <div class="riskLevelItem">
                 <span class="span-input"
-                  >{firstMenuData.evl_evlperiod_stt_dt__evl_evlperiod_end_dt}</span
+                  >{formatKoreanDate(
+                    firstMenuData.ast_uuid__ass_uuid__ast_lastconnect
+                  )}</span
                 >
               </div>
               <div class="riskLevelItem">
                 <label>점검분류</label>
-                <span class="span-input">{firstMenuData.evl_evl_type_name}</span
+                <span class="span-input"
+                  >{firstMenuData.ccr_item_no__ccc_item_group}</span
                 >
               </div>
             </div>
           </div>
           <div class="inputRow">
             <label>소속기관</label>
-            <span class="span-input">{firstMenuData.evl_evlorg_nm}</span>
+            <span class="span-input"
+              >{firstMenuData.ast_uuid__ass_uuid__ast_operator_person}</span
+            >
           </div>
         </div>
       </div>
@@ -261,7 +279,9 @@
             <label>취약점구분</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input">{firstMenuData.ccc_item_nm}</span>
+                <span class="span-input"
+                  >{firstMenuData.ccr_item_no__ccc_item_group}</span
+                >
               </div>
               <div class="riskLevelItem">
                 <label>점검번호</label>
@@ -275,35 +295,48 @@
             <label>점검결과</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input">{firstMenuData.ccr_status_name}</span>
+                <span class="span-input">{firstMenuData.ccr_item_result}</span>
               </div>
               <div class="riskLevelItem">
                 <label>수집방법</label>
-                <span class="span-input"
-                  >{firstMenuData.ccr_collect_method}</span
-                >
+                <input type="text" />
               </div>
             </div>
           </div>
           <div class="inputRow">
             <label>점검현황</label>
-            <span class="span-input">{firstMenuData.ccr_result_txt}</span>
+            <span class="span-input">{firstMenuData.ccr_item_status}</span>
           </div>
           <div class="inputRow">
             <label>점검기준(Key)</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input">{firstMenuData.ccc_key_txt}</span>
+                <span class="span-input"
+                  >{@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
+                    /\n/g,
+                    "<br/>"
+                  )}</span
+                >
               </div>
               <div class="riskLevelItem">
                 <label>점검기준</label>
-                <span class="span-input">{firstMenuData.ccc_criteria_txt}</span>
+                <span class="span-input"
+                  >{@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
+                    /\n/g,
+                    "<br/>"
+                  )}</span
+                >
               </div>
             </div>
           </div>
           <div class="inputRow">
             <label>조치방법</label>
-            <span class="span-input">{firstMenuData.ccc_action_txt}</span>
+            <span class="span-input"
+              >{@html firstMenuData.ccr_item_no__ccc_mitigation_example.replace(
+                /\n/g,
+                "<br/>"
+              )}</span
+            >
           </div>
         </div>
       </div>
@@ -316,14 +349,12 @@
         >
           <div class="inputRow">
             <label>체계명</label>
-            <span class="span-input"
-              >{firstMenuData.ast_uuid__ass_uuid__ast_nm}</span
-            >
+            <input type="text" />
           </div>
           <div class="inputRow">
             <label>운영관리담당자</label>
             <span class="span-input"
-              >{firstMenuData.ast_uuid__ass_uuid__ast_optr_nm}</span
+              >{firstMenuData.ast_uuid__ass_uuid__ast_operator_person}</span
             >
           </div>
           <div class="inputRow">
@@ -334,15 +365,11 @@
           </div>
           <div class="inputRow">
             <label>자산분류</label>
-            <span class="span-input"
-              >{firstMenuData.ast_uuid__ass_uuid__ast_class}</span
-            >
+            <input type="text" />
           </div>
           <div class="inputRow">
             <label>제조사/제품명/버전</label>
-            <span class="span-input"
-              >{firstMenuData.ast_uuid__ass_uuid__ast_maker_ver}</span
-            >
+            <input type="text" />
           </div>
         </div>
       </div>
@@ -357,7 +384,7 @@
             <label>조치계획수립</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <select bind:value={fix_method}>
+                <select bind:value={fix_method} style="width: 100%;">
                   {#each $fixways as fixway}
                     <option value={fixway.cvf_index}>{fixway.cvf_desc}</option>
                   {/each}
@@ -365,7 +392,7 @@
               </div>
               <div class="riskLevelItem">
                 <label style="margin: 0 0 0 0;">조치담당관</label>
-                <select bind:value={fix_user_index}>
+                <select bind:value={fix_user_index} style="width: 100%;">
                   {#each $userNames as names}
                     <option value={names.user_index}>{names.user_name}</option>
                   {/each}
@@ -377,6 +404,14 @@
             <label>조치예정일 </label>
             <input type="date" bind:value={fix_end_date} />
           </div>
+          <div class="inputRow">
+            <label>추가 의견</label>
+            <textarea
+              style="width: 100%;"
+              bind:value={fix_comment}
+              placeholder="추가 의견 입력"
+            ></textarea>
+          </div>
         </div>
       </div>
 
@@ -384,7 +419,7 @@
       <div style="display: flex; flex-direction: column;">
         <div style="display: flex; flex-direction: column; row-gap: 10px">
           <div class="inputRow">
-            <button class="btn-primary">저장</button>
+            <button class="btn-primary" on:click={fixPlanRegister}>저장</button>
           </div>
         </div>
       </div>

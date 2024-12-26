@@ -12,11 +12,13 @@
   } from "../../shared/sweetAlert";
   import {
     getAllCheckList,
+    getFixDoneLists,
     setDeleteChecklistGroup,
     setDeleteChecklistItem,
+    setDeletePlan,
     setNewChecklistGroup,
   } from "../../services/callApi";
-  import { allCheckList, allPlanList } from "../../services/store";
+  import { allCheckList, allPlanList, fixDoneList } from "../../services/store";
 
   // Dinamik o'zgaruvchilar
   let resultData = [];
@@ -26,93 +28,48 @@
   let tableData;
   let totalRecords = 0;
 
-  // DATA
-  let plans = [];
-  let targetData = null;
-  let assets = [];
-  let search = {
-    plan_index: "19",
-    asset_target_uuid: "",
-    step_vuln: "1",
-    page_cnt: "1",
-    list_cnt: "15",
-    search_opt: "취약",
-  };
-
-  onMount(async () => {
-    try {
-      plans = await getVulnsOfAsset(search);
-      // console.log('plans', plans);
-
-      tableData = plans?.vulns;
-      totalRecords = plans?.total_rec_cnt;
-
-      assets = await getVulnsOfAsset(search);
-      tableData = assets?.vulns;
-      totalRecords = assets?.total_rec_cnt;
-    } catch (err) {
-      await errorAlert(err?.message);
-    }
-  });
-
-  // ///////////////////////////////////////////////////////////////////////
-  let selectedTargetData = [];
-  let selectedTarget = [];
-  function handleClickTarget(targetData, item) {
-    selectedTargetData = targetData;
-    selectedTarget = item;
-    console.log("targetData", selectedTargetData);
-  }
   let currentPagePagination = 1; // Current page number
   let itemsPerPage = 10; // Items per page
 
-  // Calculate the start and end index of items for the current page
-  $: startIndex = (currentPagePagination - 1) * itemsPerPage;
-  $: endIndex = startIndex + itemsPerPage;
+  // // Calculate the start and end index of items for the current page
+  // $: startIndex = (currentPagePagination - 1) * itemsPerPage;
+  // $: endIndex = startIndex + itemsPerPage;
 
-  // Slice the data for the current page
-  $: paginatedData = selectedTargetData.slice(startIndex, endIndex);
+  // // Slice the data for the current page
+  // $: paginatedData = selectedTargetData.slice(startIndex, endIndex);
 
-  // Calculate total pages
-  $: totalPages = Math.ceil(selectedTargetData.length / itemsPerPage);
+  // // Calculate total pages
+  // $: totalPages = Math.ceil(selectedTargetData.length / itemsPerPage);
 
-  // Dynamic range for pagination numbers
-  const maxButtons = 10; // Maximum number of visible page buttons
-  let paginationStart, paginationEnd; // Declare these variables once
+  // // Dynamic range for pagination numbers
+  // const maxButtons = 10; // Maximum number of visible page buttons
+  // let paginationStart, paginationEnd; // Declare these variables once
 
-  $: {
-    paginationStart = Math.max(
-      1,
-      currentPagePagination - Math.floor(maxButtons / 2)
-    );
-    paginationEnd = Math.min(totalPages, paginationStart + maxButtons - 1);
-    paginationStart = Math.max(
-      1,
-      Math.min(paginationStart, totalPages - maxButtons + 1)
-    );
-  }
+  // $: {
+  //   paginationStart = Math.max(
+  //     1,
+  //     currentPagePagination - Math.floor(maxButtons / 2)
+  //   );
+  //   paginationEnd = Math.min(totalPages, paginationStart + maxButtons - 1);
+  //   paginationStart = Math.max(
+  //     1,
+  //     Math.min(paginationStart, totalPages - maxButtons + 1)
+  //   );
+  // }
 
-  // Function to handle page change
-  function goToPage(pageNumber) {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      currentPagePagination = pageNumber;
-    }
-  }
-  // Function to handle items per page change
-  function updateItemsPerPage(event) {
-    itemsPerPage = parseInt(event.target.value, 10);
-    // currentPagePagination = 1; // Reset to first page
-  }
+  // // Function to handle page change
+  // function goToPage(pageNumber) {
+  //   if (pageNumber > 0 && pageNumber <= totalPages) {
+  //     currentPagePagination = pageNumber;
+  //   }
+  // }
+  // // Function to handle items per page change
+  // function updateItemsPerPage(event) {
+  //   itemsPerPage = parseInt(event.target.value, 10);
+  //   // currentPagePagination = 1; // Reset to first page
+  // }
   /*************************************************************/
-  let selected = [];
-  let allSelected = false; // Indicates if all items are selected
-  let ccg_index_id = "";
-  let ccc_index = [];
 
-  function selectAll(event) {
-    allSelected = event.target.checked;
-    selected = allSelected ? [...paginatedData] : [];
-  }
   // //////////////////////////////////////////////////////////////////////////////////////
 
   const selectPage1 = (page) => {
@@ -152,11 +109,13 @@
   };
 
   // Accordion ochish/qayta yopish
-  let groupIndex = "";
+  let plan_index = "";
   const toggleAccordion = (index, item) => {
     isOpen.fill(false); // Close all accordions
     isOpen[index] = true;
-    groupIndex = item.ccg_index;
+    plan_index = item.ccg_index;
+    FixDoneList();
+    console.log("fixdoneList", $fixDoneList);
   };
   let isSectionOpen = {};
 
@@ -166,6 +125,20 @@
 
       if (response) {
         allCheckList.set(response);
+      } else {
+      }
+      // console.log("traceByPlan", $traceByPlan);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async function FixDoneList() {
+    try {
+      const response = await getFixDoneLists(plan_index);
+
+      if (response) {
+        fixDoneList.set(response);
       } else {
       }
       // console.log("traceByPlan", $traceByPlan);
@@ -200,69 +173,17 @@
     }
   }
 
-  // Clear the checkboxes and reset selection states
-  function clearSelection() {
-    selected = [];
-    allSelected = false;
-    ccg_index_id = "";
-    ccc_index = [];
-  }
   /*********************************************/
-  let new_checlist_name = "";
-  let selected_checklist_id = "";
 
-  $: if (selected.length > 0) {
-    ccg_index_id = selected[0].ccg_index_id; // Assuming all rows share the same ccg_index_id
-    ccc_index = selected.map((item) => item.ccc_index); // Extract ccc_index values
-  } else {
-    ccg_index_id = "";
-    ccc_index = [];
-  }
-
-  async function createChecklist() {
-    try {
-      const response = await setNewChecklistGroup(
-        selected_checklist_id,
-        new_checlist_name
-      );
-
-      if (response.RESULT === "OK") {
-        successAlert(`${response.CODE}`);
-        await allCheckListGet(); // Fetch updated data after deletion
-        new_checlist_name = "";
-        selected_checklist_id = "";
-        isAddingNewGroup = false;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
   /**********************************************/
-  async function deleteGroup() {
-    const isConfirmed = await confirmDelete();
-    if (!isConfirmed) return;
-    try {
-      const response = await setDeleteChecklistGroup(groupIndex);
 
-      if (response.RESULT === "OK") {
-        successAlert(`${response.CODE}`);
-        await allCheckListGet(); // Fetch updated data after deletion
-        groupIndex = "";
-      } else {
-        console.log(response.CODE);
-      }
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  let selectedHostnameData = null;
-  function handleClickHostname(data) {
-    // console.log("handle data", data);
-    currentPage = Swiper;
-    selectedHostname = data.hostname;
-    selectedHostnameData = data;
-  }
+  // let selectedHostnameData = null;
+  // function handleClickHostname(data) {
+  //   // console.log("handle data", data);
+  //   currentPage = Swiper;
+  //   selectedHostname = data.hostname;
+  //   selectedHostnameData = data;
+  // }
 </script>
 
 <main class="table-container">

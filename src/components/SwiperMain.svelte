@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { confirmDelete, successAlert } from "../shared/sweetAlert";
   import { setDeletePlan, setPlanChange } from "../services/callApi";
+  import ModalMain from "./ModalMain.svelte";
   export let selectedData;
   export let getPlanList;
   $: console.log("selected data ", selectedData);
@@ -10,6 +11,16 @@
   function formatDate(date) {
     const d = new Date(date);
     return d.toISOString().split("T")[0]; // returns YYYY-MM-DD
+  }
+  let showModal = false;
+
+  function closeShowModal() {
+    showModal = false;
+  }
+  function handleKeyDown(event) {
+    if (event.key === "Escape") {
+      closeShowModal();
+    }
   }
 
   let formFields = {
@@ -244,7 +255,9 @@
               </div>
               <div class="riskLevelItem">
                 <button class="btnUpload">변경</button>
-                <button class="btnUpload">변경이력</button>
+                <button class="btnUpload" on:click={() => (showModal = true)}
+                  >변경이력</button
+                >
               </div>
             </div>
           </div>
@@ -343,8 +356,57 @@
     </div>
   </div>
 </div>
+{#if showModal}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click={() => (showModal = false)}
+    on:keydown={handleKeyDown}
+    tabindex="0"
+  >
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
+      <ModalMain {closeShowModal} {selectedData} />
+    </dialog>
+  </div>
+{/if}
 
 <style>
+  .modal-open-wrap {
+    display: block;
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(167, 167, 167, 0.6);
+  }
+
+  /****Modal Container*/
+  dialog {
+    position: fixed;
+    /* height: 600px; */
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1103px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: svelte-s7onsa-fadeIn 0.3s ease;
+    z-index: 100;
+  }
+
+  /* Modal backdrop */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeInBackdrop 0.3s ease;
+  }
   .formContainer {
     max-width: 100%;
     margin-top: 15px;
