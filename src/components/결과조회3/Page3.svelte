@@ -253,6 +253,11 @@
   function closeSwiper() {
     currentPage = null;
   }
+  onMount(() => {
+    if ($allPlanList && $allPlanList.length > 0) {
+      toggleAccordion(0, $allPlanList[0]); // Open the first plan by default
+    }
+  });
 </script>
 
 {#if loading}
@@ -454,77 +459,81 @@
                 </tr>
               </thead>
               <tbody>
-                {#each paginatedData as data, index}
-                  <tr on:click={() => selectPage(data)}>
-                    <!-- 번호: Reverse index to display latest first -->
-                    <td class="text-center"
-                      >{$viewPlanResult.length - (startIndex + index)}</td
-                    >
-                    <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
-                    <td class="text-center">
-                      {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
-                    </td>
+                {#if paginatedData.length > 0}
+                  {#each paginatedData as data, index}
+                    <tr on:click={() => selectPage(data)}>
+                      <!-- 번호: Reverse index to display latest first -->
+                      <td class="text-center"
+                        >{$viewPlanResult.length - (startIndex + index)}</td
+                      >
+                      <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
+                      <td class="text-center">
+                        {data?.ast_uuid__ass_uuid__ast_hostname || "N/A"}
+                      </td>
 
-                    <!-- 점검항목: ccr_item_no__ccc_item_no -->
-                    <td class="text-center">
-                      <div>
-                        {data?.ccr_item_no__ccc_item_no || "N/A"}
-                      </div>
-                    </td>
+                      <!-- 점검항목: ccr_item_no__ccc_item_no -->
+                      <td class="text-center">
+                        <div>
+                          {data?.ccr_item_no__ccc_item_no || "N/A"}
+                        </div>
+                      </td>
 
-                    <!-- 점검이름: ccr_item_no__ccc_item_title -->
-                    <td>
-                      {data?.ccr_item_no__ccc_item_title || "N/A"}
-                    </td>
+                      <!-- 점검이름: ccr_item_no__ccc_item_title -->
+                      <td>
+                        {data?.ccr_item_no__ccc_item_title || "N/A"}
+                      </td>
 
-                    <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
-                    <td>
-                      {@html data?.ccr_item_no__ccc_item_criteria.replace(
-                        /\n/g,
-                        "<br/>"
-                      ) || "N/A"}
-                    </td>
+                      <!-- 점검결과: ccr_item_no__ccc_item_criteria -->
+                      <td>
+                        {@html data?.ccr_item_no__ccc_item_criteria.replace(
+                          /\n/g,
+                          "<br/>"
+                        ) || "N/A"}
+                      </td>
 
-                    <!-- 점검결과 (Actions): -->
-                    <td class="text-center">
-                      <div class="lastBox">
-                        <select
-                          style="width: 100px;"
-                          class="xs"
-                          on:click|stopPropagation={() =>
-                            handleUpdateClick(data)}
-                        >
-                          {#each validOptions as option}
-                            <option
-                              value={option}
-                              selected={data.ccr_item_result === option}
-                            >
-                              {option}
-                            </option>
-                          {/each}
-                        </select>
-                        <!-- Bind change_method directly to the data object for each row -->
-                        <select
-                          style="width: 100px;"
-                          class="xs"
-                          on:click|stopPropagation
-                          on:change={(e) => {
-                            e.stopPropagation(); // Stop the event from bubbling up
-                            change_option = e.target.value; // Set the selected value to change_option
-                          }}
-                        >
-                          <option value="ALL">천제</option>
-                          <option value="ONE">해당</option>
-                        </select>
-                        <button
-                          class="btnSave"
-                          on:click|stopPropagation={resultUpdate}>저장</button
-                        >
-                        <button class="btnUpload">관련시스템보기</button>
-                      </div>
-                    </td>
-                  </tr>
-                {/each}
+                      <!-- 점검결과 (Actions): -->
+                      <td class="text-center">
+                        <div class="lastBox">
+                          <select
+                            style="width: 100px;"
+                            class="xs"
+                            on:click|stopPropagation={() =>
+                              handleUpdateClick(data)}
+                          >
+                            {#each validOptions as option}
+                              <option
+                                value={option}
+                                selected={data.ccr_item_result === option}
+                              >
+                                {option}
+                              </option>
+                            {/each}
+                          </select>
+                          <!-- Bind change_method directly to the data object for each row -->
+                          <select
+                            style="width: 100px;"
+                            class="xs"
+                            on:click|stopPropagation
+                            on:change={(e) => {
+                              e.stopPropagation(); // Stop the event from bubbling up
+                              change_option = e.target.value; // Set the selected value to change_option
+                            }}
+                          >
+                            <option value="ALL">천제</option>
+                            <option value="ONE">해당</option>
+                          </select>
+                          <button
+                            class="btnSave"
+                            on:click|stopPropagation={resultUpdate}>저장</button
+                          >
+                          <button class="btnUpload">관련시스템보기</button>
+                        </div>
+                      </td>
+                    </tr>
+                  {/each}
+                {:else}
+                  <td class="text-center" colspan="7">데이터 없음 </td>
+                {/if}
               </tbody>
             </table>
           </div>

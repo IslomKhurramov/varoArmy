@@ -5,6 +5,7 @@
   import { fixways, userNames, vulnAssetList } from "../../services/store";
   import { setFixPlanRegister } from "../../services/callApi";
   import { successAlert } from "../../shared/sweetAlert";
+  import ModalSwiper1 from "./ModalSwiper1.svelte";
 
   let swiperContainer;
   let scrollAmount = 0;
@@ -15,6 +16,9 @@
   let showModal = false;
   export let firstMenuData;
   export let resultVulnsOfPlans;
+  export let fetchPaginatedData;
+  let approvalStatus = ""; // It will be either "approved" or "rejected"
+
   $: console.log("firstmenu data", firstMenuData);
   function formatKoreanDate(date) {
     const d = new Date(date);
@@ -29,15 +33,7 @@
     return new Intl.DateTimeFormat("ko-KR", options).format(d);
   }
 
-  let asset_uuid = firstMenuData.ast_uuid;
-  let ccr_index = firstMenuData.ccr_index;
-  let fix_method = "";
-  let fix_level = "";
-  let fix_start_date = "";
   let fix_end_date = "";
-  let fix_comment = "";
-  let fix_user_index = "";
-  let fix_step_status = "";
 
   $: console.log("firstMenuData", firstMenuData);
   onMount(() => {
@@ -148,35 +144,6 @@
     };
   });
 
-  async function fixPlanRegister() {
-    try {
-      const response = await setFixPlanRegister(
-        asset_uuid,
-        ccr_index,
-        fix_method,
-        fix_level,
-        fix_start_date,
-        fix_end_date,
-        fix_comment,
-        fix_user_index,
-        fix_step_status
-      );
-
-      if (response.RESULT === "OK") {
-        successAlert(`${response.CODE}`);
-      }
-    } catch (err) {
-      console.error("Error fetching paginated data:", err);
-    }
-  }
-  $: console.log("dasset_uuid ", asset_uuid);
-  $: console.log("ccr_index ", ccr_index);
-  $: console.log("fix_method ", fix_method);
-  $: console.log("fix_level ", fix_level);
-  $: console.log("fix_start_date ", fix_start_date);
-  $: console.log("fix_comment ", fix_comment);
-  $: console.log("fix_user_index ", fix_user_index);
-  $: console.log("fix_step_status", fix_step_status);
   let results = Object.values($vulnAssetList)
     .filter((item) => Array.isArray(item) && item[0]?.result)
     .map((item) => item[0].result);
@@ -246,19 +213,17 @@
           style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
         >
           <div class="inputRow">
-            <label>점검기간</label>
+            <label>평가수행부대 </label>
             <div class="riskLevels">
               <div class="riskLevelItem">
                 <span class="span-input"
-                  >{formatKoreanDate(
-                    firstMenuData.ast_uuid__ass_uuid__ast_lastconnect
-                  )}</span
+                  >{firstMenuData.cct_index__cct_target}</span
                 >
               </div>
               <div class="riskLevelItem">
-                <label>점검분류</label>
+                <label>점검관 </label>
                 <span class="span-input"
-                  >{firstMenuData.ccr_item_no__ccc_item_group}</span
+                  >{firstMenuData.ccr_item_no__ccc_item_no}</span
                 >
               </div>
             </div>
@@ -283,7 +248,7 @@
             <div class="riskLevels">
               <div class="riskLevelItem">
                 <span class="span-input"
-                  >{firstMenuData.ccr_item_no__ccc_item_group}</span
+                  >{firstMenuData.ccr_item_no__ccc_item_no}</span
                 >
               </div>
               <div class="riskLevelItem">
@@ -302,7 +267,9 @@
               </div>
               <div class="riskLevelItem">
                 <label>수집방법</label>
-                <input type="text" />
+                <span class="span-input"
+                  >{firstMenuData.ccr_item_no__ccc_item_no}</span
+                >
               </div>
             </div>
           </div>
@@ -332,14 +299,10 @@
               </div>
             </div>
           </div>
+
           <div class="inputRow">
-            <label>조치방법</label>
-            <span class="span-input"
-              >{@html firstMenuData.ccr_item_no__ccc_mitigation_example.replace(
-                /\n/g,
-                "<br/>"
-              )}</span
-            >
+            <label>보호대책</label>
+            <input type="text" />
           </div>
         </div>
       </div>
@@ -351,27 +314,31 @@
           style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
         >
           <div class="inputRow">
-            <label>체계명</label>
-            <input type="text" />
+            <label>변경일시</label>
+            <span
+              >{formatKoreanDate(
+                firstMenuData.ast_uuid__ass_uuid__ast_lastconnect
+              )}</span
+            >
           </div>
           <div class="inputRow">
-            <label>운영관리담당자</label>
+            <label>조치상태</label>
             <span class="span-input"
               >{firstMenuData.ast_uuid__ass_uuid__ast_operator_person}</span
             >
           </div>
           <div class="inputRow">
-            <label>IP/호스팅</label>
+            <label>조치예정일</label>
             <span class="span-input"
               >{firstMenuData.ast_uuid__ass_uuid__ast_ipaddr}</span
             >
           </div>
           <div class="inputRow">
-            <label>자산분류</label>
+            <label>조치예정요청자 </label>
             <input type="text" />
           </div>
           <div class="inputRow">
-            <label>제조사/제품명/버전</label>
+            <label>조치예정내용 </label>
             <input type="text" />
           </div>
         </div>
@@ -384,36 +351,40 @@
           style="display: flex; flex-direction: column; row-gap: 10px; border:1px solid #cccccc; padding:20px"
         >
           <div class="inputRow">
-            <label>조치계획수립</label>
+            <label>처리방안</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <select bind:value={fix_method} style="width: 100%;">
-                  {#each $fixways as fixway}
-                    <option value={fixway.cvf_index}>{fixway.cvf_desc}</option>
-                  {/each}
-                </select>
+                <div class="box2_radio">
+                  <label>
+                    <input
+                      type="radio"
+                      name="approvalStatus"
+                      bind:group={approvalStatus}
+                      value="approved"
+                    />
+                    승인
+                  </label>
+                </div>
+                <div class="box2_radio">
+                  <label>
+                    <input
+                      type="radio"
+                      name="approvalStatus"
+                      bind:group={approvalStatus}
+                      value="rejected"
+                    />
+                    반려
+                  </label>
+                </div>
               </div>
-              <div class="riskLevelItem">
-                <label style="margin: 0 0 0 0;">조치담당관</label>
-                <select bind:value={fix_user_index} style="width: 100%;">
-                  {#each $userNames as names}
-                    <option value={names.user_index}>{names.user_name}</option>
-                  {/each}
-                </select>
-              </div>
+              <button class="btnUpload" on:click={() => (showModal = true)}
+                >상세보기</button
+              >
             </div>
           </div>
           <div class="inputRow">
-            <label>조치예정일 </label>
-            <input type="date" bind:value={fix_end_date} />
-          </div>
-          <div class="inputRow">
-            <label>추가 의견</label>
-            <textarea
-              style="width: 100%;"
-              bind:value={fix_comment}
-              placeholder="추가 의견 입력"
-            ></textarea>
+            <label>승인내용 </label>
+            <input type="text" />
           </div>
         </div>
       </div>
@@ -422,15 +393,48 @@
       <div style="display: flex; flex-direction: column;">
         <div style="display: flex; flex-direction: column; row-gap: 10px">
           <div class="inputRow">
-            <button class="btn-primary" on:click={fixPlanRegister}>저장</button>
+            <button class="btn-primary">저장</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+{#if showModal}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click={() => (showModal = false)}
+    on:keydown={handleKeyDown}
+    tabindex="0"
+  >
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
+      <ModalSwiper1 {closeShowModal} {activeAsset} {fetchPaginatedData} />
+    </dialog>
+  </div>
+{/if}
 
 <style>
+  .box2_radio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 75px;
+  }
+
+  .box2_radio label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  input[type="radio"],
+  input[type="checkbox"] {
+    margin: 0;
+    accent-color: #0072fd;
+  }
+
   .formContainer {
     max-width: 100%;
     margin-top: 15px;
@@ -484,7 +488,15 @@
     border-radius: 5px;
     font-size: 14px;
   }
-
+  .inputRow .box2_radio input {
+    flex: 1;
+    width: 100%;
+    height: 16px;
+    padding: 17px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
   .riskLevels {
     display: flex;
     column-gap: 10px;
@@ -586,8 +598,39 @@
     cursor: pointer;
   }
 
-  .excel-img {
-    filter: invert(45%) sepia(100%) saturate(550%) hue-rotate(195deg)
-      brightness(100%) contrast(98%);
+  .modal-open-wrap {
+    display: block;
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(167, 167, 167, 0.6);
+  }
+
+  /****Modal Container*/
+  dialog {
+    position: fixed;
+    /* height: 600px; */
+    /* overflow-y: auto;
+      overflow-x: hidden; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1103px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: svelte-s7onsa-fadeIn 0.3s ease;
+    z-index: 100;
+  }
+
+  /* Modal backdrop */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeInBackdrop 0.3s ease;
   }
 </style>

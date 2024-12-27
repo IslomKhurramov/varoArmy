@@ -1,10 +1,12 @@
 <script>
   import moment from "moment";
+  import SwiperPage5 from "../SwiperPage5.svelte";
 
   // Hardcoded data for logData
   export let targetName;
   export let resultVulnsOfPlans;
   export let selectedHostname;
+  export let selectPage1;
 
   // Filter and map the results based on targetName and selectedHostname
   let results = Object.values(resultVulnsOfPlans)
@@ -145,34 +147,39 @@
         </tr>
       </thead>
       <tbody>
-        {#each paginatedData as entry, index}
-          <tr>
-            <td class="text-center">{startIndex + index + 1}</td>
-            <!-- Adjust numbering -->
-            <td class="text-center">{entry.cct_index__cct_target || "N/A"}</td>
-            <td class="text-center"
-              >{entry.ast_uuid__ass_uuid__ast_hostname || "N/A"}</td
-            >
-            <td class="text-center"
-              >{entry.ccr_item_no__ccc_item_no || "N/A"}</td
-            >
-            <td class="text-center"
-              >{entry.ccr_item_no__ccc_item_title || "N/A"}</td
-            >
-            <td class="text-center">{entry.ccr_item_result || "N/A"}</td>
-            <td class="text-center">
-              {#if entry.ccr_item_result === "취약"}
-                조치예정
-              {:else if entry.ccr_item_result === "양호"}
-                조치완료
-              {:else if entry.ccr_item_result === "예외"}
-                예외처리
-              {:else}
-                관리적조치
-              {/if}
-            </td>
-          </tr>
-        {/each}
+        {#if paginatedData.length > 0}
+          {#each paginatedData as entry, index}
+            <tr on:click={() => selectPage1(SwiperPage5, entry)}>
+              <td class="text-center">{startIndex + index + 1}</td>
+              <!-- Adjust numbering -->
+              <td class="text-center">{entry.cct_index__cct_target || "N/A"}</td
+              >
+              <td class="text-center"
+                >{entry.ast_uuid__ass_uuid__ast_hostname || "N/A"}</td
+              >
+              <td class="text-center"
+                >{entry.ccr_item_no__ccc_item_no || "N/A"}</td
+              >
+              <td class="text-center"
+                >{entry.ccr_item_no__ccc_item_title || "N/A"}</td
+              >
+              <td class="text-center">{entry.ccr_item_result || "N/A"}</td>
+              <td class="text-center">
+                {#if entry.ccr_item_result === "취약"}
+                  조치예정
+                {:else if entry.ccr_item_result === "양호"}
+                  조치완료
+                {:else if entry.ccr_item_result === "예외"}
+                  예외처리
+                {:else}
+                  관리적조치
+                {/if}
+              </td>
+            </tr>
+          {/each}
+        {:else}
+          <td class="text-center" colspan="7">데이터 없음 </td>
+        {/if}
       </tbody>
     </table>
   </div>

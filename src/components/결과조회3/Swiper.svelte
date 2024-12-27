@@ -28,13 +28,6 @@
 
   async function updateSelectedData(data) {
     try {
-      console.log("plan_index", data.plan_index);
-      console.log("result_index", data?.result_index);
-      console.log("checklist_index", data?.checklist_index);
-      console.log("change_result", data?.change_result);
-      console.log("change_option", data?.change_option);
-      console.log("change_status_text", data?.change_status_text);
-      console.log("change_evidence_file", data?.change_evidence_file);
       const formData = new FormData();
 
       formData.append("plan_index", data?.plan_index);

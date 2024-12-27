@@ -7,6 +7,7 @@
   import { getVulnsOfAsset, setDeletePlan } from "../../services/callApi";
   import { allPlanList, vulnAssetList } from "../../services/store";
   import { faL } from "@fortawesome/free-solid-svg-icons";
+  import Swiperpage5_2 from "./Swiperpage5-2.svelte";
 
   // Dinamik o'zgaruvchilar
   let setView = "plan";
@@ -30,7 +31,6 @@
     isOpen[index] = true; // Open only the selected accordion
     plan_index = item.ccp_index;
     fetchPaginatedData();
-    currentPage1 = FirstMenu;
   };
   async function fetchPaginatedData() {
     try {
@@ -66,14 +66,22 @@
   /*************************************************************/
 
   // //////////////////////////////////////////////////////////////////////////////////////
-
-  const selectPage1 = (page) => {
+  let firstMenuData = [];
+  const selectPage1 = (page, data) => {
     currentPage1 = page;
+    firstMenuData = data;
   };
 
   const selectPage = () => {
     currentPage = SwiperPage5;
   };
+
+  function closeSwiper() {
+    currentPage1 = FirstMenu;
+  }
+  function closeSwiper2() {
+    currentPage1 = SeconMenu;
+  }
 
   // Accordion logikasi
   let mainTitle = "점검 계획 현황";
@@ -129,6 +137,11 @@
     selectedHostname = data.hostname;
     selectedHostnameData = data;
   }
+  onMount(() => {
+    if ($allPlanList && $allPlanList.length > 0) {
+      toggleAccordion(0, $allPlanList[0]); // Open the first plan by default
+    }
+  });
 </script>
 
 {#if loading}
@@ -143,7 +156,22 @@
         <div class="menuContainer">
           <!-- Header -->
           <div>
-            <div class="menuHeader">{mainTitle}</div>
+            <div class="menuHeader">
+              {mainTitle}
+              {#if currentPage1 === SwiperPage5}
+                <img
+                  src="assets/images/back.png"
+                  alt="back"
+                  on:click={closeSwiper}
+                />
+              {:else if currentPage1 === Swiperpage5_2}
+                <img
+                  src="assets/images/back.png"
+                  alt="back"
+                  on:click={closeSwiper2}
+                />
+              {/if}
+            </div>
 
             <!-- Accordion -->
             <div class="accordion">
@@ -303,6 +331,8 @@
               {selectPage1}
               bind:resultVulnsOfPlans
               {selectedHostname}
+              {firstMenuData}
+              {fetchPaginatedData}
             />
           {/if}
         </article>
@@ -312,6 +342,15 @@
 {/if}
 
 <style>
+  .menuHeader {
+    position: relative;
+  }
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
+  }
   .loading-overlay {
     position: fixed;
     top: 0;

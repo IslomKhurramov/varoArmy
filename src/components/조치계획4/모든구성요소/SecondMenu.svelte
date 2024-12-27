@@ -1,4 +1,5 @@
 <script>
+  import SwiperPage4_2 from "../SwiperPage4-2.svelte";
   import SwiperPage4 from "../SwiperPage4.svelte";
 
   export let resultVulnsOfPlans;
@@ -103,7 +104,7 @@
       </thead>
       <tbody>
         {#each paginatedData as entry, index}
-          <tr on:click={() => selectPage1(SwiperPage4, entry)}>
+          <tr on:click={() => selectPage1(SwiperPage4_2, entry)}>
             <td class="text-center">{startIndex + index + 1}</td>
             <!-- Adjust numbering -->
             <td class="text-center">{entry.cct_index__cct_target || "N/A"}</td>

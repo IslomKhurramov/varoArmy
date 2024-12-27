@@ -17,6 +17,7 @@
   } from "../../services/callApi";
   import { confirmDelete, successAlert } from "../../shared/sweetAlert";
   import { faL } from "@fortawesome/free-solid-svg-icons";
+  import SwiperPage4_2 from "./SwiperPage4-2.svelte";
   export let getPlanList;
   // Dinamik o'zgaruvchilar
   let resultVulnsOfPlans = [];
@@ -42,7 +43,6 @@
     isOpen[index] = true; // Open only the selected accordion
     plan_index = item.ccp_index;
     fetchPaginatedData();
-    currentPage1 = FirstMenu;
   };
 
   let asset_target_uuid = "";
@@ -94,6 +94,12 @@
     selected = allSelected ? [...paginatedData] : [];
   }
 
+  onMount(() => {
+    if ($allPlanList && $allPlanList.length > 0) {
+      toggleAccordion(0, $allPlanList[0]); // Open the first plan by default
+    }
+  });
+
   // Funksiyalar orqali komponentlarni tanlash
   const selectPage1 = (page, data) => {
     currentPage1 = page;
@@ -137,6 +143,9 @@
   }
   function closeSwiper() {
     currentPage1 = FirstMenu;
+  }
+  function closeSwiper2() {
+    currentPage1 = SecondMenu;
   }
 
   async function getuserName() {
@@ -191,6 +200,12 @@
                   src="assets/images/back.png"
                   alt="back"
                   on:click={closeSwiper}
+                />
+              {:else if currentPage1 === SwiperPage4_2}
+                <img
+                  src="assets/images/back.png"
+                  alt="back"
+                  on:click={closeSwiper2}
                 />
               {/if}
             </div>
@@ -354,6 +369,7 @@
               {selectedHostname}
               {selectPage1}
               {firstMenuData}
+              {fetchPaginatedData}
             />
           {/if}
         </article>
