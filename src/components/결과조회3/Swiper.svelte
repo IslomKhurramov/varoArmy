@@ -142,24 +142,6 @@
     activeAsset = selectedData;
   }
 
-  $: {
-    if (activeAsset) {
-      scrollToActiveSlide(activeAsset); // Trigger scroll when activeAsset changes
-    }
-  }
-  function scrollToActiveSlide(activeSlide) {
-    const activeItem = document.querySelector(
-      `.menu-item[data-item-no="${activeSlide.ccr_item_no__ccc_item_no}"]`
-    );
-
-    if (activeItem) {
-      activeItem.scrollIntoView({
-        behavior: "smooth", // Smooth scrolling
-        block: "nearest", // Align to the nearest position
-      });
-    }
-  }
-
   // Close modal when Esc key is pressed
   function handleKeyDown(event) {
     if (event.key === "Escape") {
@@ -194,6 +176,40 @@
       alert(err?.message);
     }
   };
+
+  // Function to scroll and focus on the asset
+  function focusOnAsset(assetId) {
+    const menuItem = document.querySelector(`.menu-item[value="${assetId}"]`);
+    if (menuItem) {
+      menuItem.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+      setTimeout(() => {
+        menuItem.focus();
+      }, 300);
+    }
+  }
+
+  $: if (
+    selectedData &&
+    $viewPlanResult &&
+    Array.isArray($viewPlanResult) &&
+    $viewPlanResult.length > 0
+  ) {
+    activeAsset = $viewPlanResult.find(
+      (slide) =>
+        slide.ccr_item_no__ccc_item_no === selectedData.ccr_item_no__ccc_item_no
+    );
+    selectedData = activeAsset;
+
+    // Focus on the asset if it exists
+    if (activeAsset) {
+      setTimeout(() => {
+        focusOnAsset(activeAsset.ccr_item_no__ccc_item_no);
+      }, 0);
+    }
+  }
 </script>
 
 <div class="contentArea">
@@ -228,8 +244,7 @@
             {#each $viewPlanResult as slide}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div
-                data-item-no={slide.ccr_item_no__ccc_item_no}
-                value={slide.ccr_index}
+                value={slide.ccr_item_no__ccc_item_no}
                 name={slide}
                 class="menu-item {activeAsset &&
                 activeAsset.ccr_item_no__ccc_item_no ===
@@ -465,6 +480,11 @@
 {/if}
 
 <style>
+  .menu-container .menu-item.active {
+    background-color: #0067ff;
+    color: #fff;
+    border-color: #0067ff;
+  }
   .btnSave {
     height: 34px;
   }

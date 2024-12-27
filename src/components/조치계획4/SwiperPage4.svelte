@@ -100,33 +100,37 @@
     activeAsset = firstMenuData;
   }
 
-  $: {
-    if (activeAsset) {
-      scrollToActiveSlide(activeAsset); // Trigger scroll when activeAsset changes
-    }
-  }
-  function scrollToActiveSlide(activeSlide) {
-    console.log("Scrolling to active slide:", activeSlide);
-
-    const activeItem = document.querySelector(
-      `.menu-item[data-item-no="${activeSlide.ccr_item_no__ccc_item_no}"]`
-    );
-
-    console.log("Active item found:", activeItem);
-
-    if (activeItem) {
-      activeItem.scrollIntoView({
-        behavior: "smooth", // Smooth scrolling
-        block: "nearest", // Align to the nearest position
+  // Function to scroll and focus on the asset
+  function focusOnAsset(assetId) {
+    const menuItem = document.querySelector(`.menu-item[value="${assetId}"]`);
+    if (menuItem) {
+      menuItem.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
       });
-    } else {
-      console.warn(
-        "No active item found for:",
-        activeSlide.ccr_item_no__ccc_item_no
-      );
+      setTimeout(() => {
+        menuItem.focus();
+      }, 300);
     }
   }
+  $: if (
+    firstMenuData &&
+    results &&
+    Array.isArray(results) &&
+    results.length > 0
+  ) {
+    activeAsset = results.find(
+      (slide) => slide.ccr_index === firstMenuData.ccr_index
+    );
+    firstMenuData = activeAsset;
 
+    // Focus on the asset if it exists
+    if (activeAsset) {
+      setTimeout(() => {
+        focusOnAsset(activeAsset.ccr_index);
+      }, 0);
+    }
+  }
   function handleKeyDown(event) {
     if (event.key === "Escape") {
       closeShowModal();
@@ -209,7 +213,6 @@
           {#each results as slide}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
-              data-item-no={slide.ccr_item_no__ccc_item_no}
               value={slide.ccr_index}
               name={slide}
               class="menu-item {activeAsset &&
