@@ -411,7 +411,7 @@
     max-width: 100%;
     margin-top: 15px;
     overflow-y: auto;
-    max-height: 65vh;
+    height: 72vh;
     overflow-x: hidden;
   }
 

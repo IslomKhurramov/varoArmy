@@ -461,7 +461,7 @@
   .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    /* margin-top: 20px; */
     gap: 5px;
   }
   .pagination button {

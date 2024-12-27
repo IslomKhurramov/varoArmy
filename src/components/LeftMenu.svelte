@@ -32,8 +32,24 @@
   let checkList_item_no = "";
   let check_result = "";
   let show_option = "";
+  let plan_index = "";
 
-  async function reportOfPlanList() {
+  const toggleAccordion = async (index, item) => {
+    // Reset all states when a new plan is selected
+    isOpen.fill(false); // Close all accordions
+    isOpen[index] = true; // Open only the selected accordion
+
+    // Clear other states to ensure a fresh start
+    plan_index = item.ccp_index; // Set the selected plan index
+    planIndex = plan_index;
+    targetNamePlan = ""; // Reset the target name
+    selectedHostname = ""; // Reset the selected hostname
+    isSectionOpen = {}; // Clear any previously opened sections
+    currentPage = GroupDetail;
+    await reportOfPlanList(plan_index);
+  };
+
+  async function reportOfPlanList(plan_index) {
     try {
       const response = await getPlanReportLists(plan_index);
 
@@ -85,21 +101,7 @@
   // Function to filter data based on selected target and hostname
   let selectedTarget = "";
   let selectedHostname = "";
-  let plan_index = "";
-  const toggleAccordion = async (index, item) => {
-    // Reset all states when a new plan is selected
-    isOpen.fill(false); // Close all accordions
-    isOpen[index] = true; // Open only the selected accordion
 
-    // Clear other states to ensure a fresh start
-    plan_index = item.ccp_index; // Set the selected plan index
-    planIndex = plan_index;
-    targetNamePlan = ""; // Reset the target name
-    selectedHostname = ""; // Reset the selected hostname
-    isSectionOpen = {}; // Clear any previously opened sections
-    currentPage = GroupDetail;
-    await reportOfPlanList();
-  };
   function toggleSection(itemKey, sectionKey) {
     if (!isSectionOpen[itemKey]) {
       isSectionOpen[itemKey] = {}; // Ensure a nested object exists for each itemKey
@@ -460,7 +462,7 @@
     justify-content: center;
     /* margin-top: 20px; */
     gap: 5px;
-    margin-top: 10px;
+    /* margin-top: 10px; */
   }
   .pagination button {
     border: none !important;
@@ -602,7 +604,7 @@
     font-size: 14px;
   }
   .tableListWrap {
-    height: 66vh;
+    height: 70vh;
     /* margin-bottom: 20px; */
     overflow-y: auto;
   }

@@ -225,7 +225,7 @@
 
   .tableListWrap {
     overflow-y: auto;
-    max-height: 70vh;
+    height: 66vh;
     padding: 0 20px 20px 20px;
   }
 
@@ -266,7 +266,7 @@
   .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    /* margin-top: 20px; */
     gap: 5px;
   }
   .pagination button {

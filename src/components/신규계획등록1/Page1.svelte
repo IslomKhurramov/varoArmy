@@ -11,9 +11,16 @@
     getPlanLists,
   } from "../../services/page1/newInspection";
   import { navigate, useLocation } from "svelte-routing";
-  import { errorAlert, successAlert } from "../../shared/sweetAlert";
+  import {
+    confirmDelete,
+    errorAlert,
+    successAlert,
+  } from "../../shared/sweetAlert";
   import SwiperPage1 from "./SwiperPage1.svelte";
+  import { allPlanList } from "../../services/store";
+  import { setDeletePlan } from "../../services/callApi";
 
+  export let getPlanList;
   let formData = {
     planTitle: "",
     inspectionPeriod: "",
@@ -216,39 +223,52 @@
   let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
   export let activeMenu = "신규계획등록";
 
-  let mainItems = [
-    {
-      title: "24 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "23 교육사 국방정보체계 취약점",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-    {
-      title: "22 교육사 국방체계 정기점검",
-      subItems: [
-        { title: "--'21 교육사 정기점검1차" },
-        { title: "--'21 교육사 정기점검2차" },
-        { title: "--'21 교육사 정기점검3차" },
-      ],
-    },
-  ];
+  let plan_index = "";
+  const toggleAccordion = (index, item) => {
+    // Reset all states when a new plan is selected
+    isOpen.fill(false); // Close all accordions
+    isOpen[index] = true; // Open only the selected accordion
 
-  const toggleAccordion = (index) => {
-    isOpen[index] = !isOpen[index];
+    // Clear other states to ensure a fresh start
+    plan_index = item.ccp_index; // Set the selected plan index
+    targetNamePlan = ""; // Reset the target name
+    selectedHostname = ""; // Reset the selected hostname
+    isSectionOpen = {}; // Clear any previously opened sections
   };
 
+  let isSectionOpen = {}; // To manage the open/close state of the sections
+
+  let targetNamePlan = "";
+  // Function to toggle the section (asset category, like UNIX or NETWORK)
+  function toggleSection(itemKey, sectionKey) {
+    if (!isSectionOpen[itemKey]) {
+      isSectionOpen[itemKey] = {}; // Ensure a nested object exists for each itemKey
+    }
+    isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey]; // Toggle the section
+    targetNamePlan = sectionKey;
+  }
   function selectPage() {
     currentPage = SwiperPage1;
+  }
+
+  async function deletePlan() {
+    const isConfirmed = await confirmDelete();
+    if (!isConfirmed) return;
+    try {
+      const response = await setDeletePlan(plan_index);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+        loading = true;
+        await getPlanList(); // Fetch updated data after deletion
+        plan_index = "";
+        loading = false;
+      } else {
+        console.log(response.CODE);
+      }
+    } catch (err) {
+      throw err;
+    }
   }
 </script>
 
@@ -263,28 +283,71 @@
 
           <!-- Accordion -->
           <div class="accordion">
-            {#each mainItems as item, index}
+            {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
-                  on:click={() => toggleAccordion(index)}
+                  on:click={() => {
+                    toggleAccordion(index, item);
+                  }}
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
-                  {item.title}
+                  {item.ccp_title}
+                  <!-- ccp_title will be displayed here -->
                 </button>
+
                 <div
                   class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '150px' : '0px'}"
+                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
                 >
                   <ul>
-                    {#each item.subItems as subItem}
-                      <li
-                        on:click={() => {
-                          (activeMenu = subItem.title), selectPage();
-                        }}
-                      >
-                        {subItem.title}
-                      </li>
-                    {/each}
+                    <div
+                      class="accordion-content {isOpen[index] ? 'open' : ''}"
+                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                    >
+                      {#if item.asset && typeof item.asset === "object"}
+                        {#each Object.entries(item.asset) as [targetName, targetData]}
+                          <p
+                            on:click={() => {
+                              toggleSection(index, targetName);
+                            }}
+                            class={isSectionOpen[index]?.[targetName]
+                              ? "active"
+                              : ""}
+                          >
+                            {targetName}
+                          </p>
+                          <!-- This will display UNIX, NETWORK, etc. -->
+
+                          {#if targetData && targetData.length > 0}
+                            <ul
+                              class="sublist {isSectionOpen[index]?.[targetName]
+                                ? 'open'
+                                : ''}"
+                              style="max-height: {isSectionOpen[index]?.[
+                                targetName
+                              ]
+                                ? '100%'
+                                : '0px'}"
+                            >
+                              {#each targetData as subItem}
+                                <li
+                                  on:click={() => {
+                                    activeMenu = subItem;
+                                    handleClickHostname(subItem); // Set selected hostname
+                                  }}
+                                >
+                                  <strong>{subItem.hostname}</strong>
+                                  <!-- Display the hostname -->
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
+                        {/each}
+                      {:else}
+                        <li>No assets available</li>
+                        <!-- In case there are no assets -->
+                      {/if}
+                    </div>
                   </ul>
                 </div>
               </div>
@@ -295,7 +358,7 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button>삭제</button>
+          <button on:click={deletePlan}>삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -566,6 +629,33 @@
 {/if}
 
 <style>
+  .sublist {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+  .sublist.open {
+    max-height: 100%;
+  }
+  .accordion-content ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid black;
+  }
+  .accordion-content.open {
+    padding: 0px 10px 0px 10px;
+  }
+  .accordion-content p {
+    cursor: pointer;
+  }
+  .accordion-content p:hover {
+    background-color: #3d5878;
+    cursor: pointer;
+    border-radius: 5px;
+    /* padding: 15px; */
+
+    color: white;
+  }
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;

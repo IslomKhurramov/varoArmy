@@ -533,7 +533,9 @@
       </div>
     </div>
     <div class="body_menu">
-      <Route path="/page1" component={Page1} />
+      <Route path="/page1">
+        <Page1 {getPlanList} /></Route
+      >
       <Route path="/page2" component={Page2} />
       <Route path="/page3">
         <Page3 {getPlanList} {loading} />

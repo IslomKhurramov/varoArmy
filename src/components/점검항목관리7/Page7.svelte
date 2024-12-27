@@ -92,7 +92,7 @@
     // console.log("targetData", selectedTargetData);
   }
   let currentPagePagination = 1; // Current page number
-  let itemsPerPage = 10; // Items per page
+  let itemsPerPage = 20; // Items per page
 
   $: startIndex = (currentPagePagination - 1) * itemsPerPage;
   $: endIndex = startIndex + itemsPerPage;
@@ -126,7 +126,7 @@
   }
   // Function to handle items per page change
   function updateItemsPerPage(event) {
-    itemsPerPage = parseInt(event.target.value, 10);
+    itemsPerPage = parseInt(event.target.value, 20);
     // currentPagePagination = 1; // Reset to first page
   }
   /*************************************************************/
@@ -482,8 +482,8 @@
         <article class="contentArea">
           <div class="last_button2">
             <select on:change={updateItemsPerPage}>
-              <option value="10" selected>10줄</option>
-              <option value="20">20줄</option>
+              <option value="10">10줄</option>
+              <option value="20" selected>20줄</option>
             </select>
           </div>
           <div class="tableListWrap">
@@ -545,47 +545,51 @@
               </tbody>
             </table>
           </div>
-          <!-- Pagination -->
-          <div class="pagination">
-            <button
-              on:click={() => goToPage(1)}
-              disabled={currentPagePagination === 1}
-            >
-              {"<<"}
-            </button>
-            <button
-              on:click={() => goToPage(currentPagePagination - 1)}
-              disabled={currentPagePagination === 1}
-            >
-              {"<"}
-            </button>
-            {#each Array(totalPages).fill(0) as _, pageIndex}
-              <button
-                class:selected={currentPagePagination === pageIndex + 1}
-                on:click={() => goToPage(pageIndex + 1)}
-              >
-                {pageIndex + 1}
-              </button>
-            {/each}
-            <button
-              on:click={() => goToPage(currentPagePagination + 1)}
-              disabled={currentPagePagination === totalPages}
-            >
-              {">"}
-            </button>
-            <button
-              on:click={() => goToPage(totalPages)}
-              disabled={currentPagePagination === totalPages}
-            >
-              {">>"}
-            </button>
-          </div>
 
-          <div class="last_button">
-            <button class="btn btnSave" on:click={deleteChecklist}
-              >선택항목삭제
-            </button>
-            <button class="btn btnSave">변경이력확인 </button>
+          <div style="width: 100%; display:flex; justify-content:flex-end;">
+            <div class="last_button">
+              <!-- Pagination -->
+              <div class="pagination">
+                <button
+                  on:click={() => goToPage(1)}
+                  disabled={currentPagePagination === 1}
+                >
+                  {"<<"}
+                </button>
+                <button
+                  on:click={() => goToPage(currentPagePagination - 1)}
+                  disabled={currentPagePagination === 1}
+                >
+                  {"<"}
+                </button>
+                {#each Array(totalPages).fill(0) as _, pageIndex}
+                  <button
+                    class:selected={currentPagePagination === pageIndex + 1}
+                    on:click={() => goToPage(pageIndex + 1)}
+                  >
+                    {pageIndex + 1}
+                  </button>
+                {/each}
+                <button
+                  on:click={() => goToPage(currentPagePagination + 1)}
+                  disabled={currentPagePagination === totalPages}
+                >
+                  {">"}
+                </button>
+                <button
+                  on:click={() => goToPage(totalPages)}
+                  disabled={currentPagePagination === totalPages}
+                >
+                  {">>"}
+                </button>
+              </div>
+              <div>
+                <button class="btn btnSave" on:click={deleteChecklist}
+                  >선택항목삭제
+                </button>
+                <button class="btn btnSave">변경이력확인 </button>
+              </div>
+            </div>
           </div>
         </article>
       {/if}
@@ -673,7 +677,7 @@
   .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    /* margin-top: 20px; */
     gap: 5px;
   }
   .pagination button {
@@ -779,12 +783,10 @@
     transition-duration: 0.3s;
   }
   .last_button {
-    width: 100%;
+    width: 60%;
     display: flex;
-    flex-direction: row;
-    justify-content: end;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
   }
   .last_button2 {
     width: 100%;
