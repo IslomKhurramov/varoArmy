@@ -179,6 +179,49 @@
     getuserName();
     getfixWays();
   });
+  let filterGroup = "";
+  let filterOperatorName = "";
+  let filterPlanDate = "";
+  let filterTarget = "";
+
+  $: results = Object.values(resultVulnsOfPlans)
+    .filter((item) => Array.isArray(item) && item[0]?.result)
+    .map((item) => item[0].result);
+
+  // Filter results based on targetName and selectedHostname
+  $: filteredResults = results.filter((entry) => {
+    const matchesTargetName = targetName
+      ? entry.cct_index__cct_target === targetName
+      : true;
+    const matchesHostname = selectedHostname
+      ? entry.ast_uuid__ass_uuid__ast_hostname === selectedHostname
+      : true;
+    return matchesTargetName && matchesHostname;
+  });
+
+  // Generate unique operators
+  $: uniqueOperators = Array.from(
+    new Set(
+      filteredResults.map(
+        (vulns) => vulns.ast_uuid__ass_uuid__ast_operator_person
+      )
+    )
+  );
+
+  // Generate unique groups
+  $: uniqueGroups = Array.from(
+    new Set(filteredResults.map((vulns) => vulns.ccr_item_no__ccc_item_group))
+  );
+  $: uniqueTargets = Array.from(
+    new Set(filteredResults.map((plan) => plan.cct_index__cct_target))
+  );
+  // Reset filters function
+  function resetFilters() {
+    filterGroup = "";
+    filterOperatorName = "";
+    filterPlanDate = "";
+    filterTarget = "";
+  }
 </script>
 
 {#if loading}
@@ -305,28 +348,36 @@
         <article class="contentArea">
           <section class="filterWrap" style="margin-bottom: 0px;">
             <div>
-              <select>
+              <select bind:value={filterTarget}>
                 <option value="" selected>점검대상체계</option>
-
-                <option value={"점검대상체계"}>점검대상체계</option>
+                {#each uniqueTargets as target}
+                  <option value={target}>{target}</option>
+                {/each}
               </select>
+
               <input
+                bind:value={filterPlanDate}
                 style="    height: 28px;
               font-size: 12px;"
-                type="datetime-local"
+                type="date"
               />
-
-              <select>
-                <option value="" selected>미등록</option>
-
-                <option value="점검관">점검관</option>
+              <select bind:value={filterOperatorName}>
+                <option value="점검관" selected>점검관</option>
+                {#each uniqueOperators as operator}
+                  <option value={operator}>{operator}</option>
+                {/each}
               </select>
-              <select id="result">
-                <option value="" selected>점검구분 </option>
-                <option value="점검구분">점검구분 </option>
+
+              <!-- Group Filter Dropdown -->
+              <select id="result" bind:value={filterGroup}>
+                <option value="" selected>점검구분</option>
+                {#each uniqueGroups as group}
+                  <option value={group}>{group}</option>
+                {/each}
               </select>
 
               <button
+                on:click={resetFilters}
                 class="btn btnSearch"
                 style="width: 98px; font-size: 14px;"
                 ><img
@@ -370,6 +421,10 @@
               {selectPage1}
               {firstMenuData}
               {fetchPaginatedData}
+              {filterGroup}
+              {filterOperatorName}
+              {filterPlanDate}
+              {filterTarget}
             />
           {/if}
         </article>

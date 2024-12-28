@@ -8,12 +8,16 @@
   export let selectedHostname;
   export let selectPage1;
 
-  // Filter and map the results based on targetName and selectedHostname
+  export let filterGroup;
+  export let filterOperatorName;
+  export let filterPlanDate;
+  export let filterTarget;
+
   let results = Object.values(resultVulnsOfPlans)
     .filter((item) => Array.isArray(item) && item[0]?.result)
     .map((item) => item[0].result);
 
-  // Filter results based on targetName and selectedHostname
+  // Filter results based on targetName, selectedHostname, and other filters
   $: filteredResults = results.filter((entry) => {
     const matchesTargetName = targetName
       ? entry.cct_index__cct_target === targetName
@@ -21,7 +25,30 @@
     const matchesHostname = selectedHostname
       ? entry.ast_uuid__ass_uuid__ast_hostname === selectedHostname
       : true;
-    return matchesTargetName && matchesHostname;
+    const matchesGroup = filterGroup
+      ? entry.ccr_item_no__ccc_item_group === filterGroup
+      : true;
+    const matchesOperatorName = filterOperatorName
+      ? entry.ast_uuid__ass_uuid__ast_operator_person === filterOperatorName
+      : true;
+    const matchesPlanDate = filterPlanDate
+      ? new Date(entry.ast_uuid__ass_uuid__ast_lastconnect)
+          .toISOString()
+          .startsWith(filterPlanDate)
+      : true;
+    const matchesTarget = filterTarget
+      ? entry.cct_index__cct_target === filterTarget
+      : true;
+
+    // Combine all filter conditions
+    return (
+      matchesTargetName &&
+      matchesHostname &&
+      matchesGroup &&
+      matchesOperatorName &&
+      matchesPlanDate &&
+      matchesTarget
+    );
   });
 
   let currentPagePagination = 1; // Current page number
