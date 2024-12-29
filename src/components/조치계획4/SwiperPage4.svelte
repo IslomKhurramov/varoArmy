@@ -161,7 +161,7 @@
         fix_user_index,
         fix_step_status
       );
-
+      console.log("response page4 ", response);
       if (response.RESULT === "OK") {
         successAlert(`${response.CODE}`);
       }

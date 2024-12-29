@@ -213,7 +213,7 @@
           </div>
 
           <!-- Accordion -->
-          <div class="accordion">
+          <div class="accordion accordion2" style="height: 41vh;">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
@@ -444,6 +444,9 @@
 </main>
 
 <style>
+  .accordion2 {
+    height: 41vh;
+  }
   .modal-open-wrap {
     display: block;
     z-index: 99;
