@@ -23,24 +23,6 @@
     }
   }
 
-  let formFields = {
-    ccp_title: selectedData?.ccp_title || "",
-    plan_start_date: formatDateTime(selectedData?.plan_start_date) || "",
-    plan_end_date: formatDateTime(selectedData?.plan_end_date) || "",
-    fix_start_date: formatDate(selectedData?.fix_start_date) || "",
-    fix_end_date: formatDate(selectedData?.fix_end_date) || "",
-
-    plan_execution_type: selectedData?.plan_execution_type || true, // true for '즉시', false for '예약'
-    plan_execute_interval_value: selectedData?.plan_execute_interval_value || 1, // default to '1회'
-    plan_execute_interval_term:
-      selectedData?.plan_execute_interval_term || "months", // default to 'months'
-
-    plan_execute_interval_value:
-      selectedData?.plan_execute_interval_value || "", // The numerical value for repeat frequency
-    plan_execute_interval_unit:
-      selectedData?.plan_execute_interval_unit || "시", // Default unit: '시' (hours)
-  };
-
   function formatDateTime(date) {
     if (!date) return "";
     const d = new Date(date);
@@ -52,52 +34,58 @@
     const seconds = String(d.getSeconds()).padStart(2, "0");
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   } // Create FormData and append values
-  let formData = new FormData();
-
-  // Append the form data fields
-  formData.append("ccp_index", selectedData?.ccp_index || "");
-  formData.append("ccp_title", formFields.ccp_title || "");
-  formData.append("plan_planer_info", selectedData?.plan_planer_info_id || "");
-  formData.append("plan_start_date", formFields.plan_start_date || "");
-  formData.append("plan_end_date", formFields.plan_end_date || "");
-  formData.append("plan_execution_type", 1); // Default to 1 (execution type)
-
-  // Plan repeat frequency: handle the interval value and term
-  formData.append(
-    "plan_execute_interval_value",
-    formFields.plan_execute_interval_value ||
-      selectedData?.plan_execute_interval_value ||
-      ""
-  );
-
-  formData.append(
-    "plan_execute_interval_term",
-    formFields.plan_execute_interval_unit ||
-      selectedData?.plan_execute_interval_term ||
-      ""
-  );
-
-  // Repeat rule and other settings
-  formData.append(
-    "plan_name_repeat_rule_type",
-    selectedData?.plan_name_repeat_rule_type || 1 // Default to 1
-  );
-  formData.append(
-    "plan_name_repeat_rule",
-    selectedData?.plan_name_repeat_rule || ""
-  );
-
-  // Fix date setup
-  formData.append("fix_date_setup", 1); // Default to 1
-  formData.append("fix_start_date", formFields.fix_start_date || "");
-  formData.append("fix_end_date", formFields.fix_end_date || "");
-  formData.append(
-    "fix_conductor_info",
-    selectedData?.fix_conductor_info_id || ""
-  );
 
   async function updatePlan() {
     try {
+      // Reinitialize FormData within updatePlan
+      let formData = new FormData();
+      formData.append("ccp_index", selectedData?.ccp_index || "");
+      formData.append("ccp_title", selectedData.ccp_title || "");
+      formData.append(
+        "plan_planer_info",
+        selectedData?.plan_planer_info_id || ""
+      );
+      formData.append(
+        "plan_start_date",
+        formatDateTime(selectedData.plan_start_date) || ""
+      );
+      formData.append(
+        "plan_end_date",
+        formatDateTime(selectedData.plan_end_date) || ""
+      );
+
+      // Convert plan_execution_type to 1 or 0
+      formData.append(
+        "plan_execution_type",
+        selectedData.plan_execution_type ? 1 : 0
+      );
+
+      // Handle interval and term
+      formData.append(
+        "plan_execute_interval_value",
+        parseInt(selectedData.plan_execute_interval_value) || 0
+      );
+      formData.append(
+        "plan_execute_interval_term",
+        selectedData.plan_execute_interval_unit || ""
+      );
+
+      formData.append(
+        "plan_name_repeat_rule_type",
+        parseInt(selectedData.plan_name_repeat_rule_type) || 1
+      );
+      formData.append(
+        "plan_name_repeat_rule",
+        selectedData.plan_name_repeat_rule || ""
+      );
+      formData.append("fix_date_setup", 1); // Default to 1
+      formData.append("fix_start_date", selectedData.fix_start_date || "");
+      formData.append("fix_end_date", selectedData.fix_end_date || "");
+      formData.append(
+        "fix_conductor_info",
+        selectedData?.fix_conductor_info_id || ""
+      );
+
       console.log("Sending FormData for update:");
       for (let pair of formData.entries()) {
         console.log(`${pair[0]}: ${pair[1]}`);
@@ -109,7 +97,7 @@
         console.log("Update Successful:", response.CODE);
         successAlert(response.CODE);
 
-        // Ensure getPlanList() fetches the updated data
+        // Fetch the updated data
         await getPlanList();
       } else {
         console.error("Update Failed:", response.CODE);
@@ -119,7 +107,6 @@
     }
   }
 
-  $: console.log("formData", formData);
   function formatKoreanDate(date) {
     const d = new Date(date);
     const options = {
@@ -163,20 +150,19 @@
         >
           <div class="inputRow">
             <label>점검계획제목</label>
-            <input bind:value={formFields.ccp_title} type="text" />
+            <input bind:value="{selectedData.ccp_title}" type="text" />
           </div>
           <div class="inputRow">
             <label>점검기간</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <!-- Bind dates and times to formFields -->
                 <input
-                  bind:value={formFields.plan_start_date}
+                  bind:value="{selectedData.plan_start_date}"
                   type="datetime-local"
                 />
                 ~
                 <input
-                  bind:value={formFields.plan_end_date}
+                  bind:value="{selectedData.plan_end_date}"
                   type="datetime-local"
                 />
               </div>
@@ -238,7 +224,7 @@
           <div class="inputRow">
             <label>점검계획내용</label>
             <span class="span-input"
-              >{formData?.plan_name_repeat_rule || ""}</span
+              >{selectedData?.plan_name_repeat_rule || ""}</span
             >
           </div>
 
@@ -255,7 +241,7 @@
               </div>
               <div class="riskLevelItem">
                 <button class="btnUpload">변경</button>
-                <button class="btnUpload" on:click={() => (showModal = true)}
+                <button class="btnUpload" on:click="{() => (showModal = true)}"
                   >변경이력</button
                 >
               </div>
@@ -279,16 +265,16 @@
                   <button>수행조건</button>
                   <select
                     style="width: 45%;"
-                    bind:value={formFields.plan_execution_type}
+                    bind:value="{selectedData.plan_execution_type}"
                   >
-                    <option value={true}>즉시</option>
-                    <option value={false}>예약</option>
+                    <option value="{true}">즉시</option>
+                    <option value="{false}">예약</option>
                   </select>
 
                   <!-- 반복주기 (Repeat Frequency) -->
                   <select
                     style="width: 45%;"
-                    bind:value={formFields.plan_execute_interval_value}
+                    bind:value="{selectedData.plan_execute_interval_value}"
                   >
                     <option value="1회">1회</option>
                     <option value="반복">반복</option>
@@ -300,12 +286,12 @@
                 <input
                   style="width: 45%;"
                   type="text"
-                  bind:value={formFields.plan_execute_interval_value}
+                  bind:value="{selectedData.plan_execute_interval_value}"
                   placeholder="값을 입력하세요"
                 />
                 <select
                   style="width: 45%;"
-                  bind:value={formFields.plan_execute_interval_unit}
+                  bind:value="{selectedData.plan_execute_interval_unit}"
                 >
                   <option value="시">시</option>
                   <option value="일">일</option>
@@ -320,10 +306,10 @@
                 <span class="span-input">
                   <button>시작일</button>
                   <input
-                    bind:value={formFields.fix_start_date}
+                    bind:value="{selectedData.fix_start_date}"
                     style="width: 93%;"
                     type="date"
-                    placeholder={selectedData?.fix_start_date || ""}
+                    placeholder="{selectedData?.fix_start_date || ''}"
                   />
                 </span>
               </div>
@@ -331,10 +317,10 @@
                 <span class="span-input">
                   <button>종료일</button>
                   <input
-                    bind:value={formFields.fix_end_date}
+                    bind:value="{selectedData.fix_end_date}"
                     style="width: 93%;"
                     type="date"
-                    placeholder={selectedData?.fix_end_date || ""}
+                    placeholder="{selectedData?.fix_end_date || ''}"
                   />
                 </span>
               </div>
@@ -351,8 +337,8 @@
   >
     <div class="inputRow">
       <button class="btn-primary">보고서 </button>
-      <button class="btn-primary" on:click={updatePlan}>업데이트</button>
-      <button class="btn-primary" on:click={deletePlan}>삭제</button>
+      <button class="btn-primary" on:click="{updatePlan}">업데이트</button>
+      <button class="btn-primary" on:click="{deletePlan}">삭제</button>
     </div>
   </div>
 </div>
@@ -360,12 +346,16 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     class="modal-open-wrap"
-    on:click={() => (showModal = false)}
-    on:keydown={handleKeyDown}
+    on:click="{() => (showModal = false)}"
+    on:keydown="{handleKeyDown}"
     tabindex="0"
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
+    <dialog
+      open
+      on:close="{() => (showModal = false)}"
+      on:click|stopPropagation
+    >
       <ModalMain {closeShowModal} {selectedData} />
     </dialog>
   </div>

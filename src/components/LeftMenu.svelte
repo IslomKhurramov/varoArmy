@@ -33,20 +33,26 @@
   let check_result = "";
   let show_option = "";
   let plan_index = "";
-
+  let parentIndex = null;
   const toggleAccordion = async (index, item) => {
     // Reset all states when a new plan is selected
     isOpen.fill(false); // Close all accordions
-    isOpen[index] = true; // Open only the selected accordion
+    isOpen[index] = true;
+    isOpen = [...isOpen]; // Trigger reactivity by creating a new array
 
-    // Clear other states to ensure a fresh start
-    plan_index = item.ccp_index; // Set the selected plan index
+    plan_index = item.ccp_index; // Update the plan index
     planIndex = plan_index;
     targetNamePlan = ""; // Reset the target name
-    selectedHostname = ""; // Reset the selected hostname
-    isSectionOpen = {}; // Clear any previously opened sections
-    currentPage = GroupDetail;
+    selectedHostname = ""; // Reset the hostname
+    isSectionOpen = {}; // Clear open sections
+
     await reportOfPlanList(plan_index);
+    if (item.ccp_index_parent != 0) {
+      parentIndex = item.ccp_index_parent;
+    }
+
+    selectedData = item; // Update the selected data
+    currentPage = SwiperMain;
   };
 
   async function reportOfPlanList(plan_index) {
@@ -201,26 +207,26 @@
               <img
                 src="assets/images/back.png"
                 alt="back"
-                on:click={closeSwiper}
+                on:click="{closeSwiper}"
               />
             {:else if currentPage === GroupDetail}
               <img
                 src="assets/images/back.png"
                 alt="back"
-                on:click={closeSwiper}
+                on:click="{closeSwiper}"
               />
             {/if}
           </div>
 
           <!-- Accordion -->
-          <div class="accordion accordion2" style="height: 41vh;">
+          <div class="accordion">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
-                  on:click={() => {
+                  on:click="{() => {
                     toggleAccordion(index, item);
                     // Direct function call in Svelte
-                  }}
+                  }}"
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
                   {item.ccp_title}
@@ -236,47 +242,13 @@
                       class="accordion-content {isOpen[index] ? 'open' : ''}"
                       style="max-height: {isOpen[index] ? '100%' : '0px'}"
                     >
-                      {#if item.asset && typeof item.asset === "object"}
-                        {#each Object.entries(item.asset) as [targetName, targetData]}
-                          <p
-                            on:click={() => {
-                              toggleSection(index, targetName);
-                            }}
-                            class={isSectionOpen[index]?.[targetName]
-                              ? "active"
-                              : ""}
-                          >
-                            {targetName}
-                          </p>
-                          <!-- This will display UNIX, NETWORK, etc. -->
-
-                          {#if targetData && targetData.length > 0}
-                            <ul
-                              class="sublist {isSectionOpen[index]?.[targetName]
-                                ? 'open'
-                                : ''}"
-                              style="max-height: {isSectionOpen[index]?.[
-                                targetName
-                              ]
-                                ? '100%'
-                                : '0px'}"
-                            >
-                              {#each targetData as subItem}
-                                <li
-                                  on:click={() => {
-                                    activeMenu = subItem;
-                                    handleClickHostname(subItem); // Set selected hostname
-                                  }}
-                                >
-                                  <strong>{subItem.hostname}</strong>
-                                  <!-- Display the hostname -->
-                                </li>
-                              {/each}
-                            </ul>
-                          {/if}
-                        {/each}
+                      {#if item.ccp_index_parent != 0 && item.ccp_index_parent === parentIndex}
+                        <p>
+                          {item.ccp_title}
+                        </p>
+                        <!-- This will display UNIX, NETWORK, etc. -->
                       {:else}
-                        <li>No assets available</li>
+                        <li>No subPlan</li>
                         <!-- In case there are no assets -->
                       {/if}
                     </div>
@@ -290,7 +262,7 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button on:click={deletePlan}>삭제</button>
+          <button on:click="{deletePlan}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -298,22 +270,22 @@
   </section>
   <section class="section2">
     {#if currentPage}
-      <svelte:component this={currentPage} {selectedData} {getPlanList} />
+      <svelte:component this="{currentPage}" bind:selectedData {getPlanList} />
     {:else}
       <article class="contentArea">
         <div class="tableListWrap">
           <table class="tableList hdBorder">
             <colgroup>
               <col style="width:90px;" />
-              <col style="width:170px" />
-              <col style="width:200px" />
+              <col style="width:230px" />
+              <col style="width:322px" />
               <col style="width: 200px;" />
-              <col />
-              <col />
+              <col style="width: 120px;" />
+              <col style="width:156px" />
               <col style="width: 255px;" />
-              <col />
-              <col />
-              <col />
+              <col style="width: 120px;" />
+              <col style="width:120px" />
+              <col style="width:120px" />
             </colgroup>
             <thead>
               <tr>
@@ -332,7 +304,7 @@
             </thead>
             <tbody>
               {#each paginatedData as data, index}
-                <tr on:click={() => handleRowClick(data)}>
+                <tr on:click="{() => handleRowClick(data)}">
                   <!-- 번호: Reverse index to display latest first -->
                   <td class="text-center"
                     >{$allPlanList.length - (startIndex + index)}</td
@@ -398,16 +370,16 @@
         <div class="pagination">
           <!-- First Page Button -->
           <button
-            on:click={() => goToPage(1)}
-            disabled={currentPagePagination === 1}
+            on:click="{() => goToPage(1)}"
+            disabled="{currentPagePagination === 1}"
           >
             {"<<"}
           </button>
 
           <!-- Previous Page Button -->
           <button
-            on:click={() => goToPage(currentPagePagination - 1)}
-            disabled={currentPagePagination === 1}
+            on:click="{() => goToPage(currentPagePagination - 1)}"
+            disabled="{currentPagePagination === 1}"
           >
             {"<"}
           </button>
@@ -415,8 +387,9 @@
           <!-- Visible Page Buttons -->
           {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
             <button
-              class:selected={currentPagePagination === paginationStart + index}
-              on:click={() => goToPage(paginationStart + index)}
+              class:selected="{currentPagePagination ===
+                paginationStart + index}"
+              on:click="{() => goToPage(paginationStart + index)}"
             >
               {paginationStart + index}
             </button>
@@ -424,16 +397,16 @@
 
           <!-- Next Page Button -->
           <button
-            on:click={() => goToPage(currentPagePagination + 1)}
-            disabled={currentPagePagination === totalPages}
+            on:click="{() => goToPage(currentPagePagination + 1)}"
+            disabled="{currentPagePagination === totalPages}"
           >
             {">"}
           </button>
 
           <!-- Last Page Button -->
           <button
-            on:click={() => goToPage(totalPages)}
-            disabled={currentPagePagination === totalPages}
+            on:click="{() => goToPage(totalPages)}"
+            disabled="{currentPagePagination === totalPages}"
           >
             {">>"}
           </button>
