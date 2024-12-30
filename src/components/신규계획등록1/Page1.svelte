@@ -15,10 +15,13 @@
     confirmDelete,
     errorAlert,
     successAlert,
+    warningAlert,
   } from "../../shared/sweetAlert";
   import SwiperPage1 from "./SwiperPage1.svelte";
   import { allPlanList } from "../../services/store";
   import { setDeletePlan } from "../../services/callApi";
+  import axios from "axios";
+  import { serverApi } from "../../lib/config";
 
   export let getPlanList;
   let formData = {
@@ -110,87 +113,9 @@
 
   let planOptions = [];
   let planList = [];
-
-  const submitNewPlan = async () => {
-    try {
-      // if (!projectName) throw new Error("플랜명을 확인해 주세요!");
-      // if (selectedType == "0") {
-      //   if (!selectedCheckList) throw new Error("점검대상을 확인해 주세요!");
-      // }
-
-      // if (!selectedAssetList) throw new Error("점검항목을 확인해 주세요!");
-      // if (!selectedPersons) throw new Error("점검자를 확인해 주세요!");
-      // if (!conductorInfo) throw new Error("조치승인담당자를 확인해 주세요!");
-      // if (!startDate || !endDate) throw new Error("점검일정을 확인해 주세요!");
-
-      // if (schedule == "1") {
-      //   if (plan_execute_interval_value == 0)
-      //     throw new Error("주기를 0 보다 큰 숫자를 입력해 주세요!");
-      // }
-
-      const sendData = {
-        plan_name: projectName,
-        plan_recheck: isNaN(parseInt(selectedType))
-          ? 0
-          : parseInt(selectedType),
-        plan_recheck_plan_index: isNaN(parseInt(recheckplanIndex))
-          ? 0
-          : parseInt(recheckplanIndex),
-        checklist_index: isNaN(parseInt(selectedAssetList))
-          ? 0
-          : parseInt(selectedAssetList),
-        plan_planer_info: isNaN(parseInt(selectedPersons))
-          ? 0
-          : parseInt(selectedPersons),
-        plan_start_date: moment(startDate).format("YYYY-MM-DD h:mm:ss"),
-        plan_end_date: moment(endDate).format("YYYY-MM-DD h:mm:ss"),
-        plan_execution_type: isNaN(parseInt(schedule)) ? 0 : parseInt(schedule),
-        plan_execute_interval_value:
-          plan_execute_interval_value === 0 ? 0 : plan_execute_interval_value,
-        plan_execute_interval_term: schedule === 0 ? "hours" : repeatCycle,
-        fix_date_setup: isNaN(parseInt(actionSchedule))
-          ? 0
-          : parseInt(actionSchedule),
-        fix_start_date: actionStartDate,
-        fix_end_date: actionEndDate,
-        fix_conductor_info: isNaN(parseInt(conductorInfo))
-          ? 0
-          : parseInt(conductorInfo),
-        assessment_command: inspectionInformation,
-      };
-
-      if (parseInt(selectedType) === 0) {
-        sendData.asset_group_index = isNaN(parseInt(selectedCheckList))
-          ? 0
-          : parseInt(selectedCheckList);
-      }
-
-      if (parseInt(selectedType) === 0)
-        sendData.asset_group_index = parseInt(selectedCheckList);
-
-      const formData = new FormData();
-
-      for (const key in sendData) {
-        formData.append(key, sendData[key]);
-      }
-
-      const response = await setNewPlanSave(formData);
-
-      if (response.RESULT === "OK") {
-        await successAlert(response.CODE);
-        getPlanLists();
-      } else if (response.RESULT === "ERROR") {
-        await errorAlert(response.CODE);
-        getPlanLists();
-        console.log("ERROR PAGE1", response);
-      }
-
-      navigate(window.location?.pathname == "/" ? "/page1" : "/");
-    } catch (error) {
-      errorAlert(error?.message);
-      throw error;
-    }
-  };
+  let assetGroupIndex = null;
+  let repeatRule = null;
+  let repeatRuleType = "1";
 
   onMount(async () => {
     try {
@@ -291,6 +216,81 @@
       throw err;
     }
   }
+
+  async function submitNewPlan() {
+    // Validate fields
+    if (assetGroupIndex === null) {
+      warningAlert("점검 대상을 선택해주세요."); // "Please select an inspection target."
+      return;
+    }
+
+    if (projectName === "") {
+      warningAlert("프로젝트 이름을 입력해주세요."); // "Please enter the project name."
+      return;
+    }
+
+    if (selectedAssetList === "") {
+      warningAlert("점검 항목을 선택해주세요."); // "Please select an inspection item."
+      return;
+    }
+
+    if (repeatRule === null) {
+      warningAlert("반복 규칙을 선택해주세요."); // "Please select a repeat rule."
+      return;
+    }
+
+    // Prepare form data
+    const formDataObj = new FormData();
+    formDataObj.append("plan_name", projectName); // 플랜 제목
+    formDataObj.append("plan_recheck", "0"); // 신규/이행 점검 (0 by default)
+    formDataObj.append("plan_recheck_plan_index", "0"); // 이행점검시 점검 플랜 (default 0)
+    formDataObj.append("asset_group_index", assetGroupIndex); // 점검 대상
+    formDataObj.append("checklist_index", selectedAssetList); // 점검 항목
+    formDataObj.append("plan_planer_info", "1"); // 점검자 지정 (default 1)
+    formDataObj.append("plan_start_date", startDate); // 플랜 시작일
+    formDataObj.append("plan_end_date", endDate); // 플랜 종료일
+    formDataObj.append("plan_execution_type", assetInsertData.reserved); // 즉시/반복 실행 (0 for 즉시, 1 for 반복)
+    formDataObj.append(
+      "plan_execute_interval_value",
+      plan_execute_interval_value || "1"
+    ); // 반복 주기 지정
+    formDataObj.append("plan_execute_interval_term", repeatCycle || "hours"); // 반복 주기 (hours, days, weeks, etc.)
+    formDataObj.append("plan_name_repeat_rule_type", "1"); // 점검플랜생성규칙 (default 1)
+    formDataObj.append("plan_name_repeat_rule", repeatRule); // 점검플랜생성규칙 상세
+    formDataObj.append("fix_date_setup", "1"); // 조치일정 설정 (default 1)
+    formDataObj.append("fix_start_date", startDate); // 조치 시작일
+    formDataObj.append("fix_end_date", endDate); // 조치 종료일
+    formDataObj.append("fix_conductor_info", "1"); // 조치 담당자 정보 (default 1)
+
+    // File upload (optional)
+    if (inputFile) {
+      formDataObj.append("assessment_command", inputFile.files[0]); // Attach the Excel file
+    }
+
+    try {
+      const response = await axios.post(
+        `${serverApi}/api/setNewPlanSave/`,
+        formDataObj,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        successAlert();
+        console.log("Response:", response.data);
+        // Handle success response
+      } else {
+        alert("Failed to save the plan. Please try again.");
+        console.error("Error:", response.data);
+      }
+    } catch (error) {
+      console.error("Error submitting the form:", error);
+      throw error;
+    }
+  }
 </script>
 
 <main class="table-container">
@@ -365,6 +365,15 @@
               type="text"
               placeholder="점검플랜명"
               bind:value="{projectName}"
+            />
+          </div>
+          <div class="inputRow">
+            <label>Repeat Rule</label>
+            <input
+              style="font-size: 14px;"
+              type="text"
+              placeholder="점검플랜명"
+              bind:value="{repeatRule}"
             />
           </div>
 
@@ -452,6 +461,18 @@
               {#if planOptions.checklist_group}
                 {#each planOptions.checklist_group as item}
                   <option value="{item.ccg_index}">{item.ccg_group}</option>
+                {/each}
+              {/if}
+            </select>
+          </div>
+
+          <div class="inputRow box_1">
+            <label>Asset Group</label>
+            <select bind:value="{assetGroupIndex}" style="font-size: 14px;">
+              <option value="" selected disabled>점검항목 목록</option>
+              {#if planOptions.asset_group}
+                {#each planOptions.asset_group as item}
+                  <option value="{item.asg_index}">{item.asg_title}</option>
                 {/each}
               {/if}
             </select>
