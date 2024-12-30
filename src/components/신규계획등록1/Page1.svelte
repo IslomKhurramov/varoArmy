@@ -130,23 +130,40 @@
 
       const sendData = {
         plan_name: projectName,
-        plan_recheck: parseInt(selectedType),
-        plan_recheck_plan_index: parseInt(recheckplanIndex ?? 0),
-        // asset_group_index: parseInt(selectedCheckList),
-        checklist_index: parseInt(selectedAssetList),
-        plan_planer_info: parseInt(selectedPersons),
+        plan_recheck: isNaN(parseInt(selectedType))
+          ? 0
+          : parseInt(selectedType),
+        plan_recheck_plan_index: isNaN(parseInt(recheckplanIndex))
+          ? 0
+          : parseInt(recheckplanIndex),
+        checklist_index: isNaN(parseInt(selectedAssetList))
+          ? 0
+          : parseInt(selectedAssetList),
+        plan_planer_info: isNaN(parseInt(selectedPersons))
+          ? 0
+          : parseInt(selectedPersons),
         plan_start_date: moment(startDate).format("YYYY-MM-DD h:mm:ss"),
         plan_end_date: moment(endDate).format("YYYY-MM-DD h:mm:ss"),
-        plan_execution_type: parseInt(schedule),
+        plan_execution_type: isNaN(parseInt(schedule)) ? 0 : parseInt(schedule),
         plan_execute_interval_value:
-          plan_execute_interval_value == 0 ? 0 : plan_execute_interval_value,
-        plan_execute_interval_term: schedule == 0 ? "hours" : repeatCycle,
-        fix_date_setup: parseInt(actionSchedule),
+          plan_execute_interval_value === 0 ? 0 : plan_execute_interval_value,
+        plan_execute_interval_term: schedule === 0 ? "hours" : repeatCycle,
+        fix_date_setup: isNaN(parseInt(actionSchedule))
+          ? 0
+          : parseInt(actionSchedule),
         fix_start_date: actionStartDate,
         fix_end_date: actionEndDate,
-        fix_conductor_info: parseInt(conductorInfo),
+        fix_conductor_info: isNaN(parseInt(conductorInfo))
+          ? 0
+          : parseInt(conductorInfo),
         assessment_command: inspectionInformation,
       };
+
+      if (parseInt(selectedType) === 0) {
+        sendData.asset_group_index = isNaN(parseInt(selectedCheckList))
+          ? 0
+          : parseInt(selectedCheckList);
+      }
 
       if (parseInt(selectedType) === 0)
         sendData.asset_group_index = parseInt(selectedCheckList);
@@ -224,6 +241,7 @@
   export let activeMenu = "신규계획등록";
 
   let plan_index = "";
+  let parentIndex = null;
   const toggleAccordion = (index, item) => {
     // Reset all states when a new plan is selected
     isOpen.fill(false); // Close all accordions
@@ -234,6 +252,9 @@
     targetNamePlan = ""; // Reset the target name
     selectedHostname = ""; // Reset the selected hostname
     isSectionOpen = {}; // Clear any previously opened sections
+    if (item.ccp_index_parent != 0) {
+      parentIndex = item.ccp_index_parent;
+    }
   };
 
   let isSectionOpen = {}; // To manage the open/close state of the sections
@@ -286,9 +307,9 @@
             {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
-                  on:click={() => {
+                  on:click="{() => {
                     toggleAccordion(index, item);
-                  }}
+                  }}"
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
                   {item.ccp_title}
@@ -304,47 +325,13 @@
                       class="accordion-content {isOpen[index] ? 'open' : ''}"
                       style="max-height: {isOpen[index] ? '100%' : '0px'}"
                     >
-                      {#if item.asset && typeof item.asset === "object"}
-                        {#each Object.entries(item.asset) as [targetName, targetData]}
-                          <p
-                            on:click={() => {
-                              toggleSection(index, targetName);
-                            }}
-                            class={isSectionOpen[index]?.[targetName]
-                              ? "active"
-                              : ""}
-                          >
-                            {targetName}
-                          </p>
-                          <!-- This will display UNIX, NETWORK, etc. -->
-
-                          {#if targetData && targetData.length > 0}
-                            <ul
-                              class="sublist {isSectionOpen[index]?.[targetName]
-                                ? 'open'
-                                : ''}"
-                              style="max-height: {isSectionOpen[index]?.[
-                                targetName
-                              ]
-                                ? '100%'
-                                : '0px'}"
-                            >
-                              {#each targetData as subItem}
-                                <li
-                                  on:click={() => {
-                                    activeMenu = subItem;
-                                    handleClickHostname(subItem); // Set selected hostname
-                                  }}
-                                >
-                                  <strong>{subItem.hostname}</strong>
-                                  <!-- Display the hostname -->
-                                </li>
-                              {/each}
-                            </ul>
-                          {/if}
-                        {/each}
+                      {#if item.ccp_index_parent != 0 && item.ccp_index_parent === parentIndex}
+                        <p>
+                          {item.ccp_title}
+                        </p>
+                        <!-- This will display UNIX, NETWORK, etc. -->
                       {:else}
-                        <li>No assets available</li>
+                        <li>No subPlan</li>
                         <!-- In case there are no assets -->
                       {/if}
                     </div>
@@ -358,7 +345,7 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button on:click={deletePlan}>삭제</button>
+          <button on:click="{deletePlan}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -367,7 +354,7 @@
 
   <section class="section2">
     {#if currentPage}
-      <svelte:component this={currentPage} />
+      <svelte:component this="{currentPage}" />
     {:else}
       <div class="formContainer_main">
         <div class="formContainer">
@@ -377,7 +364,7 @@
               style="font-size: 14px;"
               type="text"
               placeholder="점검플랜명"
-              bind:value={projectName}
+              bind:value="{projectName}"
             />
           </div>
 
@@ -388,7 +375,7 @@
                 <input
                   type="datetime-local"
                   placeholder="시작일시"
-                  bind:value={startDate}
+                  bind:value="{startDate}"
                 />
               </div>
               <img src="./assets/images/dash.svg" />
@@ -396,13 +383,13 @@
                 <input
                   type="datetime-local"
                   placeholder="종료일시"
-                  on:change={(e) => {
+                  on:change="{(e) => {
                     if (new Date(e.target.value) < new Date(startDate)) {
-                      errorAlert("종료 일자가 시작 일자보다 빠릅니다");
-                      endDate = "";
+                      errorAlert('종료 일자가 시작 일자보다 빠릅니다');
+                      endDate = '';
                     }
-                  }}
-                  bind:value={endDate}
+                  }}"
+                  bind:value="{endDate}"
                 />
               </div>
               <div class="riskLevelItem">
@@ -423,10 +410,10 @@
             <input type="text" />
             <button
               class="buttons1"
-              on:click={() => {
+              on:click="{() => {
                 showModal = true;
                 modalData = resultStatus;
-              }}>검색</button
+              }}">검색</button
             >
           </div>
 
@@ -437,7 +424,7 @@
                 <label
                   ><input
                     type="radio"
-                    bind:group={formData.domain}
+                    bind:group="{formData.domain}"
                     value="전체"
                   /> 전체</label
                 >
@@ -446,7 +433,7 @@
                 <label
                   ><input
                     type="radio"
-                    bind:group={formData.domain}
+                    bind:group="{formData.domain}"
                     value="선택"
                   /> 선택</label
                 >
@@ -460,11 +447,11 @@
 
           <div class="inputRow box_1">
             <label>점검항목</label>
-            <select bind:value={selectedAssetList} style="font-size: 14px;">
+            <select bind:value="{selectedAssetList}" style="font-size: 14px;">
               <option value="" selected disabled>점검항목 목록</option>
               {#if planOptions.checklist_group}
                 {#each planOptions.checklist_group as item}
-                  <option value={item.ccg_index}>{item.ccg_group}</option>
+                  <option value="{item.ccg_index}">{item.ccg_group}</option>
                 {/each}
               {/if}
             </select>
@@ -472,7 +459,7 @@
 
           <div class="inputRow">
             <label>점검계획내용</label>
-            <textarea type="text" />
+            <textarea type="text"></textarea>
           </div>
 
           <div class="inputRow">
@@ -485,10 +472,10 @@
             <input type="text" />
             <button
               class="buttons1"
-              on:click={() => {
+              on:click="{() => {
                 showErrorModal = true;
                 resultErrors = resultStatus;
-              }}>검색</button
+              }}">검색</button
             >
           </div>
 
@@ -497,7 +484,7 @@
             <div class="riskLevels">
               <div class="riskLevelItem page1_slect3">
                 <p>수행조건</p>
-                <select bind:value={assetInsertData.reserved}>
+                <select bind:value="{assetInsertData.reserved}">
                   <option value="0">즉시</option>
                   <option value="1">예약</option>
                 </select>
@@ -518,9 +505,9 @@
                     type="number"
                     placeholder="반복주기지정(반복설정"
                     class="w90"
-                    bind:value={plan_execute_interval_value}
+                    bind:value="{plan_execute_interval_value}"
                   />
-                  <select bind:value={repeatCycle}>
+                  <select bind:value="{repeatCycle}">
                     <option value="hours">시</option>
                     <option value="days">일</option>
                     <option value="weeks">주</option>
@@ -531,7 +518,7 @@
 
                 <div class="riskLevelItem">
                   <span>반복횟수</span>
-                  <select bind:value={formData.repeatPeriod}>
+                  <select bind:value="{formData.repeatPeriod}">
                     <option>분</option>
                     <option>시간</option>
                     <option>일</option>
@@ -550,7 +537,7 @@
                   <input
                     type="datetime-local"
                     style="margin-left: 12px;"
-                    bind:value={formData.startDate}
+                    bind:value="{formData.startDate}"
                   />
                 </div>
 
@@ -559,7 +546,7 @@
                   <input
                     type="datetime-local"
                     style="margin-left: 12px;"
-                    bind:value={formData.endDate}
+                    bind:value="{formData.endDate}"
                   />
                 </div>
               </div>
@@ -581,8 +568,8 @@
                   class="file-input"
                   id="file-upload"
                   accept=".xls,.xlsx"
-                  bind:this={inputFile}
-                  on:change={(event) => handleFileUpload(event, "excel")}
+                  bind:this="{inputFile}"
+                  on:change="{(event) => handleFileUpload(event, 'excel')}"
                 />
                 <img src="./assets/images/download.svg" class="excel-img" />
                 <span>파일업로드</span>
@@ -590,7 +577,7 @@
               <input
                 type="text"
                 placeholder="선택된 파일 없음"
-                value={fileName}
+                value="{fileName}"
                 readonly
                 class="file-name-input"
               />
@@ -600,7 +587,7 @@
           <div class="inputRow_btn">
             <label></label>
             <div class="buttons2">
-              <button class="btn-primary" on:click={submitNewPlan}
+              <button class="btn-primary" on:click="{submitNewPlan}"
                 >임시저장</button
               >
               <button class="btn-secondary">등록</button>
@@ -613,16 +600,16 @@
 </main>
 
 {#if showModal}
-  <ModalDynamic bind:showModal modalWidth={60} modalHeight={700}>
+  <ModalDynamic bind:showModal modalWidth="{60}" modalHeight="{700}">
     <InspectionTargetAssignment {units} {systems} {ipRanges} bind:modalData />
   </ModalDynamic>
 {/if}
 
 {#if showErrorModal}
   <ModalDynamic
-    bind:showModal={showErrorModal}
-    modalWidth={40}
-    modalHeight={600}
+    bind:showModal="{showErrorModal}"
+    modalWidth="{40}"
+    modalHeight="{600}"
   >
     <TargetAssignment {units} {systems} {ipRanges} bind:resultErrors />
   </ModalDynamic>

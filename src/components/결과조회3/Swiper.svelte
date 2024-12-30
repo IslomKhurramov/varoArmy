@@ -22,8 +22,30 @@
   let change_option = "ONE";
   let insertData = {};
 
-  if (selectedData) {
-    insertData.change_status_text = selectedData.ccr_item_status || "";
+  $: {
+    if (selectedData) {
+      insertData.change_status_text = selectedData.ccr_item_status || "";
+    }
+  }
+  let localChangeStatusText = "";
+
+  // Whenever `selectedData` changes, update the local text field
+  $: {
+    if (selectedData) {
+      insertData.change_status_text = selectedData.ccr_item_status || "";
+      localChangeStatusText = insertData.change_status_text; // sync with insertData
+    }
+  }
+  // Function to handle changes in the textarea
+  function handleTextareaChange(event) {
+    localChangeStatusText = event.target.value;
+  }
+
+  // Save the changes to insertData when needed (e.g., on form submission)
+  function saveChanges() {
+    insertData.change_status_text = localChangeStatusText;
+    console.log("Saved changes:", insertData);
+    // Here, you can trigger an API call or whatever other logic is needed
   }
 
   async function updateSelectedData(data) {
@@ -207,7 +229,7 @@
 
 <div class="contentArea">
   <section
-    bind:this={swiperContainer}
+    bind:this="{swiperContainer}"
     style="position: sticky;  z-index:99; background-color:white;"
     class="topCon swiper-container"
   >
@@ -218,7 +240,7 @@
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click={() => handleScroll("prev")}
+        on:click="{() => handleScroll('prev')}"
       >
         ◀
       </button>
@@ -231,20 +253,20 @@
           class="menu-wrapper"
           id="menuWrapper"
           style="background-color: white; z-index:99;"
-          bind:this={menuWrapper}
+          bind:this="{menuWrapper}"
         >
           {#if $viewPlanResult.length > 0}
             {#each $viewPlanResult as slide}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div
-                value={slide.ccr_item_no__ccc_item_no}
-                name={slide}
+                value="{slide.ccr_item_no__ccc_item_no}"
+                name="{slide}"
                 class="menu-item {activeAsset &&
                 activeAsset.ccr_item_no__ccc_item_no ===
                   slide.ccr_item_no__ccc_item_no
                   ? 'active'
                   : ''}"
-                on:click={() => handleSlideclick(slide)}
+                on:click="{() => handleSlideclick(slide)}"
               >
                 {slide.ccr_item_no__ccc_item_no}
               </div>
@@ -258,7 +280,7 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click={() => handleScroll("next")}
+        on:click="{() => handleScroll('next')}"
       >
         ▶
       </button>
@@ -333,35 +355,35 @@
       <div style="display: flex; gap:10px; flex-direction:row; width:91%">
         <select
           style="font-size: 16px;"
-          value={selectedData?.ccr_item_result}
-          on:change={(e) => (insertData.change_result = e.target.value)}
+          value="{selectedData?.ccr_item_result}"
+          on:change="{(e) => (insertData.change_result = e.target.value)}"
         >
           <option value="" disabled style="font-size: 16px;"> </option>
           <option
             style="font-size: 16px;"
             value="양호"
-            selected={selectedData?.ccr_item_result === "양호"}
+            selected="{selectedData?.ccr_item_result === '양호'}"
           >
             양호
           </option>
           <option
             style="font-size: 16px;"
             value="취약"
-            selected={selectedData?.ccr_item_result === "취약"}
+            selected="{selectedData?.ccr_item_result === '취약'}"
           >
             취약
           </option>
           <option
             style="font-size: 16px;"
             value="수동점검"
-            selected={selectedData?.ccr_item_result === "수동점검"}
+            selected="{selectedData?.ccr_item_result === '수동점검'}"
           >
             수동점검
           </option>
           <option
             style="font-size: 16px;"
             value="예외처리"
-            selected={selectedData?.ccr_item_result === "예외처리"}
+            selected="{selectedData?.ccr_item_result === '예외처리'}"
           >
             예외처리
           </option>
@@ -369,14 +391,15 @@
           <option
             style="font-size: 16px;"
             value="해당없음"
-            selected={selectedData?.ccr_item_result === "해당없음"}
+            selected="{selectedData?.ccr_item_result === '해당없음'}"
           >
             해당없음
           </option>
         </select>
 
         <!-- Button to open modal (if necessary for editing additional details) -->
-        <button class="btnSave" on:click={() => (showModal = true)}>edit</button
+        <button class="btnSave" on:click="{() => (showModal = true)}"
+          >edit</button
         >
         <input type="text" placeholder="Optional input" />
       </div>
@@ -394,22 +417,19 @@
     <div class="inputRow" style="height: 170px;">
       <label style="width: 133px;">점검현황</label>
 
-      <textarea
-        class="line-height"
-        name=""
-        id=""
-        rows="5"
-        cols="50"
-        style="width: 100%; font-size:14px;"
-        bind:value={insertData["change_status_text"]}
-      ></textarea>
+      <input
+        style="width: 100%; padding:17px;"
+        type="text"
+        bind:value="{selectedData.ccr_item_status}"
+      />
     </div>
 
     <div class="inputRow">
       <label>증적파일 </label>
       <input
         type="file"
-        on:change={(e) => (insertData.change_evidence_file = e.target.files[0])}
+        on:change="{(e) =>
+          (insertData.change_evidence_file = e.target.files[0])}"
       />
     </div>
     <div class="inputRow">
@@ -430,8 +450,8 @@
     <div class="lastButtons">
       <button
         class="btnSave"
-        disabled={Object.keys(insertData).length === 0}
-        on:click={() => {
+        disabled="{Object.keys(insertData).length === 0}"
+        on:click="{() => {
           updateSelectedData({
             plan_index: plan_index,
             result_index: selectedData?.ccr_index,
@@ -442,8 +462,8 @@
             change_status_text: insertData?.change_status_text,
             change_evidence_file: insertData?.change_evidence_file,
           });
-          change_option = "ONE";
-        }}>저장</button
+          change_option = 'ONE';
+        }}">저장</button
       >
       <button class="btnUpload">취약점이력추적</button>
       <button class="btnUpload">변경내역이력조회</button>
@@ -454,12 +474,16 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     class="modal-open-wrap"
-    on:click={() => (showModal = false)}
-    on:keydown={handleKeyDown}
+    on:click="{() => (showModal = false)}"
+    on:keydown="{handleKeyDown}"
     tabindex="0"
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
+    <dialog
+      open
+      on:close="{() => (showModal = false)}"
+      on:click|stopPropagation
+    >
       <ModalPopEdit
         {plan_index}
         {insertData}

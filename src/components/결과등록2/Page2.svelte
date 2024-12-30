@@ -280,6 +280,7 @@
     selectedHostnameData = data;
     currentPage = null;
   }
+  $: console.log("Uploaded status", uploadStatus);
 </script>
 
 <main class="table-container">
@@ -295,10 +296,10 @@
             {#each $allPlanList as item, index}
               <div class="accordion-item">
                 <button
-                  on:click={() => {
+                  on:click="{() => {
                     toggleAccordion(index, item);
                     // Direct function call in Svelte
-                  }}
+                  }}"
                   class="accordion-header {isOpen[index] ? 'active' : ''}"
                 >
                   {item.ccp_title}
@@ -317,12 +318,12 @@
                       {#if item.asset && typeof item.asset === "object"}
                         {#each Object.entries(item.asset) as [targetName, targetData]}
                           <p
-                            on:click={() => {
+                            on:click="{() => {
                               toggleSection(index, targetName);
-                            }}
-                            class={isSectionOpen[index]?.[targetName]
-                              ? "active"
-                              : ""}
+                            }}"
+                            class="{isSectionOpen[index]?.[targetName]
+                              ? 'active'
+                              : ''}"
                           >
                             {targetName}
                           </p>
@@ -341,10 +342,10 @@
                             >
                               {#each targetData as subItem}
                                 <li
-                                  on:click={() => {
+                                  on:click="{() => {
                                     activeMenu = subItem;
                                     handleClickHostname(subItem); // Set selected hostname
-                                  }}
+                                  }}"
                                 >
                                   <strong>{subItem.hostname}</strong>
                                   <!-- Display the hostname -->
@@ -367,8 +368,8 @@
 
         <!-- Buttons -->
         <div class="buttons">
-          <button on:click={() => (isAddingNewGroup = true)}>복사</button>
-          <button on:click={deleteGroup}>삭제</button>
+          <button on:click="{() => (isAddingNewGroup = true)}">복사</button>
+          <button on:click="{deleteGroup}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
@@ -381,11 +382,11 @@
         <div class="formControlWrap">
           <div class="formControl">
             <label style="font-size: 14px;">점검항목</label>
-            <select bind:value={selectedPlan}>
+            <select bind:value="{selectedPlan}">
               <option value="" selected disabled>선택</option>
               {#if planList}
                 {#each planList as plan}
-                  <option value={plan.ccp_index}>{plan.ccp_title}</option>
+                  <option value="{plan.ccp_index}">{plan.ccp_title}</option>
                 {/each}
               {/if}
             </select>
@@ -427,11 +428,9 @@
                 <col style="width:14%;" />
                 <col style="width:14%;" />
                 <col style="width:14%;" />
-                <col style="width:14%;" />
               </colgroup>
               <thead>
                 <tr>
-                  <th>등록대상</th>
                   <th>UNIX</th>
                   <th>WINDOWS</th>
                   <th>NETWORK</th>
@@ -443,23 +442,81 @@
               </thead>
               <tbody>
                 {#if Array.isArray(uploadStatus?.uploaded_status) && uploadStatus?.uploaded_status.length > 0}
-                  {#each uploadStatus.uploaded_status as row, index}
-                    <tr>
-                      <td>{row.hostname || "N/A"}</td>
-                      <td>{row.ipaddr || "N/A"}</td>
-                      <td>{row.target || "N/A"}</td>
-                      <td>{row.checklist_count || 0}</td>
-                      <td>{row.checklist_count || 0}</td>
-                      <td>{row.checklist_count || 0}</td>
-                      <td>{row.checklist_count || 0}</td>
-                      <td>{row.uploaded_result_count || 0}</td>
-                    </tr>
-                  {/each}
+                  <tr>
+                    <!-- UNIX -->
+                    <td>
+                      {uploadStatus.uploaded_status
+                        .filter((row) => row.target === "UNIX")
+                        .reduce(
+                          (sum, row) => sum + (row.uploaded_result_count || 0),
+                          0
+                        )}
+                    </td>
+
+                    <!-- WINDOWS -->
+                    <td>
+                      {uploadStatus.uploaded_status
+                        .filter((row) => row.target === "WINDOWS")
+                        .reduce(
+                          (sum, row) => sum + (row.uploaded_result_count || 0),
+                          0
+                        )}
+                    </td>
+
+                    <!-- NETWORK -->
+                    <td>
+                      {uploadStatus.uploaded_status
+                        .filter((row) => row.target === "NETWORK")
+                        .reduce(
+                          (sum, row) => sum + (row.uploaded_result_count || 0),
+                          0
+                        )}
+                    </td>
+
+                    <!-- DBMS -->
+                    <td>
+                      {uploadStatus.uploaded_status
+                        .filter((row) => row.target === "DBMS")
+                        .reduce(
+                          (sum, row) => sum + (row.uploaded_result_count || 0),
+                          0
+                        )}
+                    </td>
+
+                    <!-- PC -->
+                    <td>
+                      {uploadStatus.uploaded_status
+                        .filter((row) => row.target === "PC")
+                        .reduce(
+                          (sum, row) => sum + (row.uploaded_result_count || 0),
+                          0
+                        )}
+                    </td>
+
+                    <!-- 등록오류 -->
+                    <td>
+                      {uploadStatus.uploaded_status.reduce(
+                        (sum, row) =>
+                          sum +
+                          (row.checklist_count - row.uploaded_result_count ||
+                            0),
+                        0
+                      )}
+                    </td>
+
+                    <!-- 합계 -->
+                    <td>
+                      {uploadStatus.uploaded_status.reduce(
+                        (sum, row) => sum + (row.uploaded_result_count || 0),
+                        0
+                      )}
+                    </td>
+                  </tr>
                 {:else}
                   <tr>
-                    <td class="data_no_color" colspan="8"
-                      >데이터가 없음! 프로젝트명을 먼저 선택함</td
-                    >
+                    <td class="data_no_color" colspan="7">
+                      데이터가 없음! 프로젝트명을 먼저 선택함
+                    </td>
                   </tr>
                 {/if}
               </tbody>
@@ -468,23 +525,23 @@
           <div class="buttons1">
             <button
               type="button"
-              class={`btn ${resultStatus?.assets_info?.length > 0 ? "btn-primary" : ""}`}
-              disabled={!resultStatus?.assets_info?.length > 0}
-              on:click={() => {
+              class="{`btn ${resultStatus?.assets_info?.length > 0 ? 'btn-primary' : ''}`}"
+              disabled="{!resultStatus?.assets_info?.length > 0}"
+              on:click="{() => {
                 showModal = true;
                 modalData = resultStatus?.assets_info;
                 getResultStatus();
-              }}
+              }}"
               >결과미등록자산 ({resultStatus?.assets_info?.length || ""})
             </button>
             <button
               type="button"
-              class={`btn ${resultErrors?.length > 0 ? "btn-secondary" : ""}`}
-              disabled={!resultErrors?.length > 0}
-              on:click={() => {
+              class="{`btn ${resultErrors?.length > 0 ? 'btn-secondary' : ''}`}"
+              disabled="{!resultErrors?.length > 0}"
+              on:click="{() => {
                 showErrorModal = true;
                 modalErrorData = resultErrors;
-              }}>등록실패내역 ({resultErrors?.length || ""})</button
+              }}">등록실패내역 ({resultErrors?.length || ""})</button
             >
           </div>
         </div>
@@ -503,7 +560,7 @@
                 type="text"
                 class="file-name-input"
                 placeholder="멀티파일등록가능"
-                value={fileNames}
+                value="{fileNames}"
                 readonly
               />
             </div>
@@ -515,9 +572,9 @@
                 class="file-input"
                 multiple
                 accept=".json"
-                bind:this={jsonInput}
-                disabled={!selectedPlan}
-                on:change={(event) => handleFileSelect(event, "json")}
+                bind:this="{jsonInput}"
+                disabled="{!selectedPlan}"
+                on:change="{(event) => handleFileSelect(event, 'json')}"
               />
             </label>
           </div>
@@ -529,7 +586,7 @@
                 type="text"
                 class="file-name-input"
                 placeholder="멀티파일등록가능"
-                value={fileNames2}
+                value="{fileNames2}"
                 readonly
               />
             </div>
@@ -541,9 +598,9 @@
                 class="file-input"
                 multiple
                 accept=".txt"
-                bind:this={txtInput}
-                disabled={!selectedPlan}
-                on:change={(event) => handleFileSelect(event, "txt")}
+                bind:this="{txtInput}"
+                disabled="{!selectedPlan}"
+                on:change="{(event) => handleFileSelect(event, 'txt')}"
               />
             </label>
           </div>
@@ -555,7 +612,7 @@
                 type="text"
                 class="file-name-input"
                 placeholder=".EXCEL 파일만 허용"
-                value={fileNames3}
+                value="{fileNames3}"
                 readonly
               />
             </div>
@@ -567,9 +624,9 @@
                 class="file-input"
                 multiple
                 accept=".xls,.xlsx"
-                bind:this={excelInput}
-                disabled={!selectedPlan}
-                on:change={(event) => handleFileSelect(event, "excel")}
+                bind:this="{excelInput}"
+                disabled="{!selectedPlan}"
+                on:change="{(event) => handleFileSelect(event, 'excel')}"
               />
             </label>
           </div>
@@ -577,8 +634,8 @@
 
         <div
           class="upload-submit"
-          on:click={submitNewSystemCommand}
-          disabled={!selectedPlan || !allFiles.length}
+          on:click="{submitNewSystemCommand}"
+          disabled="{!selectedPlan || !allFiles.length}"
         >
           <button class="btn btn-upload">업로드</button>
         </div>
@@ -589,10 +646,10 @@
 
 {#if uploadStatusModalData && uploadStatusModalData?.length !== 0}
   <ModalDynamic
-    bind:showModal={uploadStatusModalData}
-    modalWidth={80}
-    modalHeight={500}
-    bind:modalData={uploadStatusModalData}
+    bind:showModal="{uploadStatusModalData}"
+    modalWidth="{80}"
+    modalHeight="{500}"
+    bind:modalData="{uploadStatusModalData}"
   >
     <ResultUploadStatusPopup bind:uploadStatusModalData />
   </ModalDynamic>
@@ -600,11 +657,11 @@
 
 {#if modalErrorData && modalErrorData?.length !== 0}
   <ModalDynamic
-    bind:showModal={showErrorModal}
-    modalWidth={80}
-    modalHeight={500}
-    bind:modalData={modalErrorData}
-    showExecuteAllButton={true}
+    bind:showModal="{showErrorModal}"
+    modalWidth="{80}"
+    modalHeight="{500}"
+    bind:modalData="{modalErrorData}"
+    showExecuteAllButton="{true}"
   >
     <ResultErrorPopup bind:modalErrorData />
   </ModalDynamic>

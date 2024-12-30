@@ -21,6 +21,7 @@
   export let getPlanList;
   export let loading = true;
   let targetNamePlan = "";
+  let parentIndex = null;
   // Function to toggle the section (asset category, like UNIX or NETWORK)
   function toggleSection(itemKey, sectionKey) {
     if (!isSectionOpen[itemKey]) {
@@ -56,6 +57,12 @@
     selectedHostname = ""; // Reset the selected hostname
     isSectionOpen = {}; // Clear any previously opened sections
     viewPlanResultFunction(); // Fetch data for the selected plan
+    if (item.ccp_index_parent != 0) {
+      parentIndex = item.ccp_index_parent;
+    } else {
+      parentIndex = null;
+    }
+    console.log("parentIndex", parentIndex);
   };
 
   let selectedData = null;
@@ -279,20 +286,20 @@
                 <img
                   src="assets/images/back.png"
                   alt="back"
-                  on:click={closeSwiper}
+                  on:click="{closeSwiper}"
                 />
               {/if}
             </div>
 
             <!-- Accordion -->
-            <div class="accordion">
+            <div class="accordion" style="height: 41vh;">
               {#each $allPlanList as item, index}
                 <div class="accordion-item">
                   <button
-                    on:click={() => {
+                    on:click="{() => {
                       toggleAccordion(index, item);
                       getPlanDetail(item); // Direct function call in Svelte
-                    }}
+                    }}"
                     class="accordion-header {isOpen[index] ? 'active' : ''}"
                   >
                     {item.ccp_title}
@@ -311,12 +318,12 @@
                         {#if item.asset && typeof item.asset === "object"}
                           {#each Object.entries(item.asset) as [targetName, targetData]}
                             <p
-                              on:click={() => {
+                              on:click="{() => {
                                 toggleSection(index, targetName);
-                              }}
-                              class={isSectionOpen[index]?.[targetName]
-                                ? "active"
-                                : ""}
+                              }}"
+                              class="{isSectionOpen[index]?.[targetName]
+                                ? 'active'
+                                : ''}"
                             >
                               {targetName}
                             </p>
@@ -337,10 +344,10 @@
                               >
                                 {#each targetData as subItem}
                                   <li
-                                    on:click={() => {
+                                    on:click="{() => {
                                       activeMenu = subItem;
                                       handleClickHostname(subItem); // Set selected hostname
-                                    }}
+                                    }}"
                                   >
                                     <strong>{subItem.hostname}</strong>
                                     <!-- Display the hostname -->
@@ -359,12 +366,26 @@
                 </div>
               {/each}
             </div>
+
+            <div class="menuHeader">subPlan</div>
+            <div class="accordion" style="height: 25vh;">
+              {#each $allPlanList as item, index}
+                {#if item.ccp_index_parent != 0 && parentIndex === item.ccp_index_parent}
+                  <div class="accordion-item">
+                    <button class="accordion-header">
+                      {item.ccp_title}
+                      <!-- ccp_title will be displayed here -->
+                    </button>
+                  </div>
+                {/if}
+              {/each}
+            </div>
           </div>
 
           <!-- Buttons -->
           <div class="buttons">
             <button>복사</button>
-            <button on:click={deletePlan}>삭제</button>
+            <button on:click="{deletePlan}">삭제</button>
             <button>EXCEL</button>
           </div>
         </div>
@@ -373,7 +394,7 @@
     <section class="section2">
       {#if currentPage}
         <svelte:component
-          this={currentPage}
+          this="{currentPage}"
           {selectedData}
           {selectedHostnameData}
           {plan_index}
@@ -383,13 +404,19 @@
         <article class="contentArea">
           <section class="filterWrap">
             <div>
-              <select bind:value={planIndex} on:change={viewPlanResultFunction}>
+              <select
+                bind:value="{planIndex}"
+                on:change="{viewPlanResultFunction}"
+              >
                 <option value="" selected disabled>프로젝트</option>
                 {#each $allPlanList as plan}
-                  <option value={plan.ccp_index}>{plan.ccp_title}</option>
+                  <option value="{plan.ccp_index}">{plan.ccp_title}</option>
                 {/each}
               </select>
-              <select bind:value={target} on:change={viewPlanResultFunction}>
+              <select
+                bind:value="{target}"
+                on:change="{viewPlanResultFunction}"
+              >
                 <option value="" selected>점검대상</option>
                 <option value="UNIX">UNIX</option>
                 <option value="WINDOWS">WINDOWS</option>
@@ -402,13 +429,16 @@
                 <option value="SECURITY">SECURITY</option>
               </select>
 
-              <select bind:value={hostName} on:change={viewPlanResultFunction}>
+              <select
+                bind:value="{hostName}"
+                on:change="{viewPlanResultFunction}"
+              >
                 <option value="" selected>호스트</option>
                 {#each $allPlanList as item, index}
                   {#if item.asset && typeof item.asset === "object"}
                     {#each Object.entries(item.asset) as [targetName, targetData]}
                       {#each targetData as subItem}
-                        <option value={subItem.hostname}
+                        <option value="{subItem.hostname}"
                           >{subItem.hostname}</option
                         >
                       {/each}
@@ -417,8 +447,8 @@
                 {/each}
               </select>
               <select
-                bind:value={check_result}
-                on:change={viewPlanResultFunction}
+                bind:value="{check_result}"
+                on:change="{viewPlanResultFunction}"
               >
                 <option value="" selected>점검항목</option>
                 <option value="양호">양호</option>
@@ -428,7 +458,7 @@
               </select>
 
               <button
-                on:click={resetSearch}
+                on:click="{resetSearch}"
                 class="btn btnSearch"
                 style="width: 98px; font-size: 14px;"
                 ><img
@@ -461,7 +491,7 @@
               <tbody>
                 {#if paginatedData.length > 0}
                   {#each paginatedData as data, index}
-                    <tr on:click={() => selectPage(data)}>
+                    <tr on:click="{() => selectPage(data)}">
                       <!-- 번호: Reverse index to display latest first -->
                       <td class="text-center"
                         >{$viewPlanResult.length - (startIndex + index)}</td
@@ -497,13 +527,13 @@
                           <select
                             style="width: 100px;"
                             class="xs"
-                            on:click|stopPropagation={() =>
-                              handleUpdateClick(data)}
+                            on:click|stopPropagation="{() =>
+                              handleUpdateClick(data)}"
                           >
                             {#each validOptions as option}
                               <option
-                                value={option}
-                                selected={data.ccr_item_result === option}
+                                value="{option}"
+                                selected="{data.ccr_item_result === option}"
                               >
                                 {option}
                               </option>
@@ -514,17 +544,18 @@
                             style="width: 100px;"
                             class="xs"
                             on:click|stopPropagation
-                            on:change={(e) => {
+                            on:change="{(e) => {
                               e.stopPropagation(); // Stop the event from bubbling up
                               change_option = e.target.value; // Set the selected value to change_option
-                            }}
+                            }}"
                           >
                             <option value="ALL">천제</option>
                             <option value="ONE">해당</option>
                           </select>
                           <button
                             class="btnSave"
-                            on:click|stopPropagation={resultUpdate}>저장</button
+                            on:click|stopPropagation="{resultUpdate}"
+                            >저장</button
                           >
                           <button class="btnUpload">관련시스템보기</button>
                         </div>
@@ -543,16 +574,16 @@
               <div class="pagination">
                 <!-- First Page Button -->
                 <button
-                  on:click={() => goToPage(1)}
-                  disabled={currentPagePagination === 1}
+                  on:click="{() => goToPage(1)}"
+                  disabled="{currentPagePagination === 1}"
                 >
                   {"<<"}
                 </button>
 
                 <!-- Previous Page Button -->
                 <button
-                  on:click={() => goToPage(currentPagePagination - 1)}
-                  disabled={currentPagePagination === 1}
+                  on:click="{() => goToPage(currentPagePagination - 1)}"
+                  disabled="{currentPagePagination === 1}"
                 >
                   {"<"}
                 </button>
@@ -560,9 +591,9 @@
                 <!-- Visible Page Buttons -->
                 {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, index}
                   <button
-                    class:selected={currentPagePagination ===
-                      paginationStart + index}
-                    on:click={() => goToPage(paginationStart + index)}
+                    class:selected="{currentPagePagination ===
+                      paginationStart + index}"
+                    on:click="{() => goToPage(paginationStart + index)}"
                   >
                     {paginationStart + index}
                   </button>
@@ -570,16 +601,16 @@
 
                 <!-- Next Page Button -->
                 <button
-                  on:click={() => goToPage(currentPagePagination + 1)}
-                  disabled={currentPagePagination === totalPages}
+                  on:click="{() => goToPage(currentPagePagination + 1)}"
+                  disabled="{currentPagePagination === totalPages}"
                 >
                   {">"}
                 </button>
 
                 <!-- Last Page Button -->
                 <button
-                  on:click={() => goToPage(totalPages)}
-                  disabled={currentPagePagination === totalPages}
+                  on:click="{() => goToPage(totalPages)}"
+                  disabled="{currentPagePagination === totalPages}"
                 >
                   {">>"}
                 </button>
@@ -596,14 +627,14 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     class="modal-open-wrap"
-    on:click={() => (closeShowModalDetail = false)}
-    on:keydown={handleKeyDown}
+    on:click="{() => (closeShowModalDetail = false)}"
+    on:keydown="{handleKeyDown}"
     tabindex="0"
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <dialog
       open
-      on:close={() => (closeShowModalDetail = false)}
+      on:close="{() => (closeShowModalDetail = false)}"
       on:click|stopPropagation
     >
       <ModalPopDetail {closeShowModal} {selectedData} />
