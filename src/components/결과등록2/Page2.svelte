@@ -66,6 +66,7 @@
       } catch (error) {}
     })();
   }
+  $: console.log("uploadStatus", uploadStatus);
 
   const submitNewSystemCommand = async () => {
     try {
@@ -281,6 +282,19 @@
     currentPage = null;
   }
   $: console.log("Uploaded status", uploadStatus);
+  $: nonAgentTotalCount =
+    uploadStatus?.non_agent_target?.reduce(
+      (sum, target) => sum + target.count,
+      0
+    ) || 0;
+  $: AgentTotalCount =
+    uploadStatus?.agent_target?.reduce(
+      (sum, target) => sum + target.count,
+      0
+    ) || 0;
+  $: unregisteredAssetsCount =
+    uploadStatus?.total_count[0]?.ast_count -
+      (nonAgentTotalCount + AgentTotalCount) || 0;
 </script>
 
 <main class="table-container">
@@ -419,8 +433,32 @@
         <div class="tableListWrap">
           <p>등록현황</p>
           <div class="table_scroll_bar">
+            <table class="tableList hdBorder" style="width: 170px;">
+              <colgroup>
+                <col style="width:14%;" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>등록대상</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>
+                    {#if uploadStatus}
+                      <div class="first_col">
+                        <p>에이전트({AgentTotalCount})</p>
+                        <p>비에이전트({nonAgentTotalCount})</p>
+                        <p>미등록자산</p>
+                      </div>
+                    {/if}
+                  </th>
+                </tr>
+              </tbody>
+            </table>
             <table class="tableList hdBorder">
               <colgroup>
+                <col style="width:14%;" />
                 <col style="width:14%;" />
                 <col style="width:14%;" />
                 <col style="width:14%;" />
@@ -436,89 +474,111 @@
                   <th>NETWORK</th>
                   <th>DBMS</th>
                   <th>PC</th>
+                  <th>SECURITY</th>
                   <th>등록오류</th>
                   <th>합계</th>
                 </tr>
               </thead>
               <tbody>
-                {#if Array.isArray(uploadStatus?.uploaded_status) && uploadStatus?.uploaded_status.length > 0}
-                  <tr>
-                    <!-- UNIX -->
+                <!-- Row 1: Agent -->
+                <tr>
+                  {#if uploadStatus}
                     <td>
-                      {uploadStatus.uploaded_status
-                        .filter((row) => row.target === "UNIX")
-                        .reduce(
-                          (sum, row) => sum + (row.uploaded_result_count || 0),
-                          0
-                        )}
+                      {uploadStatus.agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "UNIX"
+                      )?.count || "-"}
                     </td>
+                    <td>
+                      {uploadStatus.agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "WINDOWS"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "NETWORK"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "DBMS"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "PC"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "SECURITY"
+                      )?.count || "-"}
+                    </td>
+                    <td>-</td>
+                    <td>{uploadStatus.total_count[0].ast_count}%</td>
+                  {/if}
+                </tr>
 
-                    <!-- WINDOWS -->
+                <!-- Row 2: Non-Agent -->
+                <tr>
+                  {#if uploadStatus}
                     <td>
-                      {uploadStatus.uploaded_status
-                        .filter((row) => row.target === "WINDOWS")
-                        .reduce(
-                          (sum, row) => sum + (row.uploaded_result_count || 0),
-                          0
-                        )}
+                      {uploadStatus.non_agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "UNIX"
+                      )?.count || "-"}
                     </td>
+                    <td>
+                      {uploadStatus.non_agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "WINDOWS"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.non_agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "NETWORK"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.non_agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "DBMS"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.non_agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "PC"
+                      )?.count || "-"}
+                    </td>
+                    <td>
+                      {uploadStatus.non_agent_target.find(
+                        (target) =>
+                          target.ast_uuid__ast_target__cct_target === "SECURITY"
+                      )?.count || "-"}
+                    </td>
+                    <td>-</td>
+                    <td>{uploadStatus.total_count[0].ast_count}%</td>
+                  {/if}
+                </tr>
 
-                    <!-- NETWORK -->
-                    <td>
-                      {uploadStatus.uploaded_status
-                        .filter((row) => row.target === "NETWORK")
-                        .reduce(
-                          (sum, row) => sum + (row.uploaded_result_count || 0),
-                          0
-                        )}
-                    </td>
-
-                    <!-- DBMS -->
-                    <td>
-                      {uploadStatus.uploaded_status
-                        .filter((row) => row.target === "DBMS")
-                        .reduce(
-                          (sum, row) => sum + (row.uploaded_result_count || 0),
-                          0
-                        )}
-                    </td>
-
-                    <!-- PC -->
-                    <td>
-                      {uploadStatus.uploaded_status
-                        .filter((row) => row.target === "PC")
-                        .reduce(
-                          (sum, row) => sum + (row.uploaded_result_count || 0),
-                          0
-                        )}
-                    </td>
-
-                    <!-- 등록오류 -->
-                    <td>
-                      {uploadStatus.uploaded_status.reduce(
-                        (sum, row) =>
-                          sum +
-                          (row.checklist_count - row.uploaded_result_count ||
-                            0),
-                        0
-                      )}
-                    </td>
-
-                    <!-- 합계 -->
-                    <td>
-                      {uploadStatus.uploaded_status.reduce(
-                        (sum, row) => sum + (row.uploaded_result_count || 0),
-                        0
-                      )}
-                    </td>
-                  </tr>
-                {:else}
-                  <tr>
-                    <td class="data_no_color" colspan="7">
-                      데이터가 없음! 프로젝트명을 먼저 선택함
-                    </td>
-                  </tr>
-                {/if}
+                <!-- Row 3: 미등록자산 -->
+                <tr>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>{unregisteredAssetsCount}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -527,21 +587,13 @@
               type="button"
               class="{`btn ${resultStatus?.assets_info?.length > 0 ? 'btn-primary' : ''}`}"
               disabled="{!resultStatus?.assets_info?.length > 0}"
-              on:click="{() => {
-                showModal = true;
-                modalData = resultStatus?.assets_info;
-                getResultStatus();
-              }}"
               >결과미등록자산 ({resultStatus?.assets_info?.length || ""})
             </button>
             <button
               type="button"
               class="{`btn ${resultErrors?.length > 0 ? 'btn-secondary' : ''}`}"
               disabled="{!resultErrors?.length > 0}"
-              on:click="{() => {
-                showErrorModal = true;
-                modalErrorData = resultErrors;
-              }}">등록실패내역 ({resultErrors?.length || ""})</button
+              >등록실패내역 ({resultErrors?.length || ""})</button
             >
           </div>
         </div>
@@ -668,6 +720,10 @@
 {/if}
 
 <style>
+  .first_col {
+    display: flex;
+    flex-direction: column;
+  }
   .sublist {
     overflow: hidden;
     transition: max-height 0.3s ease-in-out;
@@ -729,6 +785,8 @@
     overflow-y: auto;
     max-height: 20vh;
     margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
   }
 
   .section1 {

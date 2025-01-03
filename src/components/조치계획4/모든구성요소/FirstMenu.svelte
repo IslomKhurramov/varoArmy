@@ -125,7 +125,7 @@
       <tbody>
         {#if paginatedData.length > 0}
           {#each paginatedData as entry, index}
-            <tr on:click={() => selectPage1(SwiperPage4, entry)}>
+            <tr on:click="{() => selectPage1(SwiperPage4, entry)}">
               <td class="text-center">{startIndex + index + 1}</td>
               <!-- Adjust numbering -->
               <td class="text-center">{entry.cct_index__cct_target || "N/A"}</td
@@ -136,9 +136,7 @@
               <td class="text-center"
                 >{entry.ccr_item_no__ccc_item_no || "N/A"}</td
               >
-              <td class="text-center"
-                >{entry.ccr_item_no__ccc_item_title || "N/A"}</td
-              >
+              <td>{entry.ccr_item_no__ccc_item_title || "N/A"}</td>
               <td class="text-center">{entry.ccr_item_result || "N/A"}</td>
               <td class="text-center">
                 {#if entry.ccr_item_result === "취약"}
@@ -162,14 +160,17 @@
   <!-- Pagination -->
   <div class="pagination">
     <!-- First Page Button -->
-    <button on:click={() => goToPage(1)} disabled={currentPagePagination === 1}>
+    <button
+      on:click="{() => goToPage(1)}"
+      disabled="{currentPagePagination === 1}"
+    >
       {"<<"}
     </button>
 
     <!-- Previous Page Button -->
     <button
-      on:click={() => goToPage(currentPagePagination - 1)}
-      disabled={currentPagePagination === 1}
+      on:click="{() => goToPage(currentPagePagination - 1)}"
+      disabled="{currentPagePagination === 1}"
     >
       {"<"}
     </button>
@@ -177,8 +178,8 @@
     <!-- Visible Page Buttons -->
     {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, pageIndex}
       <button
-        class:selected={currentPagePagination === paginationStart + pageIndex}
-        on:click={() => goToPage(paginationStart + pageIndex)}
+        class:selected="{currentPagePagination === paginationStart + pageIndex}"
+        on:click="{() => goToPage(paginationStart + pageIndex)}"
       >
         {paginationStart + pageIndex}
       </button>
@@ -186,16 +187,16 @@
 
     <!-- Next Page Button -->
     <button
-      on:click={() => goToPage(currentPagePagination + 1)}
-      disabled={currentPagePagination === totalPages}
+      on:click="{() => goToPage(currentPagePagination + 1)}"
+      disabled="{currentPagePagination === totalPages}"
     >
       {">"}
     </button>
 
     <!-- Last Page Button -->
     <button
-      on:click={() => goToPage(totalPages)}
-      disabled={currentPagePagination === totalPages}
+      on:click="{() => goToPage(totalPages)}"
+      disabled="{currentPagePagination === totalPages}"
     >
       {">>"}
     </button>
