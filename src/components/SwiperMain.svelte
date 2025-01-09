@@ -261,8 +261,11 @@
           >
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input">
-                  <button>수행조건</button>
+                <span
+                  class="span-input"
+                  style="display: flex; align-items:center;"
+                >
+                  <label>수행조건</label>
                   <select
                     style="width: 45%;"
                     bind:value="{selectedData.plan_execution_type}"
@@ -282,7 +285,9 @@
                 </span>
               </div>
               <div class="riskLevelItem">
-                <button>반복주기</button>
+                <label style="display: flex; align-items:center;"
+                  >반복주기</label
+                >
                 <input
                   style="width: 45%;"
                   type="text"
@@ -303,8 +308,11 @@
             </div>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input">
-                  <button>시작일</button>
+                <span
+                  class="span-input"
+                  style="display: flex; align-items:center;"
+                >
+                  <label>시작일</label>
                   <input
                     bind:value="{selectedData.fix_start_date}"
                     style="width: 93%;"
@@ -314,8 +322,11 @@
                 </span>
               </div>
               <div class="riskLevelItem">
-                <span class="span-input">
-                  <button>종료일</button>
+                <span
+                  style="display: flex; align-items:center;"
+                  class="span-input"
+                >
+                  <label>종료일</label>
                   <input
                     bind:value="{selectedData.fix_end_date}"
                     style="width: 93%;"

@@ -59,7 +59,7 @@
   });
   /**********GETALLPLANLIST******************/
   let page_cnt = "1";
-  let list_cnt = "100";
+  let list_cnt = "1000000";
   async function getPlanList() {
     try {
       console.log("updating planlist");
@@ -526,7 +526,7 @@
   <section class="section2">
     <div class="header_menu">
       <div style="width: 10%; display:flex; justify-content:center">
-        <Link to={"/"}>MainPage</Link>
+        <Link to="{'/'}">MainPage</Link>
       </div>
       <div style="width: 80%; display:flex; justify-content:flex-start">
         <Header />
@@ -536,7 +536,7 @@
       <Route path="/page1">
         <Page1 {getPlanList} /></Route
       >
-      <Route path="/page2" component={Page2} />
+      <Route path="/page2" component="{Page2}" />
       <Route path="/page3">
         <Page3 {getPlanList} {loading} />
       </Route>
@@ -549,10 +549,10 @@
       <Route path="/page6">
         <Page6 {getPlanList} />
       </Route>
-      <Route path="/page7" component={Page7} />
-      <Route path="/page8" component={Page8} />
-      <Route path="/page9" component={Page9} />
-      <Route path="/page10" component={Page10} />
+      <Route path="/page7" component="{Page7}" />
+      <Route path="/page8" component="{Page8}" />
+      <Route path="/page9" component="{Page9}" />
+      <Route path="/page10" component="{Page10}" />
 
       <Route path="/">
         <LeftMenu {getPlanList} />

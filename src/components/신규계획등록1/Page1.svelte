@@ -19,9 +19,13 @@
   } from "../../shared/sweetAlert";
   import SwiperPage1 from "./SwiperPage1.svelte";
   import { allPlanList } from "../../services/store";
-  import { setDeletePlan } from "../../services/callApi";
+  import {
+    getPlanDetailInformation,
+    setDeletePlan,
+  } from "../../services/callApi";
   import axios from "axios";
   import { serverApi } from "../../lib/config";
+  import DetailOfSubPlan from "./DetailOfSubPlan.svelte";
 
   export let getPlanList;
   let formData = {
@@ -116,6 +120,7 @@
   let assetGroupIndex = null;
   let repeatRule = null;
   let repeatRuleType = "1";
+  let plan_index_for_detail = null;
 
   onMount(async () => {
     try {
@@ -150,6 +155,41 @@
     }
   };
 
+  let firstDetail = null;
+
+  async function getPlanDetail() {
+    try {
+      const response = await getPlanDetailInformation(plan_index_for_detail);
+      console.log("Response detail:", response);
+
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+          detailInfoPlan.set(firstDetail);
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
+      } else {
+        console.error("Unexpected response structure or empty data:", response);
+      }
+    } catch (err) {
+      console.error("Error fetching plan detail:", err);
+    }
+  }
+
+  async function handleSubItem(data) {
+    plan_index_for_detail = data.ccp_index;
+    currentPage = DetailOfSubPlan;
+    await getPlanDetail();
+  }
+
   // const handleFileUpload = (event) => {
   //   formData.attachment = event.target.files[0];
   // };
@@ -175,11 +215,8 @@
     // Clear other states to ensure a fresh start
     plan_index = item.ccp_index; // Set the selected plan index
     targetNamePlan = ""; // Reset the target name
-    selectedHostname = ""; // Reset the selected hostname
     isSectionOpen = {}; // Clear any previously opened sections
-    if (item.ccp_index_parent != 0) {
-      parentIndex = item.ccp_index_parent;
-    }
+    parentIndex = item.ccp_index;
   };
 
   let isSectionOpen = {}; // To manage the open/close state of the sections
@@ -291,6 +328,9 @@
       throw error;
     }
   }
+  function closeSwiper() {
+    currentPage = null;
+  }
 </script>
 
 <main class="table-container">
@@ -300,43 +340,46 @@
       <div class="menuContainer">
         <!-- Header -->
         <div>
-          <div class="menuHeader">{mainTitle}</div>
+          <div class="menuHeader">
+            {mainTitle}
+            {#if currentPage === DetailOfSubPlan}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click="{closeSwiper}"
+              />
+            {/if}
+          </div>
 
           <!-- Accordion -->
           <div class="accordion">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
-                <button
-                  on:click="{() => {
-                    toggleAccordion(index, item);
-                  }}"
-                  class="accordion-header {isOpen[index] ? 'active' : ''}"
-                >
-                  {item.ccp_title}
-                  <!-- ccp_title will be displayed here -->
-                </button>
-
-                <div
-                  class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                >
-                  <ul>
-                    <div
-                      class="accordion-content {isOpen[index] ? 'open' : ''}"
-                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                    >
-                      {#if item.ccp_index_parent != 0 && item.ccp_index_parent === parentIndex}
-                        <p>
-                          {item.ccp_title}
+                {#if item.ccp_index_parent === 0}
+                  <!-- Display parent plans -->
+                  <button
+                    on:click="{() => toggleAccordion(index, item)}"
+                    class="accordion-header {isOpen[index] ? 'active' : ''}"
+                  >
+                    {item.ccp_title}
+                  </button>
+                  <div
+                    class="accordion-content {isOpen[index] ? 'open' : ''}"
+                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                  >
+                    <!-- Subplans of this parent -->
+                    {#each $allPlanList as subItem}
+                      {#if subItem.ccp_index_parent === item.ccp_index}
+                        <p
+                          class="subplan"
+                          on:click="{() => handleSubItem(subItem)}"
+                        >
+                          ➔ {subItem.ccp_title}
                         </p>
-                        <!-- This will display UNIX, NETWORK, etc. -->
-                      {:else}
-                        <li>No subPlan</li>
-                        <!-- In case there are no assets -->
                       {/if}
-                    </div>
-                  </ul>
-                </div>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
@@ -354,7 +397,7 @@
 
   <section class="section2">
     {#if currentPage}
-      <svelte:component this="{currentPage}" />
+      <svelte:component this="{currentPage}" bind:firstDetail />
     {:else}
       <div class="formContainer_main">
         <div class="formContainer">
@@ -637,6 +680,16 @@
 {/if}
 
 <style>
+  .menuHeader {
+    position: relative;
+  }
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
+  }
+
   .sublist {
     overflow: hidden;
     transition: max-height 0.3s ease-in-out;
@@ -671,6 +724,12 @@
     display: flex;
     flex-direction: row;
   }
+  .subplan {
+    margin-left: 2rem; /* Indent for subplans */
+    font-size: 0.9rem;
+    color: gray;
+  }
+
   .section2 {
     width: 85%;
     height: 90vh;

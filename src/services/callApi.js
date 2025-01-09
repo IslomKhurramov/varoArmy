@@ -432,7 +432,7 @@ export const getPlanLists = async () => {
       { withCredentials: true } // Additional config
     );
 
-    console.log("API Responselist:", response);
+    console.log("API Responselist planlist:", response);
 
     if (response) {
       return response.data; // Expected valid response
@@ -491,5 +491,94 @@ export const getFixDoneLists = async (plan_index) => {
   } catch (error) {
     console.error("API Call Error:", error.message);
     throw new Error(`Failed to fetch asset detail: ${error.message}`);
+  }
+};
+
+
+export const setPlanSummaryReportCreate = async (plan_index) => {
+  try {
+    const response = await axios.post(
+      `${serverApi}/api/setPlanSummaryReportCreate/`,
+      {
+        plan_index: plan_index,
+      },
+      {
+        responseType: "blob",
+        withCredentials: true,
+      },
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "요약 보고서생성.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const setMakeExcelWordFullReport = async (data) => {
+  try {
+    if (data.plan_index) data.plan_index = String(data.plan_index);
+
+    const response = await axios.post(
+      `${serverApi}/api/setMakeExcelWordFullReport/`,
+      data,
+      {
+        withCredentials: true,
+      },
+    );
+
+    if (response?.data?.RESULT == "ERROR") throw new Error(response.data?.CODE);
+
+    return response.data?.CODE;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const setDeleteReport = async (data) => {
+  try {
+    if (data.plan_index) data.plan_index = String(data.plan_index);
+
+    const response = await axios.post(
+      `${serverApi}/api/setDeleteReport/`,
+      data,
+      {
+        withCredentials: true,
+      },
+    );
+
+    if (response?.data?.RESULT == "ERROR") throw new Error(response.data?.CODE);
+
+    return response.data?.CODE;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getDownloadReport = async (data) => {
+  try {
+    const response = await axios.post(
+      `${serverApi}/api/getDownloadReport/`,
+      data,
+      {
+        responseType: "blob", // Important for file downloads
+        withCredentials: true, // If you're using session cookies
+      },
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = data["filename"];
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (error) {
+    throw error;
   }
 };

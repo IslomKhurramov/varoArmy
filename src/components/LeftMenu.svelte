@@ -2,18 +2,22 @@
   import { onMount } from "svelte";
   //   import { allPlanList, viewPlanResult } from "../../services/store";
   import {
+    getPlanDetailInformation,
     getPlanReportLists,
     getViewPlanResults,
     setDeletePlan,
   } from "../services/callApi";
   import {
     allPlanList,
+    detailInfoPlan,
     reportPlanList,
     viewPlanResult,
   } from "../services/store";
   import SwiperMain from "./SwiperMain.svelte";
-  import { confirmDelete } from "../shared/sweetAlert";
+  import { confirmDelete, successAlert } from "../shared/sweetAlert";
   import GroupDetail from "./GroupDetail.svelte";
+  import DetailOfPlanMain from "./DetailOfPlanMain.svelte";
+  import MainReportDownload from "./MainReportDownload.svelte";
 
   /**********************************LEFT SIDE******/
   let mainTitle = "점검 계획 현황";
@@ -47,12 +51,11 @@
     isSectionOpen = {}; // Clear open sections
 
     await reportOfPlanList(plan_index);
-    if (item.ccp_index_parent != 0) {
-      parentIndex = item.ccp_index_parent;
-    }
+
+    parentIndex = item.ccp_index;
+    console.log("parent index,", parentIndex);
 
     selectedData = item; // Update the selected data
-    currentPage = SwiperMain;
   };
 
   async function reportOfPlanList(plan_index) {
@@ -92,6 +95,53 @@
     selectedData = data;
     currentPage = SwiperMain;
   }
+  let plan_index_for_detail = null;
+  let detailOfPlan = [];
+  async function handlePogosoBtn(data) {
+    plan_index_for_detail = data.ccp_index;
+    currentPage = DetailOfPlanMain;
+    await getPlanDetail();
+  }
+  async function handlewanryoBtn(data) {
+    plan_index_for_detail = data.ccp_index;
+    currentPage = MainReportDownload;
+    await getPlanDetail();
+  }
+  async function handleSubItem(data) {
+    plan_index_for_detail = data.ccp_index;
+    currentPage = DetailOfPlanMain;
+    await getPlanDetail();
+  }
+  let firstDetail = null;
+
+  async function getPlanDetail() {
+    try {
+      const response = await getPlanDetailInformation(plan_index_for_detail);
+      console.log("Response detail:", response);
+
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+          detailInfoPlan.set(firstDetail);
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
+      } else {
+        console.error("Unexpected response structure or empty data:", response);
+      }
+    } catch (err) {
+      console.error("Error fetching plan detail:", err);
+    }
+  }
+
+  $: console.log("detailInfoPlan", $detailInfoPlan);
   /**************PAGINATION*/
   let isSectionOpen = {};
   let targetNamePlan = "";
@@ -182,7 +232,6 @@
 
       if (response.RESULT === "OK") {
         successAlert(`${response.CODE}`);
-        loading = true;
         await getPlanList(); // Fetch updated data after deletion
         plan_index = "";
       } else {
@@ -215,6 +264,12 @@
                 alt="back"
                 on:click="{closeSwiper}"
               />
+            {:else if currentPage === DetailOfPlanMain}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click="{closeSwiper}"
+              />
             {/if}
           </div>
 
@@ -222,38 +277,31 @@
           <div class="accordion">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
-                <button
-                  on:click="{() => {
-                    toggleAccordion(index, item);
-                    // Direct function call in Svelte
-                  }}"
-                  class="accordion-header {isOpen[index] ? 'active' : ''}"
-                >
-                  {item.ccp_title}
-                  <!-- ccp_title will be displayed here -->
-                </button>
-
-                <div
-                  class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                >
-                  <ul>
-                    <div
-                      class="accordion-content {isOpen[index] ? 'open' : ''}"
-                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                    >
-                      {#if item.ccp_index_parent != 0 && item.ccp_index_parent === parentIndex}
-                        <p>
-                          {item.ccp_title}
+                {#if item.ccp_index_parent === 0}
+                  <!-- Display parent plans -->
+                  <button
+                    on:click="{() => toggleAccordion(index, item)}"
+                    class="accordion-header {isOpen[index] ? 'active' : ''}"
+                  >
+                    {item.ccp_title}
+                  </button>
+                  <div
+                    class="accordion-content {isOpen[index] ? 'open' : ''}"
+                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                  >
+                    <!-- Subplans of this parent -->
+                    {#each $allPlanList as subItem}
+                      {#if subItem.ccp_index_parent === item.ccp_index}
+                        <p
+                          class="subplan"
+                          on:click="{() => handleSubItem(subItem)}"
+                        >
+                          ➔ {subItem.ccp_title}
                         </p>
-                        <!-- This will display UNIX, NETWORK, etc. -->
-                      {:else}
-                        <li>No subPlan</li>
-                        <!-- In case there are no assets -->
                       {/if}
-                    </div>
-                  </ul>
-                </div>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
@@ -270,7 +318,13 @@
   </section>
   <section class="section2">
     {#if currentPage}
-      <svelte:component this="{currentPage}" bind:selectedData {getPlanList} />
+      <svelte:component
+        this="{currentPage}"
+        bind:selectedData
+        bind:firstDetail
+        bind:getPlanList
+        bind:plan_index_for_detail
+      />
     {:else}
       <article class="contentArea">
         <div class="tableListWrap">
@@ -310,7 +364,7 @@
                     >{$allPlanList.length - (startIndex + index)}</td
                   >
                   <!-- 점검대상: ast_uuid__ass_uuid__ast_hostname -->
-                  <td class="text-center">
+                  <td>
                     {data?.ccp_title || "N/A"}
                   </td>
 
@@ -357,8 +411,21 @@
                     <div
                       style="display:flex; flex-direction:row; gap:5px; width:100%; justify-content:center"
                     >
-                      <button>완료 </button>
-                      <button>보고서</button>
+                      <button
+                        class="btnSave"
+                        on:click="{(event) => {
+                          event.stopPropagation();
+                          handlewanryoBtn(data);
+                        }}"
+                        >완료
+                      </button>
+                      <button
+                        on:click="{(event) => {
+                          event.stopPropagation();
+                          handlePogosoBtn(data);
+                        }}"
+                        class="btnSave">보고서</button
+                      >
                     </div>
                   </td>
                 </tr>
@@ -417,6 +484,54 @@
 </main>
 
 <style>
+  .accordion-header {
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .accordion-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding-left: 1rem;
+  }
+
+  .subplan {
+    margin-left: 2rem; /* Indent for subplans */
+    font-size: 0.9rem;
+    color: gray;
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(167, 167, 167, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Ensure it sits above other content */
+  }
+
+  .loading-spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+  }
+
+  /* Spinner animation */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
   .accordion2 {
     height: 41vh;
   }
