@@ -293,10 +293,14 @@
                     {#each $allPlanList as subItem}
                       {#if subItem.ccp_index_parent === item.ccp_index}
                         <p
+                          title="{subItem.ccp_title}"
+                          style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
                           class="subplan"
                           on:click="{() => handleSubItem(subItem)}"
                         >
                           ➔ {subItem.ccp_title}
+                          <span class="tooltip">{subItem.ccp_title}</span>
+                          <!-- Tooltip here -->
                         </p>
                       {/if}
                     {/each}
@@ -531,6 +535,30 @@
     100% {
       transform: rotate(360deg);
     }
+  }
+
+  /* Tooltip container */
+  .tooltip {
+    visibility: hidden; /* Hidden by default */
+    width: 200px; /* Adjust the width of the tooltip */
+    background-color: rgba(0, 0, 0, 0.7); /* Background color of the tooltip */
+    color: #fff; /* Text color */
+    text-align: center; /* Center text */
+    border-radius: 4px; /* Rounded corners */
+    padding: 5px; /* Padding inside tooltip */
+    position: absolute; /* Absolute positioning */
+    z-index: 1; /* On top of other elements */
+    bottom: 125%; /* Position above the paragraph */
+    left: 50%; /* Center the tooltip horizontally */
+    transform: translateX(-50%); /* Centering adjustment */
+    opacity: 0; /* Initial opacity */
+    transition: opacity 0.2s ease; /* Transition effect */
+  }
+
+  /* Show the tooltip when hovering over the parent paragraph */
+  .subplan:hover .tooltip {
+    visibility: visible; /* Show tooltip */
+    opacity: 1; /* Fade in the tooltip */
   }
   .accordion2 {
     height: 41vh;

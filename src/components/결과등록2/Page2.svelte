@@ -15,11 +15,13 @@
   import ResultUploadStatusPopup from "./ResultUploadStatusPopup.svelte";
   import {
     getAllCheckList,
+    getPlanDetailInformation,
     setDeleteChecklistGroup,
     setDeleteChecklistItem,
     setNewChecklistGroup,
   } from "../../services/callApi";
   import { allCheckList, allPlanList } from "../../services/store";
+  import DetailOfPlanMain from "../DetailOfPlanMain.svelte";
 
   let jsonInput, txtInput, excelInput;
   let jsonFiles = [];
@@ -144,21 +146,17 @@
   }
 
   let groupIndex = "";
+  let parentIndex = null;
+
   const toggleAccordion = (index, item) => {
     isOpen.fill(false);
     isOpen[index] = true;
     groupIndex = item.ccg_index;
+    parentIndex = item.ccp_index;
+
     // console.log("gttgtg", groupIndex);
   };
   let isSectionOpen = {};
-
-  // Function to toggle specific sections
-  function toggleSection(itemKey, sectionKey) {
-    if (!isSectionOpen[itemKey]) {
-      isSectionOpen[itemKey] = {};
-    }
-    isSectionOpen[itemKey][sectionKey] = !isSectionOpen[itemKey][sectionKey];
-  }
 
   /********************************/
   async function allCheckListGet() {
@@ -183,52 +181,6 @@
     // console.log("targetData", selectedTargetData);
   }
 
-  async function deleteChecklist() {
-    try {
-      const response = await setDeleteChecklistItem(ccg_index_id, ccc_index);
-
-      if (response.RESULT === "OK") {
-        if (response.CODE === "기본 제공된 체크리스트는 삭제가 불가능합니다.") {
-          warningAlert("기본 제공된 체크리스트는 삭제가 불가능합니다");
-          selected = [];
-          allSelected = false;
-        } else {
-          successAlert(`${response.CODE}`);
-          await allCheckListGet(); // Fetch updated data after deletion
-          selected = [];
-          allSelected = false;
-          clearSelection(); // Reset selection
-        }
-      } else {
-        console.log(response.CODE);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  let new_checlist_name = "";
-  let selected_checklist_id = "";
-
-  async function createChecklist() {
-    try {
-      const response = await setNewChecklistGroup(
-        selected_checklist_id,
-        new_checlist_name
-      );
-
-      if (response.RESULT === "OK") {
-        successAlert(`${response.CODE}`);
-        await allCheckListGet(); // Fetch updated data after deletion
-        new_checlist_name = "";
-        selected_checklist_id = "";
-        isAddingNewGroup = false;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   async function deleteGroup() {
     const isConfirmed = await confirmDelete();
     if (!isConfirmed) return;
@@ -250,7 +202,7 @@
   // const toggleAccordion = (index) => {
   //   isOpen[index] = !isOpen[index];
   // };
-
+  let currentPage = null;
   function handleFileSelect(event, fileType) {
     const files = Array.from(event.target.files);
     if (fileType === "json") {
@@ -274,27 +226,93 @@
     }
     updateAllFiles();
   }
-  let selectedHostnameData = null;
-  function handleClickHostname(data) {
-    // console.log("handle data", data);
-    selectedHostname = data.hostname;
-    selectedHostnameData = data;
-    currentPage = null;
-  }
+  let total_percentage_non_agent = null;
+  let total_percentage_agent = null;
   $: console.log("Uploaded status", uploadStatus);
   $: nonAgentTotalCount =
     uploadStatus?.non_agent_target?.reduce(
       (sum, target) => sum + target.count,
       0
     ) || 0;
+
+  // Access the `ast_count` from the first element of `total_count`
+
+  // Calculate `total_percentage`
+
   $: AgentTotalCount =
     uploadStatus?.agent_target?.reduce(
       (sum, target) => sum + target.count,
       0
     ) || 0;
+
+  $: ast_count = uploadStatus?.total_count?.[0]?.ast_count || 0;
+
+  // Calculate `total_percentage` for non-agent targets
+  $: total_percentage_non_agent =
+    ast_count > 0 ? Math.round((nonAgentTotalCount / ast_count) * 100) : 0;
+
+  // Calculate `total_percentage` for agent targets
+  $: total_percentage_agent =
+    ast_count > 0 ? Math.round((AgentTotalCount / ast_count) * 100) : 0;
+
   $: unregisteredAssetsCount =
     uploadStatus?.total_count[0]?.ast_count -
       (nonAgentTotalCount + AgentTotalCount) || 0;
+
+  /****************************************/
+  let firstDetail = null;
+  async function getPlanDetail() {
+    try {
+      const response = await getPlanDetailInformation(selectedPlan); // Fetch details based on selectedPlan
+      console.log("Response detail:", response);
+
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
+      } else {
+        console.error("Unexpected response structure or empty data:", response);
+      }
+    } catch (err) {
+      console.error("Error fetching plan detail:", err);
+    }
+  }
+
+  $: if (selectedPlan) {
+    // Trigger fetching detail when selectedPlan changes
+    getPlanDetail();
+  }
+
+  function formatToKoreanTime(date) {
+    if (!date) return "N/A";
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+
+      timeZone: "Asia/Seoul",
+    };
+    return new Intl.DateTimeFormat("ko-KR", options).format(new Date(date));
+  }
+  async function handleSubItem(data) {
+    selectedPlan = data.ccp_index;
+    currentPage = DetailOfPlanMain;
+    await getPlanDetail();
+  }
+  function closeSwiper() {
+    currentPage = null;
+  }
 </script>
 
 <main class="table-container">
@@ -303,78 +321,50 @@
       <div class="menuContainer">
         <!-- Header -->
         <div>
-          <div class="menuHeader">{mainTitle}</div>
+          <div class="menuHeader">
+            {mainTitle}
+            {#if currentPage === DetailOfPlanMain}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click="{closeSwiper}"
+              />
+            {/if}
+          </div>
 
           <!-- Accordion -->
           <div class="accordion">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
-                <button
-                  on:click="{() => {
-                    toggleAccordion(index, item);
-                    // Direct function call in Svelte
-                  }}"
-                  class="accordion-header {isOpen[index] ? 'active' : ''}"
-                >
-                  {item.ccp_title}
-                  <!-- ccp_title will be displayed here -->
-                </button>
-
-                <div
-                  class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                >
-                  <ul>
-                    <div
-                      class="accordion-content {isOpen[index] ? 'open' : ''}"
-                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                    >
-                      {#if item.asset && typeof item.asset === "object"}
-                        {#each Object.entries(item.asset) as [targetName, targetData]}
-                          <p
-                            on:click="{() => {
-                              toggleSection(index, targetName);
-                            }}"
-                            class="{isSectionOpen[index]?.[targetName]
-                              ? 'active'
-                              : ''}"
-                          >
-                            {targetName}
-                          </p>
-                          <!-- This will display UNIX, NETWORK, etc. -->
-
-                          {#if targetData && targetData.length > 0}
-                            <ul
-                              class="sublist {isSectionOpen[index]?.[targetName]
-                                ? 'open'
-                                : ''}"
-                              style="max-height: {isSectionOpen[index]?.[
-                                targetName
-                              ]
-                                ? '100%'
-                                : '0px'}"
-                            >
-                              {#each targetData as subItem}
-                                <li
-                                  on:click="{() => {
-                                    activeMenu = subItem;
-                                    handleClickHostname(subItem); // Set selected hostname
-                                  }}"
-                                >
-                                  <strong>{subItem.hostname}</strong>
-                                  <!-- Display the hostname -->
-                                </li>
-                              {/each}
-                            </ul>
-                          {/if}
-                        {/each}
-                      {:else}
-                        <li>No assets available</li>
-                        <!-- In case there are no assets -->
+                {#if item.ccp_index_parent === 0}
+                  <!-- Display parent plans -->
+                  <button
+                    on:click="{() => toggleAccordion(index, item)}"
+                    class="accordion-header {isOpen[index] ? 'active' : ''}"
+                  >
+                    {item.ccp_title}
+                  </button>
+                  <div
+                    class="accordion-content {isOpen[index] ? 'open' : ''}"
+                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                  >
+                    <!-- Subplans of this parent -->
+                    {#each $allPlanList as subItem}
+                      {#if subItem.ccp_index_parent === item.ccp_index}
+                        <p
+                          title="{subItem.ccp_title}"
+                          style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                          class="subplan"
+                          on:click="{() => handleSubItem(subItem)}"
+                        >
+                          ➔ {subItem.ccp_title}
+                          <span class="tooltip">{subItem.ccp_title}</span>
+                          <!-- Tooltip here -->
+                        </p>
                       {/if}
-                    </div>
-                  </ul>
-                </div>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
@@ -391,308 +381,291 @@
   </section>
 
   <section class="section2">
-    <div class="formContainer_main">
-      <div class="inspection-container">
-        <div class="formControlWrap">
-          <div class="formControl">
-            <label style="font-size: 14px;">점검항목</label>
-            <select bind:value="{selectedPlan}">
-              <option value="" selected disabled>선택</option>
-              {#if planList}
-                {#each planList as plan}
-                  <option value="{plan.ccp_index}">{plan.ccp_title}</option>
-                {/each}
+    {#if currentPage}
+      <svelte:component this="{currentPage}" bind:firstDetail />
+    {:else}
+      <div class="formContainer_main">
+        <div class="inspection-container">
+          <div class="formControlWrap">
+            <div class="formControl">
+              <label style="font-size: 14px;">점검계획</label>
+              <select bind:value="{selectedPlan}">
+                <option value="" selected disabled>선택</option>
+                {#if planList}
+                  {#each planList as plan}
+                    <option value="{plan.ccp_index}">
+                      {plan.ccp_title}
+                    </option>
+                  {/each}
+                {/if}
+              </select>
+            </div>
+          </div>
+
+          <div class="formControlWrap">
+            <div class="formControl">
+              <label style="font-size: 14px;">점검분류</label>
+              {#if firstDetail}
+                <span>{firstDetail.ccp_ruleset__ccg_group}</span>
               {/if}
-            </select>
-          </div>
-        </div>
-
-        <div class="formControlWrap">
-          <div class="formControl">
-            <label style="font-size: 14px;">점검분류</label>
-            <input type="text" />
-          </div>
-        </div>
-
-        <div class="formControlWrap">
-          <div class="inputRow box_1">
-            <label>점검기간</label>
-            <div class="dateWrap">
-              <div class="date_1">
-                <input type="date" class="" placeholder="시작일시" />
-              </div>
-              <img src="./assets/images/dash.svg" />
-              <div class="date_1">
-                <input type="date" class="" placeholder="종료일시" />
-              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Registration Status -->
-        <div class="tableListWrap">
-          <p>등록현황</p>
-          <div class="table_scroll_bar">
-            <table class="tableList hdBorder" style="width: 170px;">
-              <colgroup>
-                <col style="width:14%;" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>등록대상</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>
-                    {#if uploadStatus}
-                      <div class="first_col">
-                        <p>에이전트({AgentTotalCount})</p>
-                        <p>비에이전트({nonAgentTotalCount})</p>
-                        <p>미등록자산</p>
-                      </div>
-                    {/if}
-                  </th>
-                </tr>
-              </tbody>
-            </table>
-            <table class="tableList hdBorder">
-              <colgroup>
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-                <col style="width:14%;" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>UNIX</th>
-                  <th>WINDOWS</th>
-                  <th>NETWORK</th>
-                  <th>DBMS</th>
-                  <th>PC</th>
-                  <th>SECURITY</th>
-                  <th>등록오류</th>
-                  <th>합계</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Row 1: Agent -->
-                <tr>
-                  {#if uploadStatus}
-                    <td>
-                      {uploadStatus.agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "UNIX"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "WINDOWS"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "NETWORK"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "DBMS"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "PC"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "SECURITY"
-                      )?.count || "-"}
-                    </td>
-                    <td>-</td>
-                    <td>{uploadStatus.total_count[0].ast_count}%</td>
-                  {/if}
-                </tr>
+          <div class="formControlWrap">
+            <div class="formControl">
+              <label style="font-size: 14px;">점검분류</label>
+              {#if firstDetail}
+                <span>{formatToKoreanTime(firstDetail.plan_start_date)}</span
+                >~<span>{formatToKoreanTime(firstDetail.plan_end_date)}</span>
+              {/if}
+            </div>
 
-                <!-- Row 2: Non-Agent -->
-                <tr>
-                  {#if uploadStatus}
-                    <td>
-                      {uploadStatus.non_agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "UNIX"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.non_agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "WINDOWS"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.non_agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "NETWORK"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.non_agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "DBMS"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.non_agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "PC"
-                      )?.count || "-"}
-                    </td>
-                    <td>
-                      {uploadStatus.non_agent_target.find(
-                        (target) =>
-                          target.ast_uuid__ast_target__cct_target === "SECURITY"
-                      )?.count || "-"}
-                    </td>
-                    <td>-</td>
-                    <td>{uploadStatus.total_count[0].ast_count}%</td>
-                  {/if}
-                </tr>
+            <!-- Registration Status -->
+            <div class="tableListWrap">
+              <p>등록현황</p>
+              <div class="table_scroll_bar">
+                <table class="tableList hdBorder" style="width: 170px;">
+                  <colgroup>
+                    <col style="width:14%;" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>등록대상</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th>
+                        {#if uploadStatus}
+                          <div class="first_col">
+                            <p>에이전트({AgentTotalCount})</p>
+                            <p>비에이전트({nonAgentTotalCount})</p>
+                            <p>미등록자산</p>
+                          </div>
+                        {/if}
+                      </th>
+                    </tr>
+                  </tbody>
+                </table>
+                <table class="tableList hdBorder">
+                  <colgroup>
+                    <col style="width:14%;" />
+                    <col style="width:14%;" />
+                    <col style="width:14%;" />
+                    <col style="width:14%;" />
+                    <col style="width:14%;" />
+                    <col style="width:14%;" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>UNIX</th>
+                      <th>WINDOWS</th>
+                      <th>NETWORK</th>
 
-                <!-- Row 3: 미등록자산 -->
-                <tr>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>{unregisteredAssetsCount}</td>
-                </tr>
-              </tbody>
-            </table>
+                      <th>SECURITY</th>
+                      <th>등록오류</th>
+                      <th>합계</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Row 1: Agent -->
+                    <tr>
+                      {#if uploadStatus}
+                        <td>
+                          {uploadStatus.agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target === "UNIX"
+                          )?.count || "-"}
+                        </td>
+                        <td>
+                          {uploadStatus.agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target ===
+                              "WINDOWS"
+                          )?.count || "-"}
+                        </td>
+                        <td>
+                          {uploadStatus.agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target ===
+                              "NETWORK"
+                          )?.count || "-"}
+                        </td>
+
+                        <td>
+                          {uploadStatus.agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target ===
+                              "SECURITY"
+                          )?.count || "-"}
+                        </td>
+                        <td>-</td>
+                        <td>{total_percentage_agent}%</td>
+                      {/if}
+                    </tr>
+
+                    <!-- Row 2: Non-Agent -->
+                    <tr>
+                      {#if uploadStatus}
+                        <td>
+                          {uploadStatus.non_agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target === "UNIX"
+                          )?.count || "-"}
+                        </td>
+                        <td>
+                          {uploadStatus.non_agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target ===
+                              "WINDOWS"
+                          )?.count || "-"}
+                        </td>
+                        <td>
+                          {uploadStatus.non_agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target ===
+                              "NETWORK"
+                          )?.count || "-"}
+                        </td>
+
+                        <td>
+                          {uploadStatus.non_agent_target.find(
+                            (target) =>
+                              target.ast_uuid__ast_target__cct_target ===
+                              "SECURITY"
+                          )?.count || "-"}
+                        </td>
+                        <td>-</td>
+                        <td>{total_percentage_non_agent}%</td>
+                      {/if}
+                    </tr>
+
+                    <!-- Row 3: 미등록자산 -->
+                    <tr>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+
+                      <td>{unregisteredAssetsCount}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="buttons1">
+                <button
+                  type="button"
+                  class="{`btn ${resultStatus?.assets_info?.length > 0 ? 'btn-primary' : ''}`}"
+                  disabled="{!resultStatus?.assets_info?.length > 0}"
+                  >결과미등록자산 ({resultStatus?.assets_info?.length || ""})
+                </button>
+                <button
+                  type="button"
+                  class="{`btn ${resultErrors?.length > 0 ? 'btn-secondary' : ''}`}"
+                  disabled="{!resultErrors?.length > 0}"
+                  >등록실패내역 ({resultErrors?.length || ""})</button
+                >
+              </div>
+            </div>
+
+            <!-- File Upload Section -->
           </div>
-          <div class="buttons1">
-            <button
-              type="button"
-              class="{`btn ${resultStatus?.assets_info?.length > 0 ? 'btn-primary' : ''}`}"
-              disabled="{!resultStatus?.assets_info?.length > 0}"
-              >결과미등록자산 ({resultStatus?.assets_info?.length || ""})
-            </button>
-            <button
-              type="button"
-              class="{`btn ${resultErrors?.length > 0 ? 'btn-secondary' : ''}`}"
-              disabled="{!resultErrors?.length > 0}"
-              >등록실패내역 ({resultErrors?.length || ""})</button
+
+          <div class="page2_headir_bottom">
+            <p>이동식점검 결과 파일등록</p>
+
+            <div class="upload-section">
+              <div class="upload-box">
+                <div class="upload-button">
+                  <span>JSON 파일등록</span><br />
+                  <input
+                    type="text"
+                    class="file-name-input"
+                    placeholder="멀티파일등록가능"
+                    value="{fileNames}"
+                    readonly
+                  />
+                </div>
+
+                <label class="plus-icon">
+                  <span>+</span>
+                  <input
+                    type="file"
+                    class="file-input"
+                    multiple
+                    accept=".json"
+                    bind:this="{jsonInput}"
+                    disabled="{!selectedPlan}"
+                    on:change="{(event) => handleFileSelect(event, 'json')}"
+                  />
+                </label>
+              </div>
+
+              <div class="upload-box">
+                <div class="upload-button">
+                  <span>네트워크 설정파일등록</span><br />
+                  <input
+                    type="text"
+                    class="file-name-input"
+                    placeholder="멀티파일등록가능"
+                    value="{fileNames2}"
+                    readonly
+                  />
+                </div>
+
+                <label class="plus-icon">
+                  <span>+</span>
+                  <input
+                    type="file"
+                    class="file-input"
+                    multiple
+                    accept=".txt"
+                    bind:this="{txtInput}"
+                    disabled="{!selectedPlan}"
+                    on:change="{(event) => handleFileSelect(event, 'txt')}"
+                  />
+                </label>
+              </div>
+
+              <div class="upload-box">
+                <div class="upload-button">
+                  <span>수기등록</span><br />
+                  <input
+                    type="text"
+                    class="file-name-input"
+                    placeholder=".EXCEL 파일만 허용"
+                    value="{fileNames3}"
+                    readonly
+                  />
+                </div>
+
+                <label class="plus-icon">
+                  <span>+</span>
+                  <input
+                    type="file"
+                    class="file-input"
+                    multiple
+                    accept=".xls,.xlsx"
+                    bind:this="{excelInput}"
+                    disabled="{!selectedPlan}"
+                    on:change="{(event) => handleFileSelect(event, 'excel')}"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div
+              class="upload-submit"
+              on:click="{submitNewSystemCommand}"
+              disabled="{!selectedPlan || !allFiles.length}"
             >
-          </div>
-        </div>
-
-        <!-- File Upload Section -->
-      </div>
-
-      <div class="page2_headir_bottom">
-        <p>이동식점검 결과 파일등록</p>
-
-        <div class="upload-section">
-          <div class="upload-box">
-            <div class="upload-button">
-              <span>JSON 파일등록</span><br />
-              <input
-                type="text"
-                class="file-name-input"
-                placeholder="멀티파일등록가능"
-                value="{fileNames}"
-                readonly
-              />
+              <button class="btn btn-upload">업로드</button>
             </div>
-
-            <label class="plus-icon">
-              <span>+</span>
-              <input
-                type="file"
-                class="file-input"
-                multiple
-                accept=".json"
-                bind:this="{jsonInput}"
-                disabled="{!selectedPlan}"
-                on:change="{(event) => handleFileSelect(event, 'json')}"
-              />
-            </label>
           </div>
-
-          <div class="upload-box">
-            <div class="upload-button">
-              <span>네트워크 설정파일등록</span><br />
-              <input
-                type="text"
-                class="file-name-input"
-                placeholder="멀티파일등록가능"
-                value="{fileNames2}"
-                readonly
-              />
-            </div>
-
-            <label class="plus-icon">
-              <span>+</span>
-              <input
-                type="file"
-                class="file-input"
-                multiple
-                accept=".txt"
-                bind:this="{txtInput}"
-                disabled="{!selectedPlan}"
-                on:change="{(event) => handleFileSelect(event, 'txt')}"
-              />
-            </label>
-          </div>
-
-          <div class="upload-box">
-            <div class="upload-button">
-              <span>수기등록</span><br />
-              <input
-                type="text"
-                class="file-name-input"
-                placeholder=".EXCEL 파일만 허용"
-                value="{fileNames3}"
-                readonly
-              />
-            </div>
-
-            <label class="plus-icon">
-              <span>+</span>
-              <input
-                type="file"
-                class="file-input"
-                multiple
-                accept=".xls,.xlsx"
-                bind:this="{excelInput}"
-                disabled="{!selectedPlan}"
-                on:change="{(event) => handleFileSelect(event, 'excel')}"
-              />
-            </label>
-          </div>
-        </div>
-
-        <div
-          class="upload-submit"
-          on:click="{submitNewSystemCommand}"
-          disabled="{!selectedPlan || !allFiles.length}"
-        >
-          <button class="btn btn-upload">업로드</button>
         </div>
       </div>
-    </div>
+    {/if}
   </section>
 </main>
 
@@ -720,9 +693,54 @@
 {/if}
 
 <style>
+  .menuHeader {
+    position: relative;
+  }
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
+  }
+
+  /* Tooltip container */
+  .tooltip {
+    visibility: hidden; /* Hidden by default */
+    width: 200px; /* Adjust the width of the tooltip */
+    background-color: rgba(0, 0, 0, 0.7); /* Background color of the tooltip */
+    color: #fff; /* Text color */
+    text-align: center; /* Center text */
+    border-radius: 4px; /* Rounded corners */
+    padding: 5px; /* Padding inside tooltip */
+    position: absolute; /* Absolute positioning */
+    z-index: 1; /* On top of other elements */
+    bottom: 125%; /* Position above the paragraph */
+    left: 50%; /* Center the tooltip horizontally */
+    transform: translateX(-50%); /* Centering adjustment */
+    opacity: 0; /* Initial opacity */
+    transition: opacity 0.2s ease; /* Transition effect */
+  }
+
+  /* Show the tooltip when hovering over the parent paragraph */
+  .subplan:hover .tooltip {
+    visibility: visible; /* Show tooltip */
+    opacity: 1; /* Fade in the tooltip */
+  }
+
+  .subplan {
+    margin-left: 2rem; /* Indent for subplans */
+    font-size: 0.9rem;
+    color: gray;
+  }
+
   .first_col {
     display: flex;
     flex-direction: column;
+  }
+  .first_col p {
+    padding: 0px;
+    margin: 6px;
+    text-align: justify;
   }
   .sublist {
     overflow: hidden;
@@ -804,15 +822,15 @@
     min-width: 78px;
     height: 28px;
     padding: 0 8px;
-    font-size: 12px;
+    font-size: 14px;
     border-radius: 4px;
   }
 
-  .formControl input {
+  .formControl span {
     min-width: 48px;
     height: 28px;
     padding: 0 8px;
-    font-size: 12px;
+    font-size: 14px;
     border-radius: 4px;
   }
 
@@ -862,6 +880,15 @@
     border-radius: 5px;
     font-size: 12px;
   }
+  .inputRow span {
+    flex: 1;
+    width: 100%;
+    height: 34px;
+    padding: 17px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 12px;
+  }
 
   table {
     width: 100%;
@@ -869,7 +896,7 @@
     margin-bottom: 10px;
   }
   table td {
-    font-size: 12px;
+    font-size: 14px;
   }
   table th,
   table td {
@@ -1031,7 +1058,7 @@
     border: 1px solid #999999;
     font-weight: bold;
     border-radius: 2px;
-    font-size: 12px;
+    font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
@@ -1042,7 +1069,7 @@
     background-color: #5f7ab0;
     border: none;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 14px;
     border-radius: 2px;
   }
 
