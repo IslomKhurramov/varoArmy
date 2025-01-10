@@ -11,7 +11,11 @@
   import { getPlanLists } from "../../services/page1/newInspection";
   import ResultErrorPopup from "./ResultErrorPopup.svelte";
   import { getAllPlanLists } from "../../services/page1/planInfoService";
-  import { errorAlert, successAlert } from "../../shared/sweetAlert";
+  import {
+    errorAlert,
+    successAlert,
+    warningAlert,
+  } from "../../shared/sweetAlert";
   import ResultUploadStatusPopup from "./ResultUploadStatusPopup.svelte";
   import {
     getAllCheckList,
@@ -68,7 +72,7 @@
       } catch (error) {}
     })();
   }
-  $: console.log("uploadStatus", uploadStatus);
+  $: console.log("resultErrors", resultErrors);
 
   const submitNewSystemCommand = async () => {
     try {
@@ -110,6 +114,7 @@
       errorAlert(error?.message);
     }
   };
+  $: console.log("resultErrors", resultErrors);
 
   onMount(async () => {
     try {
@@ -204,6 +209,9 @@
   // };
   let currentPage = null;
   function handleFileSelect(event, fileType) {
+    if ((selectedPlan = "")) {
+      warningAlert("플랜을 선택해주세요");
+    }
     const files = Array.from(event.target.files);
     if (fileType === "json") {
       jsonFiles = files;
@@ -313,6 +321,29 @@
   function closeSwiper() {
     currentPage = null;
   }
+  function closeshowErrorModal() {
+    showErrorModal = false;
+  }
+  function closeShowModal() {
+    showModal = false;
+  }
+  // Close modal when Esc key is pressed
+  function handleKeyDown(event) {
+    if (event.key === "Escape") {
+      closeShowModal();
+      closeshowErrorModal();
+    }
+  }
+
+  onMount(() => {
+    // Listen for keydown event when the modal is open
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      // Remove the event listener when the component is destroyed
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });
 </script>
 
 <main class="table-container">
@@ -555,12 +586,14 @@
               </div>
               <div class="buttons1">
                 <button
+                  on:click="{() => (showModal = true)}"
                   type="button"
                   class="{`btn ${resultStatus?.assets_info?.length > 0 ? 'btn-primary' : ''}`}"
                   disabled="{!resultStatus?.assets_info?.length > 0}"
                   >결과미등록자산 ({resultStatus?.assets_info?.length || ""})
                 </button>
                 <button
+                  on:click="{() => (showErrorModal = true)}"
                   type="button"
                   class="{`btn ${resultErrors?.length > 0 ? 'btn-secondary' : ''}`}"
                   disabled="{!resultErrors?.length > 0}"
@@ -596,7 +629,6 @@
                     multiple
                     accept=".json"
                     bind:this="{jsonInput}"
-                    disabled="{!selectedPlan}"
                     on:change="{(event) => handleFileSelect(event, 'json')}"
                   />
                 </label>
@@ -622,7 +654,6 @@
                     multiple
                     accept=".txt"
                     bind:this="{txtInput}"
-                    disabled="{!selectedPlan}"
                     on:change="{(event) => handleFileSelect(event, 'txt')}"
                   />
                 </label>
@@ -669,30 +700,55 @@
   </section>
 </main>
 
-{#if uploadStatusModalData && uploadStatusModalData?.length !== 0}
-  <ModalDynamic
-    bind:showModal="{uploadStatusModalData}"
-    modalWidth="{80}"
-    modalHeight="{500}"
-    bind:modalData="{uploadStatusModalData}"
+{#if showModal}
+  <!-- svelte-ignore missing-declaration -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click="{() => (showModal = false)}"
+    on:keydown="{handleKeyDown}"
+    tabindex="0"
   >
-    <ResultUploadStatusPopup bind:uploadStatusModalData />
-  </ModalDynamic>
-{/if}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog
+      open
+      on:close="{() => (showModal = false)}"
+      on:click|stopPropagation
+    >
+      <ResultUploadStatusPopup bind:resultStatus {closeShowModal} />
+    </dialog>
+  </div>{/if}
 
-{#if modalErrorData && modalErrorData?.length !== 0}
-  <ModalDynamic
-    bind:showModal="{showErrorModal}"
-    modalWidth="{80}"
-    modalHeight="{500}"
-    bind:modalData="{modalErrorData}"
-    showExecuteAllButton="{true}"
+{#if showErrorModal}
+  <!-- svelte-ignore missing-declaration -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <div
+    class="modal-open-wrap"
+    on:click="{() => (showErrorModal = false)}"
+    on:keydown="{handleKeyDown}"
+    tabindex="0"
   >
-    <ResultErrorPopup bind:modalErrorData />
-  </ModalDynamic>
-{/if}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <dialog
+      open
+      on:close="{() => (showErrorModal = false)}"
+      on:click|stopPropagation
+    >
+      <ResultErrorPopup bind:resultErrors {closeshowErrorModal} />
+    </dialog>
+  </div>{/if}
 
 <style>
+  .modal-open-wrap {
+    display: block;
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(167, 167, 167, 0.6);
+  }
   .menuHeader {
     position: relative;
   }
@@ -702,7 +758,30 @@
     width: 16px;
     cursor: pointer;
   }
+  /****Modal Container*/
+  dialog {
+    position: fixed;
+    /* height: 600px; */
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1103px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: svelte-s7onsa-fadeIn 0.3s ease;
+    z-index: 100;
+  }
 
+  /* Modal backdrop */
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeInBackdrop 0.3s ease;
+  }
   /* Tooltip container */
   .tooltip {
     visibility: hidden; /* Hidden by default */

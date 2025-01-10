@@ -1,5 +1,6 @@
 <script>
-  export let modalErrorData;
+  export let resultErrors;
+  export let closeshowErrorModal;
 
   // $: {
   //   console.log("modalData:", modalErrorData);
@@ -23,38 +24,55 @@
       <thead>
         <tr>
           <th class="text-center">체계명</th>
-          <th class="text-center">점검분야 </th>
-          <th class="text-center">운영체제 </th>
+          <th class="text-center">점검분야</th>
+          <th class="text-center">운영체제</th>
           <th class="text-center">호스트명</th>
           <th class="text-center">아이피정보</th>
-          <th class="text-center">등록실패사유 </th>
+          <th class="text-center">등록실패사유</th>
           <th class="text-center">재실행요청</th>
         </tr>
       </thead>
       <tbody>
-        {#each modalErrorData as data, index}
+        {#each resultErrors as data, index}
           <tr>
+            <!-- 체계명 (System Name) -->
             <td class="text-center">
-              {data?.systemName || "xxxxxxxx"}
+              {data?.systemName || "N/A"}
+              <!-- Default placeholder if no system name -->
             </td>
+
+            <!-- 점검분야 (Inspection Field) -->
             <td class="text-center">
-              <div>
-                {data?.clf_hostname}
-              </div>
+              {data?.clf_target || "N/A"}
             </td>
+
+            <!-- 운영체제 (Operating System) -->
             <td class="text-center">
-              {data.clf_ipaddr}
+              {data?.os || "N/A"}
+              <!-- Add OS info here if available -->
             </td>
-            <td class="text-center"> {data.clf_orig_file}</td>
+
+            <!-- 호스트명 (Hostname) -->
             <td class="text-center">
-              {data.clf_etc}
+              {data?.clf_hostname || "N/A"}
             </td>
+
+            <!-- 아이피정보 (IP Address) -->
             <td class="text-center">
-              {data?.agent || "--"}
+              {data?.clf_ipaddr || "N/A"}
             </td>
+
+            <!-- 등록실패사유 (Registration Failure Reason) -->
+            <td class="text-center">
+              {data?.clf_etc || "이유가 제공되지 않았습니다"}
+            </td>
+
+            <!-- 재실행요청 (Retry Request) -->
             <td class="text-center">
               <div class="table_modal_btn">
-                <button class=" btn-box_12">재실행 </button>
+                <button class="btn-box_12" on:click="{() => handleRetry(data)}"
+                  >재실행</button
+                >
               </div>
             </td>
           </tr>
@@ -62,9 +80,21 @@
       </tbody>
     </table>
   </div>
+  <div class="lastButtons">
+    <button class="btnUpload" style="width:120px">전체일괄재실행 </button>
+    <button class="btnDone" on:click="{closeshowErrorModal}">닫기 </button>
+  </div>
 </div>
 
 <style>
+  .lastButtons {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+    gap: 10px;
+  }
   .tableListWrap {
     position: relative;
   }
