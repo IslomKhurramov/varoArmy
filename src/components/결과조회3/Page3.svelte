@@ -57,11 +57,8 @@
     selectedHostname = ""; // Reset the selected hostname
     isSectionOpen = {}; // Clear any previously opened sections
     viewPlanResultFunction(); // Fetch data for the selected plan
-    if (item.ccp_index_parent != 0) {
-      parentIndex = item.ccp_index_parent;
-    } else {
-      parentIndex = null;
-    }
+    parentIndex = item.ccp_index;
+
     console.log("parentIndex", parentIndex);
   };
 
@@ -265,6 +262,13 @@
       toggleAccordion(0, $allPlanList[0]); // Open the first plan by default
     }
   });
+  let selectedPlan = null;
+  async function handleSubItem(data) {
+    selectedPlan = data.ccp_index;
+    // currentPage = DetailOfPlanMain;
+    // await getPlanDetail();
+  }
+  let uniqueHostnames = new Set();
 </script>
 
 {#if loading}
@@ -292,92 +296,96 @@
             </div>
 
             <!-- Accordion -->
-            <div class="accordion" style="height: 41vh;">
+            <div class="accordion">
               {#each $allPlanList as item, index}
                 <div class="accordion-item">
-                  <button
-                    on:click="{() => {
-                      toggleAccordion(index, item);
-                      getPlanDetail(item); // Direct function call in Svelte
-                    }}"
-                    class="accordion-header {isOpen[index] ? 'active' : ''}"
-                  >
-                    {item.ccp_title}
-                    <!-- ccp_title will be displayed here -->
-                  </button>
-
-                  <div
-                    class="accordion-content {isOpen[index] ? 'open' : ''}"
-                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                  >
-                    <ul>
-                      <div
-                        class="accordion-content {isOpen[index] ? 'open' : ''}"
-                        style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                      >
-                        {#if item.asset && typeof item.asset === "object"}
-                          {#each Object.entries(item.asset) as [targetName, targetData]}
-                            <p
-                              on:click="{() => {
-                                toggleSection(index, targetName);
-                              }}"
-                              class="{isSectionOpen[index]?.[targetName]
-                                ? 'active'
-                                : ''}"
-                            >
-                              {targetName}
-                            </p>
-                            <!-- This will display UNIX, NETWORK, etc. -->
-
-                            {#if targetData && targetData.length > 0}
-                              <ul
-                                class="sublist {isSectionOpen[index]?.[
-                                  targetName
-                                ]
-                                  ? 'open'
-                                  : ''}"
-                                style="max-height: {isSectionOpen[index]?.[
-                                  targetName
-                                ]
-                                  ? '100%'
-                                  : '0px'}"
-                              >
-                                {#each targetData as subItem}
-                                  <li
-                                    on:click="{() => {
-                                      activeMenu = subItem;
-                                      handleClickHostname(subItem); // Set selected hostname
-                                    }}"
-                                  >
-                                    <strong>{subItem.hostname}</strong>
-                                    <!-- Display the hostname -->
-                                  </li>
-                                {/each}
-                              </ul>
-                            {/if}
-                          {/each}
-                        {:else}
-                          <li>No assets available</li>
-                          <!-- In case there are no assets -->
-                        {/if}
-                      </div>
-                    </ul>
-                  </div>
-                </div>
-              {/each}
-            </div>
-
-            <div class="menuHeader">subPlan</div>
-            <div class="accordion" style="height: 25vh;">
-              {#each $allPlanList as item, index}
-                {#if item.ccp_index_parent != 0 && parentIndex === item.ccp_index_parent}
-                  <div class="accordion-item">
-                    <button class="accordion-header">
+                  {#if item.ccp_index_parent === 0}
+                    <button
+                      on:click="{() => {
+                        toggleAccordion(index, item);
+                        getPlanDetail(item); // Direct function call in Svelte
+                      }}"
+                      class="accordion-header {isOpen[index] ? 'active' : ''}"
+                    >
                       {item.ccp_title}
                       <!-- ccp_title will be displayed here -->
                     </button>
-                  </div>
-                {/if}
+
+                    <div
+                      class="accordion-content {isOpen[index] ? 'open' : ''}"
+                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                    >
+                      <ul>
+                        <div
+                          class="accordion-content {isOpen[index]
+                            ? 'open'
+                            : ''}"
+                          style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                        >
+                          {#if item.asset && typeof item.asset === "object"}
+                            {#each Object.entries(item.asset) as [targetName, targetData]}
+                              <p
+                                on:click="{() => {
+                                  toggleSection(index, targetName);
+                                }}"
+                                class="{isSectionOpen[index]?.[targetName]
+                                  ? 'active'
+                                  : ''}"
+                              >
+                                {targetName}
+                              </p>
+                              <!-- This will display UNIX, NETWORK, etc. -->
+
+                              {#if targetData && targetData.length > 0}
+                                <ul
+                                  class="sublist {isSectionOpen[index]?.[
+                                    targetName
+                                  ]
+                                    ? 'open'
+                                    : ''}"
+                                  style="max-height: {isSectionOpen[index]?.[
+                                    targetName
+                                  ]
+                                    ? '100%'
+                                    : '0px'}"
+                                >
+                                  {#each targetData as subItem}
+                                    <li
+                                      on:click="{() => {
+                                        activeMenu = subItem;
+                                        handleClickHostname(subItem); // Set selected hostname
+                                      }}"
+                                    >
+                                      <strong>{subItem.hostname}</strong>
+                                      <!-- Display the hostname -->
+                                    </li>
+                                  {/each}
+                                </ul>
+                              {/if}
+                            {/each}
+                          {:else}
+                            <li>No assets available</li>
+                            <!-- In case there are no assets -->
+                          {/if}
+                        </div>
+                      </ul>
+                      {#each $allPlanList as subItem}
+                        {#if subItem.ccp_index_parent === item.ccp_index}
+                          <p
+                            title="{subItem.ccp_title}"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                            class="subplan"
+                            on:click="{() => handleSubItem(subItem)}"
+                          >
+                            ➔ {subItem.ccp_title}
+                            <span class="tooltip">{subItem.ccp_title}</span>
+                            <!-- Tooltip here -->
+                          </p>
+                        {/if}
+                      {/each}
+                    </div>
+                  {/if}
+                </div>
               {/each}
             </div>
           </div>
@@ -420,12 +428,7 @@
                 <option value="" selected>점검대상</option>
                 <option value="UNIX">UNIX</option>
                 <option value="WINDOWS">WINDOWS</option>
-                <option value="PC">PC</option>
                 <option value="NETWORK">NETWORK</option>
-                <option value="DBMS">DBMS</option>
-                <option value="WEB">WEB</option>
-                <option value="WAS">WAS</option>
-                <option value="CLOUD">CLOUD</option>
                 <option value="SECURITY">SECURITY</option>
               </select>
 
@@ -434,13 +437,17 @@
                 on:change="{viewPlanResultFunction}"
               >
                 <option value="" selected>호스트</option>
+
                 {#each $allPlanList as item, index}
                   {#if item.asset && typeof item.asset === "object"}
                     {#each Object.entries(item.asset) as [targetName, targetData]}
                       {#each targetData as subItem}
-                        <option value="{subItem.hostname}"
-                          >{subItem.hostname}</option
-                        >
+                        {#if !uniqueHostnames.has(subItem.hostname)}
+                          <option value="{subItem.hostname}">
+                            {subItem.hostname}
+                          </option>
+                          {uniqueHostnames.add(subItem.hostname)}
+                        {/if}
                       {/each}
                     {/each}
                   {/if}
@@ -643,6 +650,35 @@
 {/if}
 
 <style>
+  /* Tooltip container */
+  .tooltip {
+    visibility: hidden; /* Hidden by default */
+    width: 200px; /* Adjust the width of the tooltip */
+    background-color: rgba(0, 0, 0, 0.7); /* Background color of the tooltip */
+    color: #fff; /* Text color */
+    text-align: center; /* Center text */
+    border-radius: 4px; /* Rounded corners */
+    padding: 5px; /* Padding inside tooltip */
+    position: absolute; /* Absolute positioning */
+    z-index: 1; /* On top of other elements */
+    bottom: 125%; /* Position above the paragraph */
+    left: 50%; /* Center the tooltip horizontally */
+    transform: translateX(-50%); /* Centering adjustment */
+    opacity: 0; /* Initial opacity */
+    transition: opacity 0.2s ease; /* Transition effect */
+  }
+
+  /* Show the tooltip when hovering over the parent paragraph */
+  .subplan:hover .tooltip {
+    visibility: visible; /* Show tooltip */
+    opacity: 1; /* Fade in the tooltip */
+  }
+
+  .subplan {
+    margin-left: 2rem; /* Indent for subplans */
+    font-size: 0.9rem;
+    color: gray;
+  }
   .loading-overlay {
     position: fixed;
     top: 0;

@@ -312,28 +312,7 @@
           <span>{selectedData?.ccr_item_no__ccc_item_level}</span>
         </div>
       </section>
-      <!-- <section class="rowSection">
-        <div class="inputRow">
-          <label>아이디</label>
-          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
-        </div>
-        <div class="inputRow">
-          <label>연락처</label>
-          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
-        </div>
-      </section> -->
     </section>
-    <!-- 
-    <section class="rowSection">
-      <div class="inputRow">
-        <label>점검일시</label>
-        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
-      </div>
-      <div class="inputRow">
-        <label>점검구분</label>
-        <span>{selectedData.ccr_item_no__ccc_target_system}</span>
-      </div>
-    </section> -->
     <div class="inputRow">
       <label>점검기준</label>
       <span> {@html selectedData?.ccr_item_no__ccc_item_criteria}</span>
@@ -399,9 +378,8 @@
 
         <!-- Button to open modal (if necessary for editing additional details) -->
         <button class="btnSave" on:click="{() => (showModal = true)}"
-          >edit</button
-        >
-        <input type="text" placeholder="Optional input" />
+          >변경
+        </button>
       </div>
     </div>
     <div class="inputRow">
@@ -437,9 +415,9 @@
       <span>{selectedData.ccr_item_no__ccc_mitigation_method}</span>
     </div>
 
-    <div class="inputRow">
+    <div class="inputRow" style="height: 150px;">
       <label>개선예시</label>
-      <span style="overflow-y: auto;"
+      <span style="overflow-y: auto; height:130px;"
         >{@html selectedData?.ccr_item_no__ccc_mitigation_example.replace(
           /\n/g,
           "<br/>"
@@ -535,7 +513,7 @@
     row-gap: 20px;
     column-gap: 10px;
     width: 100%;
-    height: 60px;
+    /* height: 60px; */
   }
   .inputRo {
     display: flex;

@@ -15,7 +15,7 @@
   let currentPage = null; // Hozirgi komponent
 
   let asset_target_uuid = "";
-  let step_vuln = "1";
+  let step_vuln = "3";
   let currentPagePagination = "1";
   let itemsPerPage = "99999";
   let search_opt = "취약";
@@ -63,6 +63,16 @@
       console.error("Error fetching paginated data:", err);
     }
   }
+  $: {
+    if (
+      (currentPage1 === SeconMenu && step_vuln !== "4") ||
+      (currentPage1 === FirstMenu && step_vuln !== "3")
+    ) {
+      step_vuln = currentPage1 === SeconMenu ? "4" : "3";
+      fetchPaginatedData();
+    }
+  }
+
   /*************************************************************/
 
   // //////////////////////////////////////////////////////////////////////////////////////
@@ -206,13 +216,13 @@
                 <img
                   src="assets/images/back.png"
                   alt="back"
-                  on:click={closeSwiper}
+                  on:click="{closeSwiper}"
                 />
               {:else if currentPage1 === Swiperpage5_2}
                 <img
                   src="assets/images/back.png"
                   alt="back"
-                  on:click={closeSwiper2}
+                  on:click="{closeSwiper2}"
                 />
               {/if}
             </div>
@@ -221,73 +231,91 @@
             <div class="accordion">
               {#each $allPlanList as item, index}
                 <div class="accordion-item">
-                  <button
-                    on:click={() => {
-                      toggleAccordion(index, item); // Direct function call in Svelte
-                    }}
-                    class="accordion-header {isOpen[index] ? 'active' : ''}"
-                  >
-                    {item.ccp_title}
-                    <!-- ccp_title will be displayed here -->
-                  </button>
+                  {#if item.ccp_index_parent === 0}
+                    <button
+                      on:click="{() => {
+                        toggleAccordion(index, item);
+                      }}"
+                      class="accordion-header {isOpen[index] ? 'active' : ''}"
+                    >
+                      {item.ccp_title}
+                      <!-- ccp_title will be displayed here -->
+                    </button>
 
-                  <div
-                    class="accordion-content {isOpen[index] ? 'open' : ''}"
-                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                  >
-                    <ul>
-                      <div
-                        class="accordion-content {isOpen[index] ? 'open' : ''}"
-                        style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                      >
-                        {#if item.asset && typeof item.asset === "object"}
-                          {#each Object.entries(item.asset) as [targetName, targetData]}
-                            <p
-                              on:click={() => {
-                                toggleSection(index, targetName);
-                              }}
-                              class={isSectionOpen[index]?.[targetName]
-                                ? "active"
-                                : ""}
-                            >
-                              {targetName}
-                            </p>
-                            <!-- This will display UNIX, NETWORK, etc. -->
-
-                            {#if targetData && targetData.length > 0}
-                              <ul
-                                class="sublist {isSectionOpen[index]?.[
-                                  targetName
-                                ]
-                                  ? 'open'
+                    <div
+                      class="accordion-content {isOpen[index] ? 'open' : ''}"
+                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                    >
+                      <ul>
+                        <div
+                          class="accordion-content {isOpen[index]
+                            ? 'open'
+                            : ''}"
+                          style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                        >
+                          {#if item.asset && typeof item.asset === "object"}
+                            {#each Object.entries(item.asset) as [targetName, targetData]}
+                              <p
+                                on:click="{() => {
+                                  toggleSection(index, targetName);
+                                }}"
+                                class="{isSectionOpen[index]?.[targetName]
+                                  ? 'active'
                                   : ''}"
-                                style="max-height: {isSectionOpen[index]?.[
-                                  targetName
-                                ]
-                                  ? '100%'
-                                  : '0px'}"
                               >
-                                {#each targetData as subItem}
-                                  <li
-                                    on:click={() => {
-                                      activeMenu = subItem;
-                                      handleClickHostname(subItem); // Set selected hostname
-                                    }}
-                                  >
-                                    <strong>{subItem.hostname}</strong>
-                                    <!-- Display the hostname -->
-                                  </li>
-                                {/each}
-                              </ul>
-                            {/if}
-                          {/each}
-                        {:else}
-                          <li>No assets available</li>
-                          <!-- In case there are no assets -->
+                                {targetName}
+                              </p>
+                              <!-- This will display UNIX, NETWORK, etc. -->
+
+                              {#if targetData && targetData.length > 0}
+                                <ul
+                                  class="sublist {isSectionOpen[index]?.[
+                                    targetName
+                                  ]
+                                    ? 'open'
+                                    : ''}"
+                                  style="max-height: {isSectionOpen[index]?.[
+                                    targetName
+                                  ]
+                                    ? '100%'
+                                    : '0px'}"
+                                >
+                                  {#each targetData as subItem}
+                                    <li
+                                      on:click="{() => {
+                                        activeMenu = subItem;
+                                        handleClickHostname(subItem); // Set selected hostname
+                                      }}"
+                                    >
+                                      <strong>{subItem.hostname}</strong>
+                                      <!-- Display the hostname -->
+                                    </li>
+                                  {/each}
+                                </ul>
+                              {/if}
+                            {/each}
+                          {:else}
+                            <li>No assets available</li>
+                            <!-- In case there are no assets -->
+                          {/if}
+                        </div>
+                      </ul>
+                      {#each $allPlanList as subItem}
+                        {#if subItem.ccp_index_parent === item.ccp_index}
+                          <p
+                            title="{subItem.ccp_title}"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                            class="subplan"
+                            on:click="{() => handleSubItem(subItem)}"
+                          >
+                            ➔ {subItem.ccp_title}
+                            <span class="tooltip">{subItem.ccp_title}</span>
+                            <!-- Tooltip here -->
+                          </p>
                         {/if}
-                      </div>
-                    </ul>
-                  </div>
+                      {/each}
+                    </div>
+                  {/if}
                 </div>
               {/each}
             </div>
@@ -295,8 +323,8 @@
 
           <!-- Buttons -->
           <div class="buttons">
-            <button on:click={() => (isAddingNewGroup = true)}>복사</button>
-            <button on:click={deletePlan}>삭제</button>
+            <button on:click="{() => (isAddingNewGroup = true)}">복사</button>
+            <button on:click="{deletePlan}">삭제</button>
             <button>EXCEL</button>
           </div>
         </div>
@@ -307,40 +335,44 @@
     <section class="section2">
       <!-- Dinamik sahifa -->
       {#if currentPage}
-        <svelte:component this={currentPage} />
+        <svelte:component this="{currentPage}" />
       {:else}
         <article class="contentArea">
           <section class="filterWrap" style="margin-bottom: 0px;">
             <div>
-              <select bind:value={filterTarget}>
+              <select bind:value="{filterTarget}">
                 <option value="" selected>점검대상체계</option>
-                {#each uniqueTargets as target}
-                  <option value={target}>{target}</option>
-                {/each}
+                <option value="" selected>점검대상체계</option>
+                <option value="UNIX">UNIX</option>
+                <option value="WINDOWS">WINDOWS</option>
+                <option value="NETWORK">NETWORK</option>
+                <option value="SECURITY">SECURITY</option>
+                <option value="WEB">WEB</option>
+                <option value="DBMS">DBMS</option>
               </select>
               <input
-                bind:value={filterPlanDate}
+                bind:value="{filterPlanDate}"
                 style="    height: 28px;
               font-size: 12px;"
                 type="date"
               />
-              <select bind:value={filterOperatorName}>
+              <select bind:value="{filterOperatorName}">
                 <option value="점검관" selected>점검관</option>
                 {#each uniqueOperators as operator}
-                  <option value={operator}>{operator}</option>
+                  <option value="{operator}">{operator}</option>
                 {/each}
               </select>
 
               <!-- Group Filter Dropdown -->
-              <select id="result" bind:value={filterGroup}>
+              <select id="result" bind:value="{filterGroup}">
                 <option value="" selected>점검구분</option>
                 {#each uniqueGroups as group}
-                  <option value={group}>{group}</option>
+                  <option value="{group}">{group}</option>
                 {/each}
               </select>
 
               <button
-                on:click={resetFilters}
+                on:click="{resetFilters}"
                 class="btn btnSearch"
                 style="width: 98px; font-size: 14px;"
                 ><img
@@ -354,28 +386,28 @@
           <section class="subTabWrap">
             <a
               style="font-size: 14px;"
-              class={setView == "plan" ? "active" : ""}
-              on:click={() => {
-                setView = "plan";
+              class="{setView == 'plan' ? 'active' : ''}"
+              on:click="{() => {
+                setView = 'plan';
                 selectPage1(FirstMenu);
-              }}
+              }}"
             >
-              조치계획등록
+              조치결과등록
             </a>
             <a
               style="font-size: 14px;"
-              class={setView == "plan_accept" ? "active" : ""}
-              on:click={() => {
-                setView = "plan_accept";
+              class="{setView == 'plan_accept' ? 'active' : ''}"
+              on:click="{() => {
+                setView = 'plan_accept';
                 selectPage1(SeconMenu);
-              }}
+              }}"
             >
-              조치계획승인
+              조치결과승인
             </a>
           </section>
           {#if currentPage1}
             <svelte:component
-              this={currentPage1}
+              this="{currentPage1}"
               {targetName}
               bind:resultVulnsOfAsset
               {currentPage1}
@@ -397,6 +429,17 @@
 {/if}
 
 <style>
+  /* Show the tooltip when hovering over the parent paragraph */
+  .subplan:hover .tooltip {
+    visibility: visible; /* Show tooltip */
+    opacity: 1; /* Fade in the tooltip */
+  }
+
+  .subplan {
+    margin-left: 2rem; /* Indent for subplans */
+    font-size: 0.9rem;
+    color: gray;
+  }
   .menuHeader {
     position: relative;
   }

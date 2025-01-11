@@ -10,6 +10,7 @@
   export let filterOperatorName;
   export let filterPlanDate;
   export let filterTarget;
+  let registerfilter = "0";
 
   let results = Object.values(resultVulnsOfPlans)
     .filter((item) => Array.isArray(item) && item[0]?.result)
@@ -29,6 +30,10 @@
     const matchesOperatorName = filterOperatorName
       ? entry.ast_uuid__ass_uuid__ast_operator_person === filterOperatorName
       : true;
+    const matchesRegister =
+      registerfilter !== null
+        ? entry.cfi_fix_status__cvs_index === Number(registerfilter)
+        : true;
     const matchesPlanDate = filterPlanDate
       ? new Date(entry.ast_uuid__ass_uuid__ast_lastconnect)
           .toISOString()
@@ -38,16 +43,17 @@
       ? entry.cct_index__cct_target === filterTarget
       : true;
 
-    // Combine all filter conditions
     return (
       matchesTargetName &&
       matchesHostname &&
       matchesGroup &&
       matchesOperatorName &&
       matchesPlanDate &&
-      matchesTarget
+      matchesTarget &&
+      matchesRegister
     );
   });
+  $: console.log("Updated registerfilter:", registerfilter);
 
   let currentPagePagination = 1; // Current page number
   let itemsPerPage = 20; // Items per page
@@ -94,9 +100,9 @@
 
 <div class="first_nenu">
   <div class="last_button">
-    <select>
-      <option value="미등록" selected>미등록</option>
-      <option value="조치예정">조치예정</option>
+    <select bind:value="{registerfilter}">
+      <option value="0" selected>미등록</option>
+      <option value="1">조치예정</option>
     </select>
   </div>
 

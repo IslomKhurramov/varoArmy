@@ -492,7 +492,6 @@
                       <th>UNIX</th>
                       <th>WINDOWS</th>
                       <th>NETWORK</th>
-
                       <th>SECURITY</th>
                       <th>등록오류</th>
                       <th>합계</th>
