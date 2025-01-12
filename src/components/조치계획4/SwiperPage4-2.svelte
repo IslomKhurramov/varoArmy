@@ -151,7 +151,7 @@
 
 <div class="contentArea">
   <section
-    bind:this={swiperContainer}
+    bind:this="{swiperContainer}"
     style="position: sticky;  z-index:99; background-color:white; margin-top:10px"
     class="topCon swiper-container"
   >
@@ -162,7 +162,7 @@
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click={() => handleScroll("prev")}
+        on:click="{() => handleScroll('prev')}"
       >
         ◀
       </button>
@@ -175,18 +175,18 @@
           class="menu-wrapper"
           id="menuWrapper"
           style="background-color: white; z-index:99;"
-          bind:this={menuWrapper}
+          bind:this="{menuWrapper}"
         >
           {#each results as slide}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
-              value={slide.ccr_index}
-              name={slide}
+              value="{slide.ccr_index}"
+              name="{slide}"
               class="menu-item {activeAsset &&
               activeAsset.ccr_index === slide.ccr_index
                 ? 'active'
                 : ''}"
-              on:click={() => handleSlideclick(slide)}
+              on:click="{() => handleSlideclick(slide)}"
             >
               {slide.ccr_item_no__ccc_item_no}
             </div>
@@ -197,7 +197,7 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click={() => handleScroll("next")}
+        on:click="{() => handleScroll('next')}"
       >
         ▶
       </button>
@@ -281,21 +281,24 @@
             <label>점검기준(Key)</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input"
-                  >{@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
+                <span class="span-input">
+                  {@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
                     /\n/g,
                     "<br/>"
-                  )}</span
-                >
+                  )}
+                </span>
               </div>
               <div class="riskLevelItem">
-                <label>점검기준</label>
-                <span class="span-input"
-                  >{@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
+                <label>점검기준(Value)</label>
+                <span
+                  class="span-input"
+                  style="word-break:break-all;     white-space: break-spaces;"
+                >
+                  {@html firstMenuData.ccr_item_no__ccc_check_purpose.replace(
                     /\n/g,
                     "<br/>"
-                  )}</span
-                >
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -359,7 +362,7 @@
                     <input
                       type="radio"
                       name="approvalStatus"
-                      bind:group={approvalStatus}
+                      bind:group="{approvalStatus}"
                       value="approved"
                     />
                     승인
@@ -370,14 +373,14 @@
                     <input
                       type="radio"
                       name="approvalStatus"
-                      bind:group={approvalStatus}
+                      bind:group="{approvalStatus}"
                       value="rejected"
                     />
                     반려
                   </label>
                 </div>
               </div>
-              <button class="btnUpload" on:click={() => (showModal = true)}
+              <button class="btnUpload" on:click="{() => (showModal = true)}"
                 >상세보기</button
               >
             </div>
@@ -404,12 +407,16 @@
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div
     class="modal-open-wrap"
-    on:click={() => (showModal = false)}
-    on:keydown={handleKeyDown}
+    on:click="{() => (showModal = false)}"
+    on:keydown="{handleKeyDown}"
     tabindex="0"
   >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <dialog open on:close={() => (showModal = false)} on:click|stopPropagation>
+    <dialog
+      open
+      on:close="{() => (showModal = false)}"
+      on:click|stopPropagation
+    >
       <ModalSwiper2 {closeShowModal} {activeAsset} {fetchPaginatedData} />
     </dialog>
   </div>

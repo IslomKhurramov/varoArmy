@@ -1,4 +1,6 @@
 <script>
+  import { setFixApprove } from "../../../services/callApi";
+  import { successAlert } from "../../../shared/sweetAlert";
   import SwiperPage4_2 from "../SwiperPage4-2.svelte";
   import SwiperPage4 from "../SwiperPage4.svelte";
 
@@ -10,6 +12,9 @@
   export let filterOperatorName;
   export let filterPlanDate;
   export let filterTarget;
+  let registerfilter = "0";
+  let filterInspectionResult = "";
+
   let results = Object.values(resultVulnsOfPlans)
     .filter((item) => Array.isArray(item) && item[0]?.result)
     .map((item) => item[0].result);
@@ -28,6 +33,10 @@
     const matchesOperatorName = filterOperatorName
       ? entry.ast_uuid__ass_uuid__ast_operator_person === filterOperatorName
       : true;
+    // const matchesRegister =
+    //   registerfilter !== null
+    //     ? entry.cfi_fix_status__cvs_index === Number(registerfilter)
+    //     : true;
     const matchesPlanDate = filterPlanDate
       ? new Date(entry.ast_uuid__ass_uuid__ast_lastconnect)
           .toISOString()
@@ -37,6 +46,15 @@
       ? entry.cct_index__cct_target === filterTarget
       : true;
 
+    // // Add a new filter for ccr_item_result based on selected filter
+    // const matchesInspectionResult =
+    //   filterInspectionResult && filterInspectionResult !== "미결정"
+    //     ? (filterInspectionResult === "승인" &&
+    //         entry.ccr_item_result === "양호") ||
+    //       (filterInspectionResult === "반려" &&
+    //         entry.ccr_item_result === "취약")
+    //     : true;
+
     // Combine all filter conditions
     return (
       matchesTargetName &&
@@ -45,8 +63,11 @@
       matchesOperatorName &&
       matchesPlanDate &&
       matchesTarget
+      // matchesRegister
+      // matchesInspectionResult
     );
   });
+
   let currentPagePagination = 1; // Current page number
   let itemsPerPage = 20; // Items per page
 
@@ -88,15 +109,64 @@
 
   // Slice the data for the current page
   $: paginatedData = filteredResults.slice(startIndex, endIndex);
+
+  let approved = "1";
+  let unApprove = "0";
+  let approved_comment = "";
+  async function fixApprovePlan(entry) {
+    try {
+      // Wrap entry.ccr_index in an array
+      const ccrIndexArray = Array.isArray(entry.ccr_index)
+        ? entry.ccr_index
+        : [entry.ccr_index];
+
+      const response = await setFixApprove(
+        entry.ast_uuid,
+        entry.ccp_index,
+        approved,
+        ccrIndexArray, // Pass the array here
+        approved_comment
+      );
+
+      console.log("response page4 ", response.CODE);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response}`);
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
+
+  async function fixUnApprovePlan() {
+    try {
+      const ccrIndexArray = Array.isArray(entry.ccr_index)
+        ? entry.ccr_index
+        : [entry.ccr_index];
+      const response = await setFixApprove(
+        entry.ast_uuid,
+        entry.ccp_index,
+        unApprove,
+        ccrIndexArray,
+        approved_comment
+      );
+      console.log("response page4 ", response);
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
 </script>
 
 <div class="first_nenu">
   <div class="last_button">
-    <select>
-      <option value="미등록" selected>미등록</option>
-      <option value="조치예정">조치예정</option>
+    <select bind:value="{registerfilter}">
+      <option value="0" selected>미등록</option>
+      <option value="1">조치예정</option>
     </select>
-    <select>
+    <select bind:value="{filterInspectionResult}">
       <option value="승인">승인</option>
       <option value="반려">반려</option>
       <option value="미결정">미결정</option>
@@ -151,8 +221,24 @@
             </td>
             <td class="text-center">
               <div>
-                <button class="btnSave">승인</button>
-                <button class="btnSave">반려</button>
+                <button
+                  class="btnSave"
+                  on:click="{(event) => {
+                    event.stopPropagation();
+                    fixApprovePlan(entry);
+                  }}"
+                >
+                  승인
+                </button>
+                <button
+                  class="btnSave"
+                  on:click="{(event) => {
+                    event.stopPropagation();
+                    fixUnApprovePlan(entry);
+                  }}"
+                >
+                  반려
+                </button>
               </div>
             </td>
           </tr>

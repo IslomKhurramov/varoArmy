@@ -333,6 +333,15 @@
 </article>
 
 <style>
+  select {
+    flex: 1;
+    width: 100%;
+    min-width: 72px;
+    height: 28px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
   * {
     font-size: 14px;
   }

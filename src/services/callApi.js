@@ -582,3 +582,42 @@ export const getDownloadReport = async (data) => {
     throw error;
   }
 };
+export const setFixApprove = async (
+  asset_target_uuid,
+  plan_index,
+  approved,
+  approved_targets,
+  approved_comment
+) => {
+  try {
+
+
+    // Make API call
+    const response = await axios.post(
+      `${serverApi}/api/setFixApprove/`,
+      {
+        asset_target_uuid,
+        plan_index,
+        approved,
+        approved_targets,
+        approved_comment,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    // Handle backend errors
+    if (response?.data?.RESULT === "ERROR") {
+      throw new Error(response.data?.CODE || "An unknown error occurred");
+    }
+
+    // Return success code
+    return response.data;
+  } catch (error) {
+    // Add logging for debugging if needed
+    console.error("Error in setFixApprove:", error.message);
+    throw error;
+  }
+};
+

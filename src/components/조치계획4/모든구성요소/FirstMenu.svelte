@@ -114,8 +114,8 @@
         <col style="width:140px" />
         <col style="width: 200px;" />
         <col />
-        <col />
-        <col />
+        <col style="width: 140px;" />
+        <col style="width: 150px;" />
       </colgroup>
       <thead>
         <tr>

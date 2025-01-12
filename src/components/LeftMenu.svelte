@@ -270,6 +270,12 @@
                 alt="back"
                 on:click="{closeSwiper}"
               />
+            {:else if currentPage === MainReportDownload}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click="{closeSwiper}"
+              />
             {/if}
           </div>
 

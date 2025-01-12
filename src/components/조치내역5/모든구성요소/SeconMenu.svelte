@@ -1,4 +1,6 @@
 <script>
+  import { setFixApprove } from "../../../services/callApi";
+  import { successAlert } from "../../../shared/sweetAlert";
   import Swiperpage5_2 from "../Swiperpage5-2.svelte";
 
   export let resultVulnsOfPlans;
@@ -90,6 +92,54 @@
 
   // Slice the data for the current page
   $: paginatedData = filteredResults.slice(startIndex, endIndex);
+  let approved = "1";
+  let unApprove = "0";
+  let approved_comment = "";
+  async function fixApprovePlan(entry) {
+    try {
+      // Wrap entry.ccr_index in an array
+      const ccrIndexArray = Array.isArray(entry.ccr_index)
+        ? entry.ccr_index
+        : [entry.ccr_index];
+
+      const response = await setFixApprove(
+        entry.ast_uuid,
+        entry.ccp_index,
+        approved,
+        ccrIndexArray, // Pass the array here
+        approved_comment
+      );
+
+      console.log("response page4 ", response);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
+
+  async function fixUnApprovePlan() {
+    try {
+      const ccrIndexArray = Array.isArray(entry.ccr_index)
+        ? entry.ccr_index
+        : [entry.ccr_index];
+      const response = await setFixApprove(
+        entry.ast_uuid,
+        entry.ccp_index,
+        unApprove,
+        ccrIndexArray,
+        approved_comment
+      );
+      console.log("response page4 ", response.CODE);
+      if (response.RESULT === "OK") {
+        successAlert(`${response}`);
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
 </script>
 
 <div class="first_nenu">
@@ -153,8 +203,24 @@
             </td>
             <td class="text-center">
               <div>
-                <button class="btnSave">승인</button>
-                <button class="btnSave">반려</button>
+                <button
+                  class="btnSave"
+                  on:click="{(event) => {
+                    event.stopPropagation();
+                    fixApprovePlan(entry);
+                  }}"
+                >
+                  승인
+                </button>
+                <button
+                  class="btnSave"
+                  on:click="{(event) => {
+                    event.stopPropagation();
+                    fixUnApprovePlan(entry);
+                  }}"
+                >
+                  반려
+                </button>
               </div>
             </td>
           </tr>

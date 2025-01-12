@@ -184,7 +184,7 @@
 
 <div class="contentArea">
   <section
-    bind:this={swiperContainer}
+    bind:this="{swiperContainer}"
     style="position: sticky;  z-index:99; background-color:white; margin-top:10px"
     class="topCon swiper-container"
   >
@@ -195,7 +195,7 @@
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click={() => handleScroll("prev")}
+        on:click="{() => handleScroll('prev')}"
       >
         ◀
       </button>
@@ -208,18 +208,18 @@
           class="menu-wrapper"
           id="menuWrapper"
           style="background-color: white; z-index:99;"
-          bind:this={menuWrapper}
+          bind:this="{menuWrapper}"
         >
           {#each results as slide}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
-              value={slide.ccr_index}
-              name={slide}
+              value="{slide.ccr_index}"
+              name="{slide}"
               class="menu-item {activeAsset &&
               activeAsset.ccr_index === slide.ccr_index
                 ? 'active'
                 : ''}"
-              on:click={() => handleSlideclick(slide)}
+              on:click="{() => handleSlideclick(slide)}"
             >
               {slide.ccr_item_no__ccc_item_no}
             </div>
@@ -230,7 +230,7 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click={() => handleScroll("next")}
+        on:click="{() => handleScroll('next')}"
       >
         ▶
       </button>
@@ -314,21 +314,24 @@
             <label>점검기준(Key)</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <span class="span-input"
-                  >{@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
+                <span class="span-input">
+                  {@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
                     /\n/g,
                     "<br/>"
-                  )}</span
-                >
+                  )}
+                </span>
               </div>
               <div class="riskLevelItem">
-                <label>점검기준</label>
-                <span class="span-input"
-                  >{@html firstMenuData.ccr_item_no__ccc_item_criteria.replace(
+                <label>점검기준(Value)</label>
+                <span
+                  class="span-input"
+                  style="word-break:break-all;     white-space: break-spaces;"
+                >
+                  {@html firstMenuData.ccr_item_no__ccc_check_purpose.replace(
                     /\n/g,
                     "<br/>"
-                  )}</span
-                >
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -387,17 +390,19 @@
             <label>조치계획수립</label>
             <div class="riskLevels">
               <div class="riskLevelItem">
-                <select bind:value={fix_method} style="width: 100%;">
+                <select bind:value="{fix_method}" style="width: 100%;">
                   {#each $fixways as fixway}
-                    <option value={fixway.cvf_index}>{fixway.cvf_desc}</option>
+                    <option value="{fixway.cvf_index}">{fixway.cvf_desc}</option
+                    >
                   {/each}
                 </select>
               </div>
               <div class="riskLevelItem">
                 <label style="margin: 0 0 0 0;">조치담당관</label>
-                <select bind:value={fix_user_index} style="width: 100%;">
+                <select bind:value="{fix_user_index}" style="width: 100%;">
                   {#each $userNames as names}
-                    <option value={names.user_index}>{names.user_name}</option>
+                    <option value="{names.user_index}">{names.user_name}</option
+                    >
                   {/each}
                 </select>
               </div>
@@ -405,13 +410,13 @@
           </div>
           <div class="inputRow">
             <label>조치예정일 </label>
-            <input type="date" bind:value={fix_end_date} />
+            <input type="date" bind:value="{fix_end_date}" />
           </div>
           <div class="inputRow">
             <label>추가 의견</label>
             <textarea
               style="width: 100%;"
-              bind:value={fix_comment}
+              bind:value="{fix_comment}"
               placeholder="추가 의견 입력"
             ></textarea>
           </div>
@@ -422,7 +427,9 @@
       <div style="display: flex; flex-direction: column;">
         <div style="display: flex; flex-direction: column; row-gap: 10px">
           <div class="inputRow">
-            <button class="btn-primary" on:click={fixPlanRegister}>저장</button>
+            <button class="btn-primary" on:click="{fixPlanRegister}"
+              >저장</button
+            >
           </div>
         </div>
       </div>
