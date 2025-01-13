@@ -74,46 +74,6 @@
   }
   $: console.log("resultErrors", resultErrors);
 
-  const submitNewSystemCommand = async () => {
-    try {
-      if (!selectedPlan) {
-        errorAlert("프로젝트명을 먼저 선택해주세요.");
-        return;
-      }
-
-      if (!jsonFiles.length && !txtFiles.length && !excelFiles.length) {
-        errorAlert("파일을 업로드하고 계획을 선택하세요.");
-        return;
-      }
-
-      const filesToUpload = [
-        ...jsonFiles.map((file) => ({ type: "JSON", file })),
-        ...txtFiles.map((file) => ({ type: "TXT", file })),
-        ...excelFiles.map((file) => ({ type: "EXCEL", file })),
-      ];
-
-      for (const { type, file } of filesToUpload) {
-        const formData = new FormData();
-        formData.append("plan_index", selectedPlan);
-        formData.append("target_system", type);
-        formData.append("result_files", file);
-
-        const response = await setUploadPlanResult(formData);
-        await successAlert(response);
-      }
-
-      resultStatus = await getCCEResultUploadStatus(selectedPlan);
-      resultErrors = await getUploadedResultErrors(selectedPlan);
-      uploadStatus = await getResultUploadStatus(selectedPlan);
-
-      jsonFiles = [];
-      txtFiles = [];
-      excelFiles = [];
-      updateAllFiles();
-    } catch (error) {
-      errorAlert(error?.message);
-    }
-  };
   $: console.log("resultErrors", resultErrors);
 
   onMount(async () => {
@@ -129,10 +89,7 @@
     } catch (err) {}
   };
 
-  $: {
-    if (projectIndex) selectedPlan = projectIndex;
-  }
-
+  $: console.log("Project index", selectedPlan);
   /*************LEFT SIDE */
 
   let mainTitle = "점검 계획 현황";
@@ -209,9 +166,6 @@
   // };
   let currentPage = null;
   function handleFileSelect(event, fileType) {
-    if ((selectedPlan = "")) {
-      warningAlert("플랜을 선택해주세요");
-    }
     const files = Array.from(event.target.files);
     if (fileType === "json") {
       jsonFiles = files;
@@ -344,6 +298,73 @@
       window.removeEventListener("keydown", handleKeyDown);
     };
   });
+  import { tick } from "svelte";
+
+  const submitNewSystemCommand = async () => {
+    console.log("selectedPlan before submit:", selectedPlan);
+    await tick(); // Wait for any pending reactivity updates to complete
+
+    if (!jsonFiles.length && !txtFiles.length && !excelFiles.length) {
+      errorAlert("파일을 업로드하고 계획을 선택하세요.");
+      return;
+    }
+
+    if (!selectedPlan) {
+      errorAlert("계획을 선택해 주세요.");
+      return;
+    }
+
+    const filesToUpload = [
+      ...jsonFiles.map((file) => ({ type: "JSON", file })),
+      ...txtFiles.map((file) => ({ type: "TXT", file })),
+      ...excelFiles.map((file) => ({ type: "EXCEL", file })),
+    ];
+
+    const uploadPromises = filesToUpload.map(async ({ type, file }) => {
+      const formData = new FormData();
+      formData.append("plan_index", selectedPlan);
+      formData.append("target_system", type);
+      formData.append("result_files", file);
+
+      console.log("formData ", formData);
+      console.log("type ", type);
+      console.log("files to upload ", filesToUpload);
+
+      try {
+        const response = await setUploadPlanResult(formData);
+        if (response) {
+          await successAlert(response); // Assuming successAlert handles the success message
+          jsonFiles = [];
+          txtFiles = [];
+          excelFiles = [];
+          fileNames = "(멀티파일등록가능)";
+          fileNames2 = "(멀티파일등록가능)";
+          fileNames3 = "(.EXCEL 파일만 허용)";
+          updateAllFiles();
+        } else {
+          errorAlert("No response returned from the upload API.");
+        }
+      } catch (error) {
+        errorAlert(`Error uploading ${file.name}: ${error.message}`);
+      }
+    });
+
+    // Wait for all uploads to finish (either fulfilled or rejected)
+    await Promise.allSettled(uploadPromises);
+
+    // Fetch the results and statuses after all uploads are done
+    resultStatus = await getCCEResultUploadStatus(selectedPlan);
+    resultErrors = await getUploadedResultErrors(selectedPlan);
+    uploadStatus = await getResultUploadStatus(selectedPlan);
+
+    // Clear the file arrays after upload
+    jsonFiles = [];
+    txtFiles = [];
+    excelFiles = [];
+
+    // Update UI after clearing the file arrays
+    updateAllFiles();
+  };
 </script>
 
 <main class="table-container">

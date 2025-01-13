@@ -76,6 +76,7 @@
   $: {
     if (selectedPlan) {
       getReportData();
+      console.log("planReports", planReports);
     }
   }
 
@@ -137,8 +138,8 @@
             <td class="text-center">취약점분석평가보고서(엑셀)</td>
             <td class="pl-20">
               <div class="flex excel">
-                {#if planReports?.summary && planReports?.summary?.length !== 0}
-                  {#each planReports?.summary as report}
+                {#if planReports?.CODE?.summary && planReports?.CODE?.summary?.length !== 0}
+                  {#each planReports?.CODE?.summary as report}
                     <a
                       href="javascript:void(0);"
                       on:click="{() =>
@@ -177,8 +178,8 @@
                   type="button"
                   class="btn btnGray"
                   disabled="{!selectedPlan ||
-                    !planReports?.summary ||
-                    planReports?.summary?.length == 0}"
+                    !planReports?.CODE?.summary ||
+                    planReports?.CODE?.summary?.length == 0}"
                   on:click="{() =>
                     deleteReport({
                       plan_index: selectedPlan,
@@ -218,8 +219,8 @@
             <td class="text-center">취약점분석평가보고서(엑셀)</td>
             <td class="pl-20">
               <div class="flex excel">
-                {#if planReports?.v_excel && planReports?.v_excel?.length !== 0}
-                  {#each planReports?.v_excel as report}
+                {#if planReports?.CODE.v_excel && planReports?.CODE.v_excel?.length !== 0}
+                  {#each planReports?.CODE.v_excel as report}
                     <a
                       href="javascript:void(0);"
                       on:click="{() =>
@@ -258,8 +259,8 @@
                   type="button"
                   class="btn btnGray w140"
                   disabled="{!selectedPlan ||
-                    !planReports?.v_excel ||
-                    planReports?.v_excel?.length == 0}"
+                    !planReports?.CODE?.v_excel ||
+                    planReports?.CODE.v_excel?.length == 0}"
                   on:click="{() =>
                     deleteReport({
                       plan_index: selectedPlan,
@@ -275,8 +276,8 @@
             <td class="text-center">취약점분석평가보고서(워드)</td>
             <td class="pl-20">
               <div class="flex excel">
-                {#if planReports?.v_word && planReports?.v_word?.length !== 0}
-                  {#each planReports?.v_word as report}
+                {#if planReports?.CODE?.v_word && planReports?.CODE?.v_word?.length !== 0}
+                  {#each planReports?.CODE?.v_word as report}
                     <a
                       href="javascript:void(0);"
                       on:click="{() =>
@@ -313,8 +314,8 @@
                   type="button"
                   class="btn btnGray"
                   disabled="{!selectedPlan ||
-                    !planReports?.v_word ||
-                    planReports?.v_word?.length == 0}"
+                    !planReports?.CODE?.v_word ||
+                    planReports?.CODE?.v_word?.length == 0}"
                   on:click="{() =>
                     deleteReport({
                       plan_index: selectedPlan,
