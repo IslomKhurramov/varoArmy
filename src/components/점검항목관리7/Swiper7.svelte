@@ -47,22 +47,35 @@
   });
   // Function to scroll the menu to the active slide automatically
 
-  $: {
-    if (activeAsset) {
-      scrollToActiveSlide(activeAsset); // Trigger scroll when activeAsset changes
+  // Function to scroll and focus on the asset
+  function focusOnAsset(assetId) {
+    const menuItem = document.querySelector(`.menu-item[value="${assetId}"]`);
+    if (menuItem) {
+      menuItem.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+      setTimeout(() => {
+        menuItem.focus();
+      }, 300);
     }
   }
-
-  function scrollToActiveSlide(activeSlide) {
-    const activeItem = document.querySelector(
-      `.menu-item[data-item-no="${activeSlide.ccc_item_no}"]`
+  $: if (
+    $swiperTargetData &&
+    selectedTargetData &&
+    Array.isArray(selectedTargetData) &&
+    selectedTargetData.length > 0
+  ) {
+    activeAsset = selectedTargetData.find(
+      (slide) => slide.ccc_item_no === $swiperTargetData.ccc_item_no
     );
+    $swiperTargetData = activeAsset;
 
-    if (activeItem) {
-      activeItem.scrollIntoView({
-        behavior: "smooth", // Smooth scrolling
-        block: "nearest", // Align to the nearest position
-      });
+    // Focus on the asset if it exists
+    if (activeAsset) {
+      setTimeout(() => {
+        focusOnAsset(activeAsset.ccc_item_no);
+      }, 0);
     }
   }
 
@@ -134,11 +147,10 @@
         selectedTarget.ccg_index,
         selectedTargetData.ccc_index
       );
-
+      console.log("delete checklist swiper", response);
       if (response.RESULT === "OK") {
         if (response.CODE === "기본 제공된 체크리스트는 삭제가 불가능합니다.") {
           warningAlert("기본 제공된 체크리스트는 삭제가 불가능합니다");
-          allSelected = false;
         } else {
           successAlert(`${response.CODE}`);
           await allCheckListGet(); // Fetch updated data after deletion
@@ -153,28 +165,27 @@
 </script>
 
 <div class="contentArea">
-  <section bind:this={swiperContainer} class="topCon swiper-container">
+  <section bind:this="{swiperContainer}" class="topCon swiper-container">
     <div class="menu-container">
       <button
         class="arrow-btn"
         id="prevBtn"
-        on:click={() => handleScroll("prev")}
+        on:click="{() => handleScroll('prev')}"
       >
         ◀
       </button>
 
       <div class="menu-wrapper-container">
-        <div class="menu-wrapper" id="menuWrapper" bind:this={menuWrapper}>
+        <div class="menu-wrapper" id="menuWrapper" bind:this="{menuWrapper}">
           {#each selectedTargetData as subItem}
             <div
-              data-item-no={subItem.ccc_item_no}
-              value={subItem.ccg_index_id}
-              name={subItem}
+              value="{subItem.ccc_item_no}"
+              name="{subItem}"
               class="menu-item {activeAsset &&
               activeAsset.ccc_item_no === subItem.ccc_item_no
                 ? 'active'
                 : ''}"
-              on:click={() => handleSlideclick(subItem)}
+              on:click="{() => handleSlideclick(subItem)}"
             >
               {subItem.ccc_item_no}
             </div>
@@ -185,74 +196,76 @@
       <button
         id="nextBtn"
         class="arrow-btn"
-        on:click={() => handleScroll("next")}
+        on:click="{() => handleScroll('next')}"
       >
         ▶
       </button>
     </div>
   </section>
   <div class="formContainer">
-    <section class="rowSection">
+    <div class="form_part">
+      <section class="rowSection">
+        <div class="inputRow">
+          <label>점검대상</label>
+          <span>UNIX</span>
+        </div>
+        <div class="inputRow">
+          <label>점검번호</label>
+          <span>{$swiperTargetData.ccc_item_no}</span>
+        </div>
+      </section>
+
       <div class="inputRow">
-        <label>점검대상</label>
-        <span>UNIX</span>
+        <label>취약점설명</label>
+        <span
+          >{@html $swiperTargetData.ccc_security_threat.replace(
+            /\n/g,
+            "<br/>"
+          )}</span
+        >
       </div>
+
       <div class="inputRow">
-        <label>점검번호</label>
-        <span>{$swiperTargetData.ccc_item_no}</span>
+        <label>취약점 점검방법 </label>
+        <span
+          >{@html $swiperTargetData.ccc_item_criteria.replace(
+            /\n/g,
+            "<br/>"
+          )}</span
+        >
       </div>
-    </section>
 
-    <div class="inputRow">
-      <label>취약점설명</label>
-      <span
-        >{@html $swiperTargetData.ccc_security_threat.replace(
-          /\n/g,
-          "<br/>"
-        )}</span
-      >
-    </div>
+      <section class="rowSection">
+        <div class="inputRow">
+          <label>점검기준(Key) </label>
+          <input type="text" />
+        </div>
+        <div class="inputRow">
+          <label>점검기준(Value) </label>
 
-    <div class="inputRow">
-      <label>취약점 점검방법 </label>
-      <span
-        >{@html $swiperTargetData.ccc_item_criteria.replace(
-          /\n/g,
-          "<br/>"
-        )}</span
-      >
-    </div>
+          <input type="text" />
+        </div>
+      </section>
 
-    <section class="rowSection">
       <div class="inputRow">
-        <label>점검기준(Key) </label>
-        <input type="text" />
+        <label>보호대책 </label>
+        <span
+          >{@html $swiperTargetData.ccc_mitigation_method.replace(
+            /\n/g,
+            "<br/>"
+          )}</span
+        >
       </div>
-      <div class="inputRow">
-        <label>점검기준(Value) </label>
-
-        <input type="text" />
+      <div class="lastButtons">
+        <button on:click="{deleteChecklist}">삭제하기</button>
+        <button>업데이트</button>
       </div>
-    </section>
-
-    <div class="inputRow">
-      <label>보호대책 </label>
-      <span
-        >{@html $swiperTargetData.ccc_mitigation_method.replace(
-          /\n/g,
-          "<br/>"
-        )}</span
-      >
-    </div>
-    <div class="lastButtons">
-      <button on:click={deleteChecklist}>삭제하기</button>
-      <button>업데이트</button>
     </div>
   </div>
 </div>
 {#if isAddingNewGroup}
   <div class="modal-open-wrap">
-    <dialog open on:close={() => (isAddingNewGroup = false)}>
+    <dialog open on:close="{() => (isAddingNewGroup = false)}">
       <div class="modal-content">
         <div class="modal">
           <input
@@ -271,6 +284,13 @@
 {/if}
 
 <style>
+  .form_part {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    border: 1px solid rgb(204, 204, 204);
+    padding: 20px;
+  }
   .menu-container,
   .menu-wrapper-container {
     overflow-x: hidden;
@@ -333,7 +353,7 @@
     flex: 1;
     width: 100%;
     height: auto;
-    padding: 17px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;

@@ -550,7 +550,9 @@
         <Page6 {getPlanList} />
       </Route>
       <Route path="/page7" component="{Page7}" />
-      <Route path="/page8" component="{Page8}" />
+      <Route path="/page8">
+        <Page8 {getPlanList} />
+      </Route>
       <Route path="/page9" component="{Page9}" />
       <Route path="/page10" component="{Page10}" />
 

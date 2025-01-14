@@ -486,7 +486,7 @@
     flex: 1;
     width: 100%;
     height: 34px;
-    padding: 17px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;

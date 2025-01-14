@@ -3,7 +3,7 @@
   import Swiper, { Navigation, Pagination } from "swiper";
   import "swiper/swiper-bundle.min.css";
   import { fixways, userNames, vulnAssetList } from "../../services/store";
-  import { setFixPlanRegister } from "../../services/callApi";
+  import { setFixApprove, setFixPlanRegister } from "../../services/callApi";
   import { successAlert } from "../../shared/sweetAlert";
   import ModalSwiper2 from "./ModalSwiper2.svelte";
 
@@ -147,6 +147,34 @@
   let results = Object.values($vulnAssetList)
     .filter((item) => Array.isArray(item) && item[0]?.result)
     .map((item) => item[0].result);
+
+  $: console.log("Current value:", firstMenuData.cfi_fix_status__cvs_index);
+
+  let approved_comment = "";
+  async function fixApprovePlan() {
+    try {
+      // Wrap entry.ccr_index in an array
+      const ccrIndexArray = Array.isArray(firstMenuData.ccr_index)
+        ? firstMenuData.ccr_index
+        : [firstMenuData.ccr_index];
+
+      const response = await setFixApprove(
+        firstMenuData.ast_uuid,
+        firstMenuData.ccp_index,
+        firstMenuData.cfi_fix_status__cvs_index,
+        ccrIndexArray, // Pass the array here
+        approved_comment
+      );
+
+      console.log("response page4 ", response.CODE);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response}`);
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
 </script>
 
 <div class="contentArea">
@@ -362,8 +390,8 @@
                     <input
                       type="radio"
                       name="approvalStatus"
-                      bind:group="{approvalStatus}"
-                      value="approved"
+                      value="{2}"
+                      bind:group="{firstMenuData.cfi_fix_status__cvs_index}"
                     />
                     승인
                   </label>
@@ -373,8 +401,8 @@
                     <input
                       type="radio"
                       name="approvalStatus"
-                      bind:group="{approvalStatus}"
-                      value="rejected"
+                      value="{0}"
+                      bind:group="{firstMenuData.cfi_fix_status__cvs_index}"
                     />
                     반려
                   </label>
@@ -387,7 +415,11 @@
           </div>
           <div class="inputRow">
             <label>승인내용 </label>
-            <input type="text" />
+            <textarea
+              style="width:91%"
+              bind:value="{approved_comment}"
+              type="text"
+            ></textarea>
           </div>
         </div>
       </div>
@@ -396,7 +428,8 @@
       <div style="display: flex; flex-direction: column;">
         <div style="display: flex; flex-direction: column; row-gap: 10px">
           <div class="inputRow">
-            <button class="btn-primary">저장</button>
+            <button class="btn-primary" on:click="{fixApprovePlan}">저장</button
+            >
           </div>
         </div>
       </div>
@@ -490,7 +523,7 @@
     flex: 1;
     width: 100%;
     height: 34px;
-    padding: 17px;
+    padding: 0 8px;
     border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;
