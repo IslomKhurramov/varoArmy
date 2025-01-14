@@ -12,7 +12,7 @@
   export let filterOperatorName;
   export let filterPlanDate;
   export let filterTarget;
-  let registerfilter = "0";
+  let registerfilter = "2";
   let filterInspectionResult = "";
 
   let results = Object.values(resultVulnsOfPlans)
@@ -33,10 +33,10 @@
     const matchesOperatorName = filterOperatorName
       ? entry.ast_uuid__ass_uuid__ast_operator_person === filterOperatorName
       : true;
-    // const matchesRegister =
-    //   registerfilter !== null
-    //     ? entry.cfi_fix_status__cvs_index === Number(registerfilter)
-    //     : true;
+    const matchesRegister =
+      registerfilter !== null
+        ? entry.cfi_fix_status__cvs_index === Number(registerfilter)
+        : true;
     const matchesPlanDate = filterPlanDate
       ? new Date(entry.ast_uuid__ass_uuid__ast_lastconnect)
           .toISOString()
@@ -62,8 +62,8 @@
       matchesGroup &&
       matchesOperatorName &&
       matchesPlanDate &&
-      matchesTarget
-      // matchesRegister
+      matchesTarget &&
+      matchesRegister
       // matchesInspectionResult
     );
   });
@@ -163,8 +163,8 @@
 <div class="first_nenu">
   <div class="last_button">
     <select bind:value="{registerfilter}">
-      <option value="0" selected>미등록</option>
-      <option value="1">조치예정</option>
+      <option value="0">미등록</option>
+      <option value="2" selected>조치예정</option>
     </select>
     <select bind:value="{filterInspectionResult}">
       <option value="승인">승인</option>
@@ -181,8 +181,8 @@
         <col style="width:140px" />
         <col style="width: 200px;" />
         <col />
-        <col />
-        <col />
+        <col style="width: 160px;" />
+        <col style="width: 270px;" />
       </colgroup>
       <thead>
         <tr>

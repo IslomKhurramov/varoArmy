@@ -267,13 +267,17 @@
     };
     return new Intl.DateTimeFormat("ko-KR", options).format(new Date(date));
   }
+  let activeSubItem = null;
+
   async function handleSubItem(data) {
     selectedPlan = data.ccp_index;
     currentPage = DetailOfPlanMain;
     await getPlanDetail();
+    activeSubItem = data;
   }
   function closeSwiper() {
     currentPage = null;
+    activeSubItem = null;
   }
   function closeshowErrorModal() {
     showErrorModal = false;
@@ -365,6 +369,8 @@
     // Update UI after clearing the file arrays
     updateAllFiles();
   };
+
+  $: console.log("result status", resultStatus);
 </script>
 
 <main class="table-container">
@@ -406,7 +412,10 @@
                         <p
                           title="{subItem.ccp_title}"
                           style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                          class="subplan"
+                          class="subplan {activeSubItem &&
+                          activeSubItem.ccp_index === subItem.ccp_index
+                            ? 'selected'
+                            : ''}"
                           on:click="{() => handleSubItem(subItem)}"
                         >
                           ➔ {subItem.ccp_title}
@@ -759,6 +768,10 @@
   </div>{/if}
 
 <style>
+  .subplan.selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
   .modal-open-wrap {
     display: block;
     z-index: 99;

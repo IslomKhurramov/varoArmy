@@ -107,10 +107,15 @@
     currentPage = MainReportDownload;
     await getPlanDetail();
   }
+
+  let activeSubItem = null;
+
   async function handleSubItem(data) {
     plan_index_for_detail = data.ccp_index;
     currentPage = DetailOfPlanMain;
     await getPlanDetail();
+    console.log("subitem data", data);
+    activeSubItem = data;
   }
   let firstDetail = null;
 
@@ -301,7 +306,10 @@
                         <p
                           title="{subItem.ccp_title}"
                           style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                          class="subplan"
+                          class="subplan {activeSubItem &&
+                          activeSubItem.ccp_title === subItem.ccp_title
+                            ? 'selected'
+                            : ''}"
                           on:click="{() => handleSubItem(subItem)}"
                         >
                           ➔ {subItem.ccp_title}
@@ -494,6 +502,10 @@
 </main>
 
 <style>
+  .subplan.selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
   .accordion-header {
     font-weight: bold;
     cursor: pointer;

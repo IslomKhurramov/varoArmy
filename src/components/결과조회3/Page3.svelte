@@ -16,6 +16,7 @@
   import ModalPopDetail from "./ModalPopDetail.svelte";
   import { confirmDelete, successAlert } from "../../shared/sweetAlert";
   import Swiper7 from "../점검항목관리7/Swiper7.svelte";
+  import DetailOfSubPlan from "./DetailOfSubPlan.svelte";
   let resultData = [];
   let isSectionOpen = {}; // To manage the open/close state of the sections
   export let getPlanList;
@@ -256,6 +257,7 @@
 
   function closeSwiper() {
     currentPage = null;
+    activeSubItem = null;
   }
   onMount(() => {
     if ($allPlanList && $allPlanList.length > 0) {
@@ -263,10 +265,40 @@
     }
   });
   let selectedPlan = null;
+  let activeSubItem = null;
+  let firstDetail = null;
+
+  async function getPlanDetail2() {
+    try {
+      const response = await getPlanDetailInformation(selectedPlan); // Fetch details based on selectedPlan
+      console.log("Response detail:", response);
+
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
+      } else {
+        console.error("Unexpected response structure or empty data:", response);
+      }
+    } catch (err) {
+      console.error("Error fetching plan detail:", err);
+    }
+  }
+
   async function handleSubItem(data) {
     selectedPlan = data.ccp_index;
-    // currentPage = DetailOfPlanMain;
-    // await getPlanDetail();
+    currentPage = DetailOfSubPlan;
+    await getPlanDetail2();
+    activeSubItem = data;
   }
   let uniqueHostnames = new Set();
 </script>
@@ -287,6 +319,12 @@
               {mainTitle}
 
               {#if currentPage === Swiper}
+                <img
+                  src="assets/images/back.png"
+                  alt="back"
+                  on:click="{closeSwiper}"
+                />
+              {:else if currentPage === DetailOfSubPlan}
                 <img
                   src="assets/images/back.png"
                   alt="back"
@@ -355,12 +393,24 @@
                                         activeMenu = subItem;
                                         handleClickHostname(subItem); // Set selected hostname
                                       }}"
+                                      class="{activeMenu.hostname ===
+                                      subItem.hostname
+                                        ? 'selected'
+                                        : ''}"
                                     >
                                       <strong>{subItem.hostname}</strong>
                                       <!-- Display the hostname -->
                                     </li>
                                   {/each}
                                 </ul>
+
+                                <style>
+                                  /* Style for selected item */
+                                  .selected {
+                                    color: #ff6600; /* Change this to your desired color */
+                                    font-weight: bold;
+                                  }
+                                </style>
                               {/if}
                             {/each}
                           {:else}
@@ -374,7 +424,10 @@
                           <p
                             title="{subItem.ccp_title}"
                             style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                            class="subplan"
+                            class="subplan {activeSubItem &&
+                            activeSubItem.ccp_index === subItem.ccp_index
+                              ? 'selected'
+                              : ''}"
                             on:click="{() => handleSubItem(subItem)}"
                           >
                             ➔ {subItem.ccp_title}
@@ -407,6 +460,7 @@
           {selectedHostnameData}
           {plan_index}
           {viewPlanResultFunction}
+          bind:firstDetail
         />
       {:else}
         <article class="contentArea">
@@ -650,6 +704,14 @@
 {/if}
 
 <style>
+  .subplan.selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
+  .selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
   /* Tooltip container */
   .tooltip {
     visibility: hidden; /* Hidden by default */

@@ -10,6 +10,7 @@
     vulnAssetList,
   } from "../../services/store";
   import {
+    getPlanDetailInformation,
     getUserName,
     getVulnsFixWay,
     getVulnsOfAsset,
@@ -18,6 +19,7 @@
   import { confirmDelete, successAlert } from "../../shared/sweetAlert";
   import { faL } from "@fortawesome/free-solid-svg-icons";
   import SwiperPage4_2 from "./SwiperPage4-2.svelte";
+  import DetailOfSubPlan from "./DetailOfSubPlan.svelte";
   export let getPlanList;
   // Dinamik o'zgaruvchilar
   let resultVulnsOfPlans = [];
@@ -126,7 +128,7 @@
   let selectedHostnameData = null;
   function handleClickHostname(data) {
     // console.log("handle data", data);
-    currentPage = Swiper;
+
     selectedHostname = data.hostname;
     selectedHostnameData = data;
   }
@@ -233,6 +235,42 @@
     filterPlanDate = "";
     filterTarget = "";
   }
+
+  let selectedPlan = null;
+  let activeSubItem = null;
+  let firstDetail = null;
+
+  async function getPlanDetail2() {
+    try {
+      const response = await getPlanDetailInformation(selectedPlan); // Fetch details based on selectedPlan
+      console.log("Response detail:", response);
+
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
+      } else {
+        console.error("Unexpected response structure or empty data:", response);
+      }
+    } catch (err) {
+      console.error("Error fetching plan detail:", err);
+    }
+  }
+  async function handleSubItem(data) {
+    selectedPlan = data.ccp_index;
+    currentPage = DetailOfSubPlan;
+    await getPlanDetail2();
+    activeSubItem = data;
+  }
 </script>
 
 {#if loading}
@@ -319,6 +357,10 @@
                                 >
                                   {#each targetData as subItem}
                                     <li
+                                      class="{activeMenu.hostname ===
+                                      subItem.hostname
+                                        ? 'selected'
+                                        : ''}"
                                       on:click="{() => {
                                         activeMenu = subItem;
                                         handleClickHostname(subItem); // Set selected hostname
@@ -342,7 +384,10 @@
                           <p
                             title="{subItem.ccp_title}"
                             style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                            class="subplan"
+                            class="subplan {activeSubItem &&
+                            activeSubItem.ccp_index === subItem.ccp_index
+                              ? 'selected'
+                              : ''}"
                             on:click="{() => handleSubItem(subItem)}"
                           >
                             ➔ {subItem.ccp_title}
@@ -372,7 +417,7 @@
     <section class="section2">
       <!-- Dinamik sahifa -->
       {#if currentPage}
-        <svelte:component this="{currentPage}" />
+        <svelte:component this="{currentPage}" bind:firstDetail />
       {:else}
         <article class="contentArea">
           <section class="filterWrap" style="margin-bottom: 0px;">
@@ -466,6 +511,14 @@
 {/if}
 
 <style>
+  .subplan.selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
+  .selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
   /* Show the tooltip when hovering over the parent paragraph */
   .subplan:hover .tooltip {
     visibility: visible; /* Show tooltip */

@@ -36,7 +36,7 @@
   let fix_start_date = "";
   let fix_end_date = "";
   let fix_comment = "";
-  let fix_user_index = "";
+  let user_index = "";
   let fix_step_status = "2";
 
   $: console.log("firstMenuData", firstMenuData);
@@ -99,7 +99,7 @@
     fix_start_date = "";
     fix_end_date = "";
     fix_comment = "";
-    fix_user_index = "";
+    user_index = "";
     fix_step_status = "2";
     // console.log("Selected Slide:", slide);
   }
@@ -157,6 +157,19 @@
 
   async function fixPlanRegister() {
     try {
+      // Log the value of fix_user_index to check if it is correct
+      console.log(
+        "fix_user_index before calling setFixPlanRegister:",
+        user_index
+      );
+
+      // Ensure fix_user_index has a valid value
+      if (!user_index) {
+        console.error("fix_user_index is missing or invalid");
+        return; // Exit early if fix_user_index is not valid
+      }
+
+      // Call setFixPlanRegister with proper parameters
       const response = await setFixPlanRegister(
         asset_uuid,
         ccr_index,
@@ -165,10 +178,13 @@
         fix_start_date,
         fix_end_date,
         fix_comment,
-        fix_user_index,
+        user_index,
         fix_step_status
       );
+
       console.log("response page4 ", response);
+
+      // Handle the response
       if (response.RESULT === "OK") {
         successAlert(`${response.CODE}`);
         fix_method = "";
@@ -176,21 +192,25 @@
         fix_start_date = "";
         fix_end_date = "";
         fix_comment = "";
-        fix_user_index = "";
+        user_index = ""; // Clear or reset the value after the request
         fix_step_status = "2";
+      } else {
+        console.error("Error in response:", response);
       }
     } catch (err) {
       console.error("Error fetching paginated data:", err);
     }
   }
+
   $: console.log("dasset_uuid ", asset_uuid);
   $: console.log("ccr_index ", ccr_index);
   $: console.log("fix_method ", fix_method);
   $: console.log("fix_level ", fix_level);
   $: console.log("fix_start_date ", fix_start_date);
   $: console.log("fix_comment ", fix_comment);
-  $: console.log("fix_user_index ", fix_user_index);
+  $: console.log("fix_user_index ", user_index);
   $: console.log("fix_step_status", fix_step_status);
+
   let results = Object.values($vulnAssetList)
     .filter((item) => Array.isArray(item) && item[0]?.result)
     .map((item) => item[0].result);
@@ -413,7 +433,7 @@
               </div>
               <div class="riskLevelItem">
                 <label style="margin: 0 0 0 0;">조치담당관</label>
-                <select bind:value="{fix_user_index}" style="width: 100%;">
+                <select bind:value="{user_index}" style="width: 100%;">
                   {#each $userNames as names}
                     <option value="{names.user_index}">{names.user_name}</option
                     >

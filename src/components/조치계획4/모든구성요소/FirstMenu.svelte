@@ -6,6 +6,7 @@
   export let selectedHostname;
   export let selectPage1;
 
+  $: console.log("selectedHostname", selectedHostname);
   export let filterGroup;
   export let filterOperatorName;
   export let filterPlanDate;
