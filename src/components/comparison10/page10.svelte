@@ -15,6 +15,7 @@
   import { confirmDelete, successAlert } from "../../shared/sweetAlert";
   import FistPage from "./FistPage.svelte";
   import SecondPage from "./SecondPage.svelte";
+  import DetailOfPlanSub from "./DetailOfPlanSub.svelte";
   let resultData = [];
   let isSectionOpen = {}; // To manage the open/close state of the sections
   export let getPlanList;
@@ -41,10 +42,18 @@
   let mainTitle = "점검 계획 현황";
   let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
   export let activeMenu = "신규계획등록";
+
+  let activeSubItem = null;
+  let plan_index_for_detail = "";
+  let currentPage = null;
+  let firstDetail = null;
   let plan_index = "";
+  let parentIndex = null;
+
   const toggleAccordion = (index, item) => {
     isOpen[index] = !isOpen[index];
     plan_index = item.ccp_index;
+    parentIndex = item.ccp_index;
   };
 
   /***********************************/
@@ -68,30 +77,36 @@
       throw err;
     }
   }
-  async function getPlanDetail(item) {
+  async function getPlanDetail() {
     try {
-      const response = await getPlanDetailInformation(item.ccp_index);
+      const response = await getPlanDetailInformation(plan_index_for_detail);
+      console.log("Response detail:", response);
 
-      if (response) {
-        detailInfoPlan.set(response);
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
       } else {
+        console.error("Unexpected response structure or empty data:", response);
       }
-      // console.log("traceByPlan", $traceByPlan);
     } catch (err) {
-      throw err;
+      console.error("Error fetching plan detail:", err);
     }
   }
-
-  let selectedHostnameData = null;
-  function handleClickHostname(data) {
-    // console.log("handle data", data);
-    selectedHostname = data.hostname;
-    selectedHostnameData = data;
+  function closeSwiper() {
+    currentPage = null;
+    activeSubItem = null;
   }
-  $: "detailPlan", $detailInfoPlan;
-  // Function to filter data based on selected target and hostname
-  let selectedTarget = "";
-  let selectedHostname = "";
 
   // Funksiyalar orqali komponentlarni tanlash
   const selectPage1 = (page, data) => {
@@ -99,6 +114,13 @@
     firstMenuData = data;
     // console.log("data1111", firstMenuData);
   };
+  async function handleSubItem(data) {
+    plan_index_for_detail = data.ccp_index;
+    currentPage = DetailOfPlanSub;
+    await getPlanDetail();
+    console.log("subitem data", data);
+    activeSubItem = data;
+  }
 </script>
 
 <main class="table-container">
@@ -108,78 +130,53 @@
       <div class="menuContainer">
         <!-- Header -->
         <div>
-          <div class="menuHeader">{mainTitle}</div>
+          <div class="menuHeader">
+            {mainTitle}
+            {#if currentPage === DetailOfPlanSub}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click="{closeSwiper}"
+              />
+            {/if}
+          </div>
 
           <!-- Accordion -->
           <div class="accordion">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
-                <button
-                  on:click={() => {
-                    toggleAccordion(index, item);
-                    getPlanDetail(item); // Direct function call in Svelte
-                  }}
-                  class="accordion-header {isOpen[index] ? 'active' : ''}"
-                >
-                  {item.ccp_title}
-                  <!-- ccp_title will be displayed here -->
-                </button>
-
-                <div
-                  class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                >
-                  <ul>
-                    <div
-                      class="accordion-content {isOpen[index] ? 'open' : ''}"
-                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                    >
-                      {#if item.asset && typeof item.asset === "object"}
-                        {#each Object.entries(item.asset) as [targetName, targetData]}
-                          <p
-                            on:click={() => {
-                              toggleSection(index, targetName);
-                            }}
-                            class={isSectionOpen[index]?.[targetName]
-                              ? "active"
-                              : ""}
-                          >
-                            {targetName}
-                          </p>
-                          <!-- This will display UNIX, NETWORK, etc. -->
-
-                          {#if targetData && targetData.length > 0}
-                            <ul
-                              class="sublist {isSectionOpen[index]?.[targetName]
-                                ? 'open'
-                                : ''}"
-                              style="max-height: {isSectionOpen[index]?.[
-                                targetName
-                              ]
-                                ? '100%'
-                                : '0px'}"
-                            >
-                              {#each targetData as subItem}
-                                <li
-                                  on:click={() => {
-                                    activeMenu = subItem;
-                                    handleClickHostname(subItem); // Set selected hostname
-                                  }}
-                                >
-                                  <strong>{subItem.hostname}</strong>
-                                  <!-- Display the hostname -->
-                                </li>
-                              {/each}
-                            </ul>
-                          {/if}
-                        {/each}
-                      {:else}
-                        <li>No assets available</li>
-                        <!-- In case there are no assets -->
+                {#if item.ccp_index_parent === 0}
+                  <!-- Display parent plans -->
+                  <button
+                    on:click="{() => toggleAccordion(index, item)}"
+                    class="accordion-header {isOpen[index] ? 'active' : ''}"
+                  >
+                    {item.ccp_title}
+                  </button>
+                  <div
+                    class="accordion-content {isOpen[index] ? 'open' : ''}"
+                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                  >
+                    <!-- Subplans of this parent -->
+                    {#each $allPlanList as subItem}
+                      {#if subItem.ccp_index_parent === item.ccp_index}
+                        <p
+                          title="{subItem.ccp_title}"
+                          style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                          class="subplan {activeSubItem &&
+                          activeSubItem.ccp_title === subItem.ccp_title
+                            ? 'selected'
+                            : ''}"
+                          on:click="{() => handleSubItem(subItem)}"
+                        >
+                          ➔ {subItem.ccp_title}
+                          <span class="tooltip">{subItem.ccp_title}</span>
+                          <!-- Tooltip here -->
+                        </p>
                       {/if}
-                    </div>
-                  </ul>
-                </div>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
@@ -188,57 +185,61 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button on:click={deletePlan}>삭제</button>
+          <button on:click="{deletePlan}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
     </div>
   </section>
   <section class="section2">
-    <article class="contentArea">
-      <section class="subTabWrap">
-        <a
-          style="font-size: 14px; cursor:pointer;"
-          class={setView == "plan" ? "active" : ""}
-          on:click={() => {
-            setView = "plan";
-            selectPage1(FistPage);
-          }}
-        >
-          조치계획등록
-        </a>
-        <a
-          style="font-size: 14px; cursor:pointer;"
-          class={setView == "plan_accept" ? "active" : ""}
-          on:click={() => {
-            setView = "plan_accept";
-            selectPage1(SecondPage);
-          }}
-        >
-          조치계획승인
-        </a>
-      </section>
-      {#if currentPage1}
-        <svelte:component this={currentPage1} />
-      {/if}
-    </article>
+    {#if currentPage}
+      <svelte:component this="{currentPage}" bind:firstDetail />
+    {:else}
+      <article class="contentArea">
+        <section class="subTabWrap">
+          <a
+            style="font-size: 14px; cursor:pointer;"
+            class="{setView == 'plan' ? 'active' : ''}"
+            on:click="{() => {
+              setView = 'plan';
+              selectPage1(FistPage);
+            }}"
+          >
+            조치현황 (전체)
+          </a>
+          <a
+            style="font-size: 14px; cursor:pointer;"
+            class="{setView == 'plan_accept' ? 'active' : ''}"
+            on:click="{() => {
+              setView = 'plan_accept';
+              selectPage1(SecondPage);
+            }}"
+          >
+            자산취약점비교
+          </a>
+        </section>
+        {#if currentPage1}
+          <svelte:component this="{currentPage1}" />
+        {/if}
+      </article>
+    {/if}
   </section>
-  <article />
+  <article></article>
 </main>
 
 <style>
-  .sublist {
-    overflow: hidden;
-    transition: max-height 0.3s ease-in-out;
+  .menuHeader {
+    position: relative;
   }
-  .sublist.open {
-    max-height: 100%;
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
   }
-  .accordion-content ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid black;
+  .subplan.selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
   }
   .accordion-content.open {
     padding: 0px 10px 0px 10px;

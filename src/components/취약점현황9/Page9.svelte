@@ -2,11 +2,15 @@
   import { onMount } from "svelte";
   import LeftContainer from "../LeftContainer.svelte";
   import { confirmDelete, successAlert } from "../../shared/sweetAlert";
-  import { setDeletePlan } from "../../services/callApi";
+  import {
+    getPlanDetailInformation,
+    setDeletePlan,
+  } from "../../services/callApi";
   import { allPlanList } from "../../services/store";
+  import DetailOfPlan from "./DetailOfPlan.svelte";
   let resultData = [];
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 10; i++) {
     resultData.push({
       ast_uuid__ass_uuid__ast_hostname: "NETWORK",
       ccr_item_no__ccc_item_no: "AAAA",
@@ -20,12 +24,14 @@
   let mainTitle = "점검 계획 현황";
   let isOpen = Array(8).fill(false); // Har bir accordion uchun ochiq/yopiq holat
   export let activeMenu = "신규계획등록";
+  let parentIndex = null;
 
   let plan_index = "";
   const toggleAccordion = (index, item) => {
     isOpen.fill(false); // Close all accordions
     isOpen[index] = true; // Open only the selected accordion
     plan_index = item.ccp_index;
+    parentIndex = item.ccp_index;
   };
 
   let isSectionOpen = {}; // To manage the open/close state of the sections
@@ -109,6 +115,48 @@
     itemsPerPage = parseInt(event.target.value, 10);
     // currentPagePagination = 1; // Reset to first page
   }
+  let activeSubItem = null;
+  let plan_index_for_detail = "";
+  let currentPage = null;
+  let firstDetail = null;
+
+  async function handleSubItem(data) {
+    plan_index_for_detail = data.ccp_index;
+    currentPage = DetailOfPlan;
+    await getPlanDetail();
+    console.log("subitem data", data);
+    activeSubItem = data;
+  }
+  async function getPlanDetail() {
+    try {
+      const response = await getPlanDetailInformation(plan_index_for_detail);
+      console.log("Response detail:", response);
+
+      if (response && typeof response === "object") {
+        // Find the first numbered key
+        const firstKey = Object.keys(response).find(
+          (key) => !isNaN(Number(key))
+        );
+
+        if (firstKey) {
+          // Extract the first object using the key
+          firstDetail = response[firstKey];
+
+          console.log("First detail extracted:", firstDetail);
+        } else {
+          console.error("No numbered keys found in response object:", response);
+        }
+      } else {
+        console.error("Unexpected response structure or empty data:", response);
+      }
+    } catch (err) {
+      console.error("Error fetching plan detail:", err);
+    }
+  }
+  function closeSwiper() {
+    currentPage = null;
+    activeSubItem = null;
+  }
 </script>
 
 <main class="table-container">
@@ -118,77 +166,53 @@
       <div class="menuContainer">
         <!-- Header -->
         <div>
-          <div class="menuHeader">{mainTitle}</div>
+          <div class="menuHeader">
+            {mainTitle}
+            {#if currentPage === DetailOfPlan}
+              <img
+                src="assets/images/back.png"
+                alt="back"
+                on:click="{closeSwiper}"
+              />
+            {/if}
+          </div>
 
           <!-- Accordion -->
           <div class="accordion">
             {#each $allPlanList as item, index}
               <div class="accordion-item">
-                <button
-                  on:click={() => {
-                    toggleAccordion(index, item); // Direct function call in Svelte
-                  }}
-                  class="accordion-header {isOpen[index] ? 'active' : ''}"
-                >
-                  {item.ccp_title}
-                  <!-- ccp_title will be displayed here -->
-                </button>
-
-                <div
-                  class="accordion-content {isOpen[index] ? 'open' : ''}"
-                  style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                >
-                  <ul>
-                    <div
-                      class="accordion-content {isOpen[index] ? 'open' : ''}"
-                      style="max-height: {isOpen[index] ? '100%' : '0px'}"
-                    >
-                      {#if item.asset && typeof item.asset === "object"}
-                        {#each Object.entries(item.asset) as [targetName, targetData]}
-                          <p
-                            on:click={() => {
-                              toggleSection(index, targetName);
-                            }}
-                            class={isSectionOpen[index]?.[targetName]
-                              ? "active"
-                              : ""}
-                          >
-                            {targetName}
-                          </p>
-                          <!-- This will display UNIX, NETWORK, etc. -->
-
-                          {#if targetData && targetData.length > 0}
-                            <ul
-                              class="sublist {isSectionOpen[index]?.[targetName]
-                                ? 'open'
-                                : ''}"
-                              style="max-height: {isSectionOpen[index]?.[
-                                targetName
-                              ]
-                                ? '100%'
-                                : '0px'}"
-                            >
-                              {#each targetData as subItem}
-                                <li
-                                  on:click={() => {
-                                    activeMenu = subItem;
-                                    handleClickHostname(subItem); // Set selected hostname
-                                  }}
-                                >
-                                  <strong>{subItem.hostname}</strong>
-                                  <!-- Display the hostname -->
-                                </li>
-                              {/each}
-                            </ul>
-                          {/if}
-                        {/each}
-                      {:else}
-                        <li>No assets available</li>
-                        <!-- In case there are no assets -->
+                {#if item.ccp_index_parent === 0}
+                  <!-- Display parent plans -->
+                  <button
+                    on:click="{() => toggleAccordion(index, item)}"
+                    class="accordion-header {isOpen[index] ? 'active' : ''}"
+                  >
+                    {item.ccp_title}
+                  </button>
+                  <div
+                    class="accordion-content {isOpen[index] ? 'open' : ''}"
+                    style="max-height: {isOpen[index] ? '100%' : '0px'}"
+                  >
+                    <!-- Subplans of this parent -->
+                    {#each $allPlanList as subItem}
+                      {#if subItem.ccp_index_parent === item.ccp_index}
+                        <p
+                          title="{subItem.ccp_title}"
+                          style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                          class="subplan {activeSubItem &&
+                          activeSubItem.ccp_title === subItem.ccp_title
+                            ? 'selected'
+                            : ''}"
+                          on:click="{() => handleSubItem(subItem)}"
+                        >
+                          ➔ {subItem.ccp_title}
+                          <span class="tooltip">{subItem.ccp_title}</span>
+                          <!-- Tooltip here -->
+                        </p>
                       {/if}
-                    </div>
-                  </ul>
-                </div>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
@@ -197,168 +221,201 @@
         <!-- Buttons -->
         <div class="buttons">
           <button>복사</button>
-          <button on:click={deletePlan}>삭제</button>
+          <button on:click="{deletePlan}">삭제</button>
           <button>EXCEL</button>
         </div>
       </div>
     </div>
   </section>
   <section class="section2">
-    <article class="contentArea">
-      <section class="filterWrap">
-        <div>
-          <select>
-            <option value="" selected disabled>점검계획명</option>
+    {#if currentPage}
+      <svelte:component this="{currentPage}" bind:firstDetail />
+    {:else}
+      <article class="contentArea">
+        <section class="filterWrap">
+          <div>
+            <select>
+              <option value="" selected disabled>점검계획명</option>
 
-            <option value={"점검계획명"}>점검계획명</option>
-          </select>
-          <select>
-            <option value="" selected>관리부대</option>
+              <option value="{'점검계획명'}">점검계획명</option>
+            </select>
+            <select>
+              <option value="" selected>관리부대</option>
 
-            <option value="관리부대">관리부대</option>
-          </select>
+              <option value="관리부대">관리부대</option>
+            </select>
 
-          <select>
-            <option value="" selected>담당자</option>
+            <select>
+              <option value="" selected>담당자</option>
 
-            <option value="담당자">담당자</option>
-          </select>
-          <select id="result">
-            <option value="" selected>취약점항목U-20 </option>
+              <option value="담당자">담당자</option>
+            </select>
+            <select id="result">
+              <option value="" selected>취약점항목U-20 </option>
 
-            <option
-              value="취약점항목U-20
+              <option
+                value="취약점항목U-20
 "
-              >취약점항목U-20
-            </option>
-          </select>
+                >취약점항목U-20
+              </option>
+            </select>
 
-          <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
-            ><img src="assets/images/reset.png" alt="search" />초기화</button
-          >
-        </div>
-      </section>
-      <div class="tableListWrap">
-        <table class="tableList hdBorder">
-          <colgroup>
-            <col style="width:90px;" />
-            <col style="width:170px" />
-            <col style="width:140px" />
-            <col style="width: 200px;" />
-            <col />
-            <col />
-            <col />
-            <col style="width:170px" />
-            <col style="width:140px" />
-            <col style="width: 200px;" />
-            <col />
-            <col />
-          </colgroup>
-          <thead>
-            <tr>
-              <th class="text-center">번호</th>
-              <th class="text-center">점검항목 </th>
-              <th class="text-center">점검결과 </th>
-              <th class="text-center">호스트명 </th>
-              <th class="text-center">아이피주소 </th>
-              <th class="text-center">소속부대 </th>
-              <th class="text-center">자산분류</th>
-              <th class="text-center">제조사 </th>
-              <th class="text-center">제품명 </th>
-              <th class="text-center">버전 </th>
-              <th class="text-center">관리부대 </th>
-              <th class="text-center">운영담당자 </th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each paginatedData as data, index}
+            <button class="btn btnSearch" style="width: 98px; font-size: 14px;"
+              ><img src="assets/images/reset.png" alt="search" />초기화</button
+            >
+          </div>
+        </section>
+        <div class="tableListWrap">
+          <table class="tableList hdBorder">
+            <colgroup>
+              <col style="width:90px;" />
+              <col style="width:170px" />
+              <col style="width:140px" />
+              <col style="width: 200px;" />
+              <col />
+              <col />
+              <col />
+              <col style="width:170px" />
+              <col style="width:140px" />
+              <col style="width: 200px;" />
+              <col />
+              <col />
+            </colgroup>
+            <thead>
               <tr>
-                <td class="text-center">{resultData.length - index}</td>
-
-                <td class="text-center">
-                  {data?.ast_uuid__ass_uuid__ast_hostname}
-                </td>
-                <td class="text-center">
-                  <div>
-                    {data?.ccr_item_no__ccc_item_no}
-                  </div>
-                </td>
-                <td class="text-center">
-                  {data.ccr_item_no__ccc_item_title}
-                </td>
-                <td class="text-center">
-                  {data.ccr_item_no__ccc_item_criteria}</td
-                >
-                <td class="text-center">
-                  {data?.ast_uuid__ass_uuid__ast_hostname}
-                </td>
-                <td class="text-center">
-                  <div>
-                    {data?.ccr_item_no__ccc_item_no}
-                  </div>
-                </td>
-                <td class="text-center">
-                  {data.ccr_item_no__ccc_item_title}
-                </td>
-                <td class="text-center">
-                  {data.ccr_item_no__ccc_item_criteria}</td
-                >
-                <td class="text-center">
-                  <div>
-                    {data?.ccr_item_no__ccc_item_no}
-                  </div>
-                </td>
-                <td class="text-center">
-                  {data.ccr_item_no__ccc_item_title}
-                </td>
-                <td class="text-center">
-                  {data.ccr_item_no__ccc_item_criteria}</td
-                >
+                <th class="text-center">번호</th>
+                <th class="text-center">점검항목 </th>
+                <th class="text-center">점검결과 </th>
+                <th class="text-center">호스트명 </th>
+                <th class="text-center">아이피주소 </th>
+                <th class="text-center">소속부대 </th>
+                <th class="text-center">자산분류</th>
+                <th class="text-center">제조사 </th>
+                <th class="text-center">제품명 </th>
+                <th class="text-center">버전 </th>
+                <th class="text-center">관리부대 </th>
+                <th class="text-center">운영담당자 </th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-      <!-- Paginatsiya -->
-      <div class="pagination">
-        <button
-          on:click={() => goToPage(1)}
-          disabled={currentPagePagination === 1}
-        >
-          {"<<"}
-        </button>
-        <button
-          on:click={() => goToPage(currentPagePagination - 1)}
-          disabled={currentPagePagination === 1}
-        >
-          {"<"}
-        </button>
-        {#each Array(totalPages).fill(0) as _, pageIndex}
+            </thead>
+            <tbody>
+              {#each paginatedData as data, index}
+                <tr>
+                  <td class="text-center">{resultData.length - index}</td>
+
+                  <td class="text-center">
+                    {data?.ast_uuid__ass_uuid__ast_hostname}
+                  </td>
+                  <td class="text-center">
+                    <div>
+                      {data?.ccr_item_no__ccc_item_no}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    {data.ccr_item_no__ccc_item_title}
+                  </td>
+                  <td class="text-center">
+                    {data.ccr_item_no__ccc_item_criteria}</td
+                  >
+                  <td class="text-center">
+                    {data?.ast_uuid__ass_uuid__ast_hostname}
+                  </td>
+                  <td class="text-center">
+                    <div>
+                      {data?.ccr_item_no__ccc_item_no}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    {data.ccr_item_no__ccc_item_title}
+                  </td>
+                  <td class="text-center">
+                    {data.ccr_item_no__ccc_item_criteria}</td
+                  >
+                  <td class="text-center">
+                    <div>
+                      {data?.ccr_item_no__ccc_item_no}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    {data.ccr_item_no__ccc_item_title}
+                  </td>
+                  <td class="text-center">
+                    {data.ccr_item_no__ccc_item_criteria}</td
+                  >
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+        <!-- Paginatsiya -->
+        <div class="pagination">
           <button
-            class:selected={currentPagePagination === pageIndex + 1}
-            on:click={() => goToPage(pageIndex + 1)}
+            on:click="{() => goToPage(1)}"
+            disabled="{currentPagePagination === 1}"
           >
-            {pageIndex + 1}
+            {"<<"}
           </button>
-        {/each}
-        <button
-          on:click={() => goToPage(currentPagePagination + 1)}
-          disabled={currentPagePagination === totalPages}
-        >
-          {">"}
-        </button>
-        <button
-          on:click={() => goToPage(totalPages)}
-          disabled={currentPagePagination === totalPages}
-        >
-          {">>"}
-        </button>
-      </div>
-    </article>
+          <button
+            on:click="{() => goToPage(currentPagePagination - 1)}"
+            disabled="{currentPagePagination === 1}"
+          >
+            {"<"}
+          </button>
+          {#each Array(totalPages).fill(0) as _, pageIndex}
+            <button
+              class:selected="{currentPagePagination === pageIndex + 1}"
+              on:click="{() => goToPage(pageIndex + 1)}"
+            >
+              {pageIndex + 1}
+            </button>
+          {/each}
+          <button
+            on:click="{() => goToPage(currentPagePagination + 1)}"
+            disabled="{currentPagePagination === totalPages}"
+          >
+            {">"}
+          </button>
+          <button
+            on:click="{() => goToPage(totalPages)}"
+            disabled="{currentPagePagination === totalPages}"
+          >
+            {">>"}
+          </button>
+        </div>
+      </article>
+    {/if}
   </section>
 </main>
 
 <style>
+  .menuHeader {
+    position: relative;
+  }
+  .menuHeader img {
+    position: absolute;
+    right: 0;
+    width: 16px;
+    cursor: pointer;
+  }
+  .subplan.selected {
+    color: #121efe; /* Change this to your desired color */
+    font-weight: bold;
+  }
+  .accordion-header {
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .accordion-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding-left: 1rem;
+  }
+
+  .subplan {
+    margin-left: 2rem; /* Indent for subplans */
+    font-size: 0.9rem;
+    color: gray;
+  }
   .table-container {
     /* overflow-y: auto; */
     border-radius: 10px;
