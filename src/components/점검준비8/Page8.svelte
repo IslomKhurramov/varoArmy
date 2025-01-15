@@ -36,6 +36,7 @@
 
   let isSectionOpen = {};
   let activeSubItem = null;
+  let parentIndex = null;
 
   const toggleAccordion = async (index, item) => {
     // Reset all states when a new plan is selected
@@ -45,7 +46,6 @@
 
     isSectionOpen = {}; // Clear open sections
 
-    await reportOfPlanList(plan_index);
     plan_index = item.ccp_index;
     parentIndex = item.ccp_index;
     console.log("parent index,", parentIndex);

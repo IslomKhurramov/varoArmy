@@ -158,6 +158,75 @@
       console.error("Error fetching paginated data:", err);
     }
   }
+  let allSelected = false; // Indicates if all items are selected
+  let selected = [];
+  let ccg_index_id = "";
+  let ccc_index = [];
+  let ast_uuidd = "";
+  function selectAll(event) {
+    allSelected = event.target.checked;
+    selected = allSelected ? [...paginatedData] : [];
+  }
+  $: if (selected.length > 0) {
+    ccg_index_id = selected[0].ccp_index; // Assuming all rows share the same ccg_index_id
+    ccc_index = selected.map((item) => item.ccr_index); // Extract ccc_index values
+    ast_uuidd = selected[0].ast_uuid;
+  } else {
+    ccg_index_id = "";
+    ccc_index = [];
+  }
+  $: console.log("selected", selected);
+  $: console.log("ccg_index_id:", ccg_index_id, "ccc_index:", ccc_index);
+
+  async function fixApprovePlanAll() {
+    try {
+      // Wrap entry.ccr_index in an array
+
+      const response = await setFixApprove(
+        ast_uuidd,
+        ccg_index_id,
+        approved,
+        ccc_index, // Pass the array here
+        approved_comment
+      );
+
+      console.log("response page4 ", response.CODE);
+
+      if (response.RESULT === "OK") {
+        successAlert(`${response}`);
+        selected = [];
+        ccg_index_id = "";
+        ccc_index = [];
+        allSelected = false;
+        let ast_uuidd = "";
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
+
+  async function fixUnApprovePlanAll() {
+    try {
+      const response = await setFixApprove(
+        ast_uuidd,
+        ccg_index_id,
+        approved,
+        ccc_index, // Pass the array here
+        approved_comment
+      );
+      console.log("response page4 ", response);
+      if (response.RESULT === "OK") {
+        successAlert(`${response.CODE}`);
+        selected = [];
+        ccg_index_id = "";
+        ccc_index = [];
+        allSelected = false;
+        let ast_uuidd = "";
+      }
+    } catch (err) {
+      console.error("Error fetching paginated data:", err);
+    }
+  }
 </script>
 
 <div class="first_nenu">
@@ -176,6 +245,8 @@
   <div class="tableListWrap">
     <table class="tableList hdBorder">
       <colgroup>
+        <col style="width: 50px;" />
+
         <col style="width:90px;" />
         <col style="width:170px" />
         <col style="width:140px" />
@@ -186,6 +257,13 @@
       </colgroup>
       <thead>
         <tr>
+          <th class="text-center">
+            <input
+              type="checkbox"
+              on:click="{selectAll}"
+              bind:checked="{allSelected}"
+            /></th
+          >
           <th class="text-center">번호</th>
           <th class="text-center">점검분야</th>
           <th class="text-center">자산명</th>
@@ -198,6 +276,14 @@
       <tbody>
         {#each paginatedData as entry, index}
           <tr on:click="{() => selectPage1(SwiperPage4_2, entry)}">
+            <td on:click|stopPropagation class="text-center">
+              <input
+                type="checkbox"
+                bind:group="{selected}"
+                value="{entry}"
+                name="{entry}"
+              /></td
+            >
             <td class="text-center">{startIndex + index + 1}</td>
             <!-- Adjust numbering -->
             <td class="text-center">{entry.cct_index__cct_target || "N/A"}</td>
@@ -246,53 +332,83 @@
       </tbody>
     </table>
   </div>
-  <!-- Pagination -->
-  <div class="pagination">
-    <!-- First Page Button -->
-    <button
-      on:click="{() => goToPage(1)}"
-      disabled="{currentPagePagination === 1}"
-    >
-      {"<<"}
-    </button>
 
-    <!-- Previous Page Button -->
-    <button
-      on:click="{() => goToPage(currentPagePagination - 1)}"
-      disabled="{currentPagePagination === 1}"
-    >
-      {"<"}
-    </button>
+  <div style="width: 100%; display:flex; justify-content:flex-end;">
+    <div class="lastButtons">
+      <!-- Pagination -->
+      <div class="pagination">
+        <!-- First Page Button -->
+        <button
+          on:click="{() => goToPage(1)}"
+          disabled="{currentPagePagination === 1}"
+        >
+          {"<<"}
+        </button>
 
-    <!-- Visible Page Buttons -->
-    {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, pageIndex}
-      <button
-        class:selected="{currentPagePagination === paginationStart + pageIndex}"
-        on:click="{() => goToPage(paginationStart + pageIndex)}"
-      >
-        {paginationStart + pageIndex}
-      </button>
-    {/each}
+        <!-- Previous Page Button -->
+        <button
+          on:click="{() => goToPage(currentPagePagination - 1)}"
+          disabled="{currentPagePagination === 1}"
+        >
+          {"<"}
+        </button>
 
-    <!-- Next Page Button -->
-    <button
-      on:click="{() => goToPage(currentPagePagination + 1)}"
-      disabled="{currentPagePagination === totalPages}"
-    >
-      {">"}
-    </button>
+        <!-- Visible Page Buttons -->
+        {#each Array(paginationEnd - paginationStart + 1).fill(0) as _, pageIndex}
+          <button
+            class:selected="{currentPagePagination ===
+              paginationStart + pageIndex}"
+            on:click="{() => goToPage(paginationStart + pageIndex)}"
+          >
+            {paginationStart + pageIndex}
+          </button>
+        {/each}
 
-    <!-- Last Page Button -->
-    <button
-      on:click="{() => goToPage(totalPages)}"
-      disabled="{currentPagePagination === totalPages}"
-    >
-      {">>"}
-    </button>
+        <!-- Next Page Button -->
+        <button
+          on:click="{() => goToPage(currentPagePagination + 1)}"
+          disabled="{currentPagePagination === totalPages}"
+        >
+          {">"}
+        </button>
+
+        <!-- Last Page Button -->
+        <button
+          on:click="{() => goToPage(totalPages)}"
+          disabled="{currentPagePagination === totalPages}"
+        >
+          {">>"}
+        </button>
+      </div>
+      <div style="display: flex; gap:10px;">
+        <button class="btn btnSave" on:click="{fixApprovePlanAll}"
+          >선택항목승인</button
+        >
+        <button class="btn btnSave" on:click="{fixUnApprovePlanAll}"
+          >선택항목반려</button
+        >
+      </div>
+    </div>
   </div>
 </div>
 
 <style>
+  .btn {
+    width: 120px;
+    font-size: 14px;
+  }
+  .lastButtons button {
+    padding: 10px;
+    border-radius: 4px;
+    width: auto;
+    margin: 10px;
+  }
+  .lastButtons {
+    width: 60%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
   .first_nenu {
     margin-top: 10px;
   }

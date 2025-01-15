@@ -542,6 +542,7 @@
                     <tr on:click="{() => selectPage(data)}">
                       <td class="text-center">
                         <input
+                          on:click|stopPropagation
                           type="checkbox"
                           bind:group="{selected}"
                           value="{data}"
