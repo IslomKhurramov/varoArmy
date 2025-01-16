@@ -305,7 +305,7 @@
       <section class="rowSection">
         <div class="inputRow">
           <label>체계담당자명</label>
-          <span>{selectedData.ccr_item_no__ccc_target_system}</span>
+          <span>{selectedData?.ccr_item_no__ccc_target_system}</span>
         </div>
         <div class="inputRow">
           <label>위험도</label>
